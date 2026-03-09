@@ -1,0 +1,9 @@
+{
+  "messages": [
+    {
+      "role": "persona",
+      "content": "Hi, I'm Marcus Chen. I've been looking over your brief for Coca-Cola Zero Sugar: Glitch Berry. What would you like to ask me about it?"
+    }
+  ],
+  "selectedPersonaId": "persona-2"
+}
