@@ -1,8 +1,8 @@
-# AI Lab - Full Stack Application
+# Focus Group AI
 
-This is a comprehensive full-stack AI lab application built with React, Node.js, and Google Cloud Vertex AI. Follow the guide below to set up your environment and run the application locally or deploy it to Google Cloud Run.
+This is a comprehensive full-stack application built with React, Node.js, and Google Cloud Vertex AI to simulate real-world customer focus groups using synthetic personas. Follow the guide below to set up your environment and run the application locally or deploy it to Google Cloud Run.
 
-Note - when first using the application be sure to run marketing brief, audience generator and then the synthetif focus groups use that data for their answers.
+**Note:** When first using the application, be sure to run the **Audience Generator** and the **Marketing Brief** tools first. The synthetic Focus Group experience relies on that generated data to provide tailored, persona-driven answers!
 
 ## Prerequisites
 
@@ -54,7 +54,7 @@ Once your cloud environment is ready, set up the project locally.
 Navigate to the root of your project directory and install the required npm packages:
 
 ```bash
-cd lab-next
+cd focus-group-app
 npm install
 ```
 
