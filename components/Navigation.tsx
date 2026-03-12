@@ -8,7 +8,9 @@ import {
   Megaphone,
   Sparkles,
   MessageSquare,
-  TrendingUp
+  TrendingUp,
+  HeartHandshake,
+  Monitor
 } from 'lucide-react';
 
 interface NavigationProps {
@@ -26,7 +28,8 @@ export const Navigation: React.FC<NavigationProps> = ({ currentMode, setMode, is
     { id: AppMode.SYNTHETIC_FOCUS_GROUP, label: 'Focus Group', icon: MessageSquare },
     { id: AppMode.PDP_HUB, label: 'Product Hub', icon: Sparkles },
     { id: AppMode.FEASIBILITY_ANALYSIS, label: 'Feasibility Analysis', icon: TrendingUp },
-    { id: AppMode.ASSISTANT, label: 'Assistant', icon: MessageSquare },
+    { id: AppMode.ASSISTANT, label: 'Assistant', icon: HeartHandshake },
+    { id: AppMode.CONCIERGE, label: 'Concierge', icon: Monitor },
   ];
 
   return (

@@ -1,5 +1,14 @@
 #!/bin/bash
 
+# Check gcloud authentication
+echo "Checking gcloud authentication..."
+if ! gcloud auth print-access-token &> /dev/null; then
+  echo "Error: You are not authenticated with gcloud."
+  echo "Please run 'gcloud auth login' and 'gcloud auth application-default login' to authenticate."
+  exit 1
+fi
+echo "gcloud authentication verified."
+
 echo "Starting local development server..."
 
 # Build the frontend first

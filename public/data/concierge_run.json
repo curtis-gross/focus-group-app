@@ -1,0 +1,128 @@
+{
+  "profile": {
+    "name": "David Miller",
+    "initials": "DM",
+    "email": "david.miller@example.com",
+    "phone": "503-555-0123",
+    "totalSaved": "$24,500",
+    "income": "$8,500/yr"
+  },
+  "familySummary": [
+    {
+      "name": "Household",
+      "relation": "Family of 4"
+    },
+    {
+      "name": "Child 1",
+      "relation": "Dependent"
+    },
+    {
+      "name": "Child 2",
+      "relation": "Dependent"
+    },
+    {
+      "name": "Newborn",
+      "relation": "Prospective Addition"
+    }
+  ],
+  "recent_purchases": [
+    {
+      "name": "Monthly Health Premium",
+      "brand": "Healthco Family Plus",
+      "price": 750,
+      "type": "Premium Payment"
+    },
+    {
+      "name": "Specialist Visit Copay",
+      "brand": "Pediatric Care Network",
+      "price": 45,
+      "type": "Copay"
+    },
+    {
+      "name": "Prescription Refill",
+      "brand": "Healthco Rx",
+      "price": 25,
+      "type": "Pharmacy"
+    }
+  ],
+  "upcoming_events": [
+    {
+      "event_name": "Annual Preventive Care Checkup",
+      "target_date": "2026-04-15",
+      "notes": "Due for comprehensive blood work and biometric screening."
+    },
+    {
+      "event_name": "Open Enrollment Preparation",
+      "target_date": "2026-10-01",
+      "notes": "Interested in adding dental coverage for the kids next year."
+    }
+  ],
+  "aiSummary": "David Miller is a Platinum Member and 'Proactive Family Protector' managing a family plan with high engagement in pediatric and preventive care. He is currently seeking a physical therapist for a sports injury and has shown recent frustration regarding a lab bill he expected to be covered under preventive services. Given his recent queries about adding a newborn and his frequent use of the claims tracker, the concierge should focus on resolving the billing discrepancy and assisting with provider searches for his injury.",
+  "nextActions": [
+    {
+      "title": "Resolve Lab Claim Discrepancy",
+      "description": "Investigate the lab bill mentioned in chat logs to ensure it was processed correctly as preventive care and explain the status of his deductible."
+    },
+    {
+      "title": "Specialist Referral Support",
+      "description": "Provide a curated list of in-network physical therapists and chiropractors in the 78701 area for his sports injury."
+    },
+    {
+      "title": "Policy Update Guidance",
+      "description": "Proactively share the documentation requirements and timeline for adding a newborn to the Family Plus policy."
+    }
+  ],
+  "marketingActivity": [
+    {
+      "type": "Web",
+      "event": "Provider Search",
+      "time": "2026-03-10",
+      "details": "Searched find-a-doctor tool for local providers."
+    },
+    {
+      "type": "App",
+      "event": "ID Card View",
+      "time": "2026-03-10",
+      "details": "Accessed digital ID card via mobile app."
+    },
+    {
+      "type": "App",
+      "event": "Claims Tracking",
+      "time": "2026-03-09",
+      "details": "Checked status of recent lab claim."
+    },
+    {
+      "type": "Web",
+      "event": "Deductible Education",
+      "time": "2026-03-09",
+      "details": "Viewed 'Understanding Your Deductible' article."
+    },
+    {
+      "type": "Email",
+      "event": "Newsletter Click",
+      "time": "2026-03-08",
+      "details": "Clicked link in Monthly Wellness Newsletter."
+    }
+  ],
+  "engagementChart": {
+    "title": "Recent Digital Engagement",
+    "data": [
+      {
+        "name": "Web",
+        "visits": 3,
+        "clicks": 1
+      },
+      {
+        "name": "App",
+        "visits": 3,
+        "clicks": 2
+      },
+      {
+        "name": "Email",
+        "visits": 2,
+        "clicks": 1
+      }
+    ]
+  },
+  "audioUrlEn": "/audio/generated/summary_1773344274193.wav"
+}

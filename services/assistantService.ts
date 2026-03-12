@@ -1,52 +1,5 @@
-
-import { GoogleGenAI } from "@google/genai";
 import { brandConfig } from "../config";
-
-let ai: GoogleGenAI;
-let apiKeyPromise: Promise<string> | null = null;
-let cachedApiKey: string | null = null;
-
-const getApiKey = (): Promise<string> => {
-    if (cachedApiKey) return Promise.resolve(cachedApiKey);
-    if (apiKeyPromise) return apiKeyPromise;
-
-    apiKeyPromise = (async () => {
-        try {
-            const response = await fetch('/api/key');
-            if (!response.ok) {
-                // Fallback for local development if endpoint fails or isn't set up
-                console.warn("Failed to fetch API key from server, checking env...");
-                // In a real client-side app without a proxy, we might need a different auth method.
-                // For this demo, we assume the same /api/key endpoint exists or we use a hardcoded one if needed (not recommended for production).
-                // However, geminiService.ts uses /api/key, so we stick to that pattern.
-                if (import.meta.env.VITE_GEMINI_API_KEY) {
-                    return import.meta.env.VITE_GEMINI_API_KEY;
-                }
-                throw new Error(`Failed to fetch API key, server responded with ${response.status}`);
-            }
-            const data = await response.json();
-            if (!data.apiKey) {
-                throw new Error('API key is missing from server response.');
-            }
-            cachedApiKey = data.apiKey;
-            return data.apiKey;
-        } catch (error) {
-            console.error('Failed to fetch API key:', error);
-            apiKeyPromise = null;
-            throw error;
-        }
-    })();
-
-    return apiKeyPromise;
-};
-
-const getClient = async (): Promise<GoogleGenAI> => {
-    const key = await getApiKey();
-    if (!ai) {
-        ai = new GoogleGenAI({ apiKey: key });
-    }
-    return ai;
-};
+import { extractTextFromResponse } from "./geminiService";
 
 export interface AssistantResponse {
     html: string;
@@ -58,7 +11,6 @@ export const generateAssistantResponse = async (
     images: string[] = []
 ): Promise<AssistantResponse> => {
     try {
-        const client = await getClient();
 
         const historyContext = history.map(msg => `${msg.sender === 'user' ? 'User' : 'Assistant'}: ${msg.text}`).join('\n');
 
@@ -137,16 +89,26 @@ export const generateAssistantResponse = async (
             });
         }
 
-        const response = await client.models.generateContent({
-            model: 'gemini-3-flash-preview',
-            contents: { parts },
-            config: {
-                responseMimeType: "application/json",
-                tools: [{ googleSearch: {} }]
-            }
+        const genaiResponse = await fetch('/api/genai/generateContent', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                model: 'gemini-3-flash-preview',
+                contents: { parts },
+                config: {
+                    responseMimeType: "application/json",
+                    tools: [{ googleSearch: {} }]
+                }
+            })
         });
+        
+        if (!genaiResponse.ok) {
+             throw new Error("Failed to generate assistant response from proxy");
+        }
+        
+        const response = await genaiResponse.json();
 
-        const text = response?.text || "{}";
+        const text = extractTextFromResponse(response) || "{}";
         const cleanText = text.replace(/```json|```/g, '').trim();
         const data = JSON.parse(cleanText);
 

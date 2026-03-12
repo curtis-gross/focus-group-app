@@ -410,7 +410,7 @@ export const MarketingBrief: React.FC = () => {
 
                     {/* Content Area */}
                     <div className="p-8 bg-gray-50 flex items-center justify-center min-h-[500px]">
-                      <div className="w-full max-w-lg flex flex-col items-center">
+                      <div className={`w-full flex flex-col items-center ${activeTab === 'website' ? 'max-w-4xl' : 'max-w-lg'}`}>
                         {/* Social Media Preview */}
                         {activeTab === 'social' && (
                           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden w-full">

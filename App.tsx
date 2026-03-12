@@ -20,6 +20,7 @@ import { ProjectHelper } from './components/ProjectHelper';
 import { FeasibilityAnalysis } from './components/FeasibilityAnalysis';
 
 import { Assistant } from './components/Assistant';
+import { Concierge } from './components/Concierge';
 
 function App() {
   const [mode, setMode] = useState<AppMode>(AppMode.HOME);
@@ -63,6 +64,8 @@ function App() {
         return <ProjectHelper />;
       case AppMode.ASSISTANT:
         return <Assistant />;
+      case AppMode.CONCIERGE:
+        return <Concierge />;
       case AppMode.HOME:
       default:
         return (

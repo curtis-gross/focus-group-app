@@ -64,14 +64,7 @@ export const PDPPersonalization: React.FC = () => {
 
 
     const saveAudiences = async (newAudiences: Audience[]) => {
-        // 1. Save to LocalStorage (Instant & Robust)
-        try {
-            localStorage.setItem('pdp_audiences_backup', JSON.stringify(newAudiences));
-        } catch (e) {
-            console.error("Failed to save to local storage", e);
-        }
-
-        // 2. Save to Server (Persistent)
+        // 1. Save to Server (Persistent)
         await saveAudiencesToServer(newAudiences);
     };
 
@@ -196,30 +189,10 @@ export const PDPPersonalization: React.FC = () => {
                         finalAudiences = [...finalAudiences, ...customAudiences];
                     }
                 } else {
-                    // Try LocalStorage if Server failed
-                    const localBackup = localStorage.getItem('pdp_audiences_backup');
-                    if (localBackup) {
-                        const localData = JSON.parse(localBackup);
-                        if (Array.isArray(localData)) {
-                            const customAudiences = localData.filter(a => !a.isDefault);
-                            finalAudiences = [...finalAudiences, ...customAudiences];
-                        }
-                    }
+                    console.warn("Server unavailable for custom audiences or empty response.");
                 }
             } catch (e) {
-                console.warn("Server unavailable for custom audiences, checking local backup...");
-                const localBackup = localStorage.getItem('pdp_audiences_backup');
-                if (localBackup) {
-                    try {
-                        const localData = JSON.parse(localBackup);
-                        if (Array.isArray(localData)) {
-                            const customAudiences = localData.filter(a => !a.isDefault);
-                            finalAudiences = [...finalAudiences, ...customAudiences];
-                        }
-                    } catch (err) {
-                        console.error("Failed to parse local backup", err);
-                    }
-                }
+                console.warn("Server unavailable for custom audiences.");
             }
 
             setAudiences(finalAudiences);

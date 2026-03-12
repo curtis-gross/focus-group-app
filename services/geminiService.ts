@@ -1,46 +1,35 @@
-import { GoogleGenAI, Schema, Video, VideoGenerationReferenceImage, VideoGenerationReferenceType, Chat, PersonGeneration } from "@google/genai";
-import { GenerateVideoParams, GenerationMode, MarketingAssets, MarketingBriefData, FeasibilityReport, CombinedPersona, ABTestResult, InterviewResult } from "../types";
+import { Schema, Video } from "@google/genai";
 import { brandConfig } from "../config";
+import type { GenerateVideoParams, GenerationMode, MarketingAssets, MarketingBriefData, FeasibilityReport, CombinedPersona, ABTestResult, InterviewResult } from "../types";
 export type { MarketingAssets };
 
-let ai: GoogleGenAI;
-let apiKeyPromise: Promise<string> | null = null;
-let cachedApiKey: string | null = null;
-
-// Fetches the API key
-const getApiKey = (): Promise<string> => {
-    if (cachedApiKey) return Promise.resolve(cachedApiKey);
-    if (apiKeyPromise) return apiKeyPromise;
-
-    apiKeyPromise = (async () => {
-        try {
-            const response = await fetch('/api/key');
-            if (!response.ok) {
-                throw new Error(`Failed to fetch API key, server responded with ${response.status}`);
-            }
-            const data = await response.json();
-            if (!data.apiKey) {
-                throw new Error('API key is missing from server response.');
-            }
-            cachedApiKey = data.apiKey;
-            return data.apiKey;
-        } catch (error) {
-            console.error('Failed to fetch API key:', error);
-            apiKeyPromise = null;
-            throw error;
-        }
-    })();
-
-    return apiKeyPromise;
+// --- Proxy Call Helper ---
+const callGenAiProxy = async (endpoint: string, payload: any): Promise<any> => {
+    const response = await fetch(`/api/genai/${endpoint}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+    });
+    
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(`Failed to call GenAI proxy ${endpoint}: ${response.status} ${response.statusText}. ${errorData.error || ''}`);
+    }
+    
+    return response.json();
 };
 
-// Initializes the GoogleGenAI client
-const getClient = async (): Promise<GoogleGenAI> => {
-    const key = await getApiKey();
-    if (!ai) {
-        ai = new GoogleGenAI({ apiKey: key });
+// --- Helper for Text Extraction ---
+export const extractTextFromResponse = (response: any): string => {
+    if (response?.text) return response.text; // SDK native
+    const candidates = response?.candidates || response?.response?.candidates;
+    if (candidates && candidates.length > 0) {
+        const parts = candidates[0]?.content?.parts;
+        if (parts && parts.length > 0) {
+            return parts.map((p: any) => p.text || '').join('');
+        }
     }
-    return ai;
+    return '';
 };
 
 // --- Helper for Image Extraction ---
@@ -82,12 +71,12 @@ const extractImageFromResponse = (response: any): string | null => {
  */
 export const generateText = async (prompt: string, model: string = "gemini-3-flash-preview"): Promise<string> => {
     try {
-        const client = await getClient();
-        const response = await client.models.generateContent({
+        
+        const response = await callGenAiProxy("generateContent", {
             model: model,
             contents: [{ role: "user", parts: [{ text: prompt }] }],
         });
-        return response?.text || "";
+        return extractTextFromResponse(response) || "";
     } catch (error) {
         console.error("Error generating text:", error);
         throw error;
@@ -99,8 +88,8 @@ export const generateText = async (prompt: string, model: string = "gemini-3-fla
  */
 export const generateJson = async (prompt: string, schema: Schema, model: string = "gemini-3-flash-preview"): Promise<any> => {
     try {
-        const client = await getClient();
-        const response = await client.models.generateContent({
+        
+        const response = await callGenAiProxy("generateContent", {
             model: model,
             contents: [{ role: "user", parts: [{ text: prompt }] }],
             config: {
@@ -108,7 +97,7 @@ export const generateJson = async (prompt: string, schema: Schema, model: string
                 responseSchema: schema,
             }
         });
-        const text = response?.text;
+        const text = extractTextFromResponse(response);
         return text ? JSON.parse(text) : null;
     } catch (error) {
         console.error("Error generating JSON:", error);
@@ -122,10 +111,10 @@ export const generateJson = async (prompt: string, schema: Schema, model: string
  */
 export const generateImage = async (prompt: string, model: string = "gemini-3.1-flash-image-preview", aspectRatio: string = "1:1"): Promise<string | null> => {
     try {
-        const client = await getClient();
+        
         console.log(`Generating image with model ${model} and prompt: ${prompt}`);
 
-        const response = await client.models.generateContent({
+        const response = await callGenAiProxy("generateContent", {
             model: model,
             contents: [{ role: "user", parts: [{ text: prompt }] }],
             config: {
@@ -155,11 +144,11 @@ export const generateImage = async (prompt: string, model: string = "gemini-3.1-
  */
 export const generateImageWithReference = async (prompt: string, referenceImageBase64: string, mimeType: string = "image/png", model: string = "gemini-3.1-flash-image-preview", aspectRatio: string = "1:1"): Promise<string | null> => {
     try {
-        const client = await getClient();
+        
         console.log(`Generating image with reference, model ${model}. Prompt: ${prompt}, Aspect: ${aspectRatio}`);
         console.log(`Reference Image Base64 Length: ${referenceImageBase64 ? referenceImageBase64.length : '0'}`);
 
-        const response = await client.models.generateContent({
+        const response = await callGenAiProxy("generateContent", {
             model: model,
             contents: [{
                 role: "user",
@@ -207,9 +196,9 @@ export const fileToGenerativePart = (file: File): Promise<string> => {
 // --- Nike Logic ---
 
 export const generateRoomDesign = async (roomImage: string, productImage: string, style: string = "modern"): Promise<string> => {
-    const client = await getClient();
+    
     try {
-        const response = await client.models.generateContent({
+        const response = await callGenAiProxy("generateContent", {
             model: 'gemini-3.1-flash-image-preview',
             contents: {
                 parts: [
@@ -231,7 +220,7 @@ export const generateRoomDesign = async (roomImage: string, productImage: string
 };
 
 export const generateLifestyleVariations = async (productImage: string): Promise<{ type: string, image: string | null }[]> => {
-    const client = await getClient();
+    
 
     const variations = [
         {
@@ -250,7 +239,7 @@ export const generateLifestyleVariations = async (productImage: string): Promise
 
     const generateSingle = async (variation: { type: string, prompt: string }): Promise<{ type: string, image: string | null }> => {
         try {
-            const response = await client.models.generateContent({
+            const response = await callGenAiProxy("generateContent", {
                 model: 'gemini-3.1-flash-image-preview',
                 contents: {
                     parts: [
@@ -276,9 +265,9 @@ export const generateLifestyleVariations = async (productImage: string): Promise
 };
 
 export const analyzeVibe = async (base64Image: string): Promise<{ mood: string, colors: string[] }> => {
-    const client = await getClient();
+    
     try {
-        const response = await client.models.generateContent({
+        const response = await callGenAiProxy("generateContent", {
             model: 'gemini-3-flash-preview',
             contents: {
                 parts: [
@@ -298,7 +287,7 @@ export const analyzeVibe = async (base64Image: string): Promise<{ mood: string, 
             }
         });
 
-        const text = response?.text || "{}";
+        const text = extractTextFromResponse(response) || "{}";
         const cleanText = text.replace(/```json|```/g, '').trim();
         return JSON.parse(cleanText);
 
@@ -309,11 +298,11 @@ export const analyzeVibe = async (base64Image: string): Promise<{ mood: string, 
 };
 
 export const generateVibeMatches = async (base64Image: string): Promise<any> => {
-    const client = await getClient();
+    
 
     // 1. Analyze Vibe & Generate Product Ideas
     try {
-        const response = await client.models.generateContent({
+        const response = await callGenAiProxy("generateContent", {
             model: 'gemini-3-flash-preview',
             contents: {
                 parts: [
@@ -349,7 +338,7 @@ export const generateVibeMatches = async (base64Image: string): Promise<any> => 
             }
         });
 
-        const text = response?.text || "{}";
+        const text = extractTextFromResponse(response) || "{}";
         const cleanText = text.replace(/```json|```/g, '').trim();
         const data = JSON.parse(cleanText);
 
@@ -379,9 +368,9 @@ export const generateVibeMatches = async (base64Image: string): Promise<any> => 
 
 
 export const generateAudienceSegments = async (context: string): Promise<any[]> => {
-    const client = await getClient();
+    
     try {
-        const response = await client.models.generateContent({
+        const response = await callGenAiProxy("generateContent", {
             model: 'gemini-3-flash-preview',
             contents: {
                 parts: [{
@@ -415,7 +404,7 @@ export const generateAudienceSegments = async (context: string): Promise<any[]> 
             config: { responseMimeType: "application/json" }
         });
 
-        const text = response?.text || "[]";
+        const text = extractTextFromResponse(response) || "[]";
         const cleanText = text.replace(/```json|```/g, '').trim();
         return JSON.parse(cleanText);
     } catch (error) {
@@ -425,7 +414,7 @@ export const generateAudienceSegments = async (context: string): Promise<any[]> 
 };
 
 export const generateSyntheticPersona = async (personaName: string, audienceName: string, context: string): Promise<any> => {
-    const client = await getClient();
+    
     try {
         const prompt = `
         You are a creative marketing analyst. Based on the provided information, generate a detailed customer persona as a JSON object.
@@ -470,13 +459,13 @@ export const generateSyntheticPersona = async (personaName: string, audienceName
         CRITICAL: The bio, tags, and trends must be highly creative and strictly align with the inferred traits of this audience segment.
         `;
 
-        const response = await client.models.generateContent({
+        const response = await callGenAiProxy("generateContent", {
             model: 'gemini-3-flash-preview',
             contents: { parts: [{ text: prompt }] },
             config: { responseMimeType: "application/json" }
         });
 
-        const text = response?.text || "{}";
+        const text = extractTextFromResponse(response) || "{}";
         const cleanText = text.replace(/```json|```/g, '').trim();
         return JSON.parse(cleanText);
 
@@ -495,10 +484,10 @@ export const generateImageFromPrompt = async (prompt: string): Promise<string> =
 };
 
 export const generateMarketingCampaignAssets = async (productName: string, targetAudience: string): Promise<MarketingAssets> => {
-    const client = await getClient();
+    
 
     // 1. Generate the Image Prompt and Copy concurrently
-    const copyPromise = client.models.generateContent({
+    const copyPromise = callGenAiProxy("generateContent", {
         model: 'gemini-3-flash-preview',
         contents: {
             parts: [{
@@ -552,28 +541,45 @@ export const generateMarketingCampaignAssets = async (productName: string, targe
 
     try {
         const copyResponse = await copyPromise;
-        const copyText = copyResponse?.text || "{}";
+        const copyText = extractTextFromResponse(copyResponse) || "{}";
         const cleanCopyText = copyText.replace(/```json|```/g, '').trim();
         const data = JSON.parse(cleanCopyText);
+        
+        console.log("Parsed Marketing Brief Data:", JSON.stringify(data, null, 2));
 
-        // 2. Generate Main Campaign Image
-        const mainImage = data.imagePrompt
-            ? await generateImageFromPrompt(data.imagePrompt + ", professional photography, high resolution, commercial lighting")
-            : null;
+        // 2 & 3. Generate Images Concurrently
+        const imagePromises: Promise<any>[] = [];
+        
+        console.log("Queueing Main Campaign Image for prompt:", data.imagePrompt);
+        const mainImagePromise = data.imagePrompt
+            ? generateImageFromPrompt(data.imagePrompt + ", professional photography, high resolution, commercial lighting")
+            : Promise.resolve(null);
+        imagePromises.push(mainImagePromise);
 
-        // 3. Generate Recommendation Images Sequentially
-        const recommendations = [];
+        console.log("Queueing Recommendation Images. Count:", (data.recommendations || []).length);
         for (const rec of (data.recommendations || [])) {
-            const recImage = await generateImageFromPrompt(rec.imagePrompt + ", clean health marketing style, warm lighting");
-            recommendations.push({ name: rec.name, price: rec.price, image: recImage });
+            console.log("Queueing Rec Image for:", rec.name, rec.imagePrompt);
+            const recPromise = generateImageFromPrompt(rec.imagePrompt + ", clean health marketing style, warm lighting").then(img => ({
+                name: rec.name,
+                price: rec.price,
+                image: img
+            }));
+            imagePromises.push(recPromise);
         }
+        
+        console.log(`Waiting for ${imagePromises.length} image generation calls...`);
+        const results = await Promise.all(imagePromises);
+        console.log("Finished all image generation calls.");
+        
+        const mainImage = results[0];
+        const recommendations = results.slice(1);
 
         return {
             image: mainImage,
-            social: data.social,
-            search: data.search,
-            email: data.email,
-            youtube: data.youtube,
+            social: data.social || { caption: "Check out our new offering!", hashtags: [] },
+            search: data.search || { headline: "New Offering", description: "Learn more today.", url: "healthco.com" },
+            email: data.email || { subject: "New Update", preheader: "Learn more inside.", body: "Explore our new offerings." },
+            youtube: data.youtube || { title: "Overview", script: "Learn about our offerings in 15 seconds." },
             website: { recommendations }
         };
 
@@ -584,9 +590,9 @@ export const generateMarketingCampaignAssets = async (productName: string, targe
 };
 
 export const generateMarketingCopy = async (productName: string, personaName: string): Promise<any> => {
-    const client = await getClient();
+    
     try {
-        const response = await client.models.generateContent({
+        const response = await callGenAiProxy("generateContent", {
             model: 'gemini-3-flash-preview',
             contents: {
                 parts: [{
@@ -609,7 +615,7 @@ export const generateMarketingCopy = async (productName: string, personaName: st
             }
         });
 
-        const text = response?.text || "{}";
+        const text = extractTextFromResponse(response) || "{}";
         const cleanText = text.replace(/```json|```/g, '').trim();
         return JSON.parse(cleanText);
     } catch (error) {
@@ -619,9 +625,9 @@ export const generateMarketingCopy = async (productName: string, personaName: st
 };
 
 export const generateProductVariant = async (productImage: string, instruction: string): Promise<string> => {
-    const client = await getClient();
+    
     try {
-        const response = await client.models.generateContent({
+        const response = await callGenAiProxy("generateContent", {
             model: 'gemini-3.1-flash-image-preview',
             contents: {
                 parts: [
@@ -648,7 +654,7 @@ export const LAMPSHADE_STYLES = [
 ];
 
 export const generateMultipleProductVariants = async (baseImage: string, styles: string[]): Promise<{ style: string, image: string | null }[]> => {
-    const client = await getClient();
+    
 
     const generateSingle = async (style: string): Promise<{ style: string, image: string | null }> => {
         try {
@@ -657,7 +663,7 @@ export const generateMultipleProductVariants = async (baseImage: string, styles:
             The background should be a plain white studio background.
             Return ONLY the edited image.`;
 
-            const response = await client.models.generateContent({
+            const response = await callGenAiProxy("generateContent", {
                 model: 'gemini-3.1-flash-image-preview',
                 contents: {
                     parts: [
@@ -682,7 +688,7 @@ export const generateMultipleProductVariants = async (baseImage: string, styles:
 };
 
 export const auditImage = async (generatedImage: string, referenceImage: string, type: 'couch' | 'table'): Promise<{ passed: boolean, reason: string }> => {
-    const client = await getClient();
+    
     try {
         const prompt = type === 'couch'
             ? `Analyze this generated room image alongside the reference couch image.
@@ -704,7 +710,7 @@ export const auditImage = async (generatedImage: string, referenceImage: string,
         const cleanGeneratedImage = generatedImage.replace(/^data:image\/\w+;base64,/, '');
         const cleanReferenceImage = referenceImage.replace(/^data:image\/\w+;base64,/, '');
 
-        const response = await client.models.generateContent({
+        const response = await callGenAiProxy("generateContent", {
             model: 'gemini-3-flash-preview',
             contents: {
                 parts: [
@@ -715,7 +721,7 @@ export const auditImage = async (generatedImage: string, referenceImage: string,
             }
         });
 
-        const text = response?.text || "FAIL - No response";
+        const text = extractTextFromResponse(response) || "FAIL - No response";
         const passed = text.toUpperCase().includes("PASS");
         return { passed, reason: text };
     } catch (error) {
@@ -775,7 +781,7 @@ const saveVideoServe = async (base64Data: string | null, videoUrl?: string): Pro
 };
 
 export const generateProductSpinVideo = async (imageB64s: string[]): Promise<string | null> => {
-    const client = await getClient();
+    
     try {
         console.log(`Generating product spin video with ${imageB64s.length} images...`);
 
@@ -788,7 +794,7 @@ export const generateProductSpinVideo = async (imageB64s: string[]): Promise<str
         const matches = firstImageB64.match(/^data:(image\/\w+);base64,/);
         const mimeType = matches ? matches[1] : "image/png";
 
-        const response = await client.models.generateVideos({
+        const response = await callGenAiProxy("generateVideos", {
             model: 'veo-3.1-generate-preview',
             prompt: "the product is on a pedestal spinning around",
             image: {
@@ -870,7 +876,7 @@ export const generateProductSpinVideo = async (imageB64s: string[]): Promise<str
 };
 
 export const generateMarketingBrief = async (context: string, goal: string): Promise<any> => {
-    const client = await getClient();
+    
     try {
         const timestamp = new Date().toLocaleString();
         const prompt = `
@@ -936,13 +942,13 @@ export const generateMarketingBrief = async (context: string, goal: string): Pro
         }
         `;
 
-        const response = await client.models.generateContent({
+        const response = await callGenAiProxy("generateContent", {
             model: 'gemini-3-flash-preview',
             contents: { parts: [{ text: prompt }] },
             config: { responseMimeType: "application/json" }
         });
 
-        const text = response?.text || "{}";
+        const text = extractTextFromResponse(response) || "{}";
         return JSON.parse(text);
     } catch (error) {
         console.error("Brief generation error:", error);
@@ -951,7 +957,7 @@ export const generateMarketingBrief = async (context: string, goal: string): Pro
 };
 
 export const generatePersonaChatResponse = async (persona: any, brief: any, message: string, chatHistory: { role: string, parts: { text: string }[] }[], simulationContext?: any): Promise<string> => {
-    const client = await getClient();
+    
     try {
         // Find if the audience matches one of our archetypes for better instructions
         const archetype = Object.values(PERSONA_ARCHETYPES).find(a => (persona.bio && persona.bio.includes(a.name)) || (persona.job_title && persona.job_title.includes(a.name))) || PERSONA_ARCHETYPES.young_family;
@@ -989,7 +995,7 @@ export const generatePersonaChatResponse = async (persona: any, brief: any, mess
         - Knowledge: ${archetype.knowledge}
         
         **THE TASK:**
-        You are reviewing a marketing brief for ${brief.productName}.
+        You are a prospective or current member reviewing a health insurance marketing brief for Healthco's ${brief.productName}.
         - Campaign Goal: ${brief.campaignGoal}
         - Value Proposition: ${brief.valueProp?.main?.en || 'N/A'}
 
@@ -1000,7 +1006,7 @@ export const generatePersonaChatResponse = async (persona: any, brief: any, mess
         If asking about your scores, explain the *reasoning* behind the numbers based on your values.
         `;
 
-        const response = await client.models.generateContent({
+        const response = await callGenAiProxy("generateContent", {
             model: 'gemini-3-flash-preview',
             contents: [
                 { role: "user", parts: [{ text: personaContext }] },
@@ -1010,7 +1016,7 @@ export const generatePersonaChatResponse = async (persona: any, brief: any, mess
             ]
         });
 
-        return response?.text || "I'm sorry, I couldn't process that.";
+        return extractTextFromResponse(response) || "I'm sorry, I couldn't process that.";
     } catch (error) {
         console.error("Chat error:", error);
         return "I'm having trouble responding right now.";
@@ -1023,7 +1029,7 @@ export const generateRoomPersonalization = async (
     roomImage: string,
     onStepUpdate: (step: string, image: string | null, status: 'pending' | 'success' | 'error', message?: string) => void
 ): Promise<string | null> => {
-    const client = await getClient();
+    
     const MAX_RETRIES = 3;
 
     // --- Step 1: Place Couch ---
@@ -1040,7 +1046,7 @@ export const generateRoomPersonalization = async (
             - Ensure the couch is scaled correctly and clearly visible.
             - Return ONLY the edited image.`;
 
-            const response = await client.models.generateContent({
+            const response = await callGenAiProxy("generateContent", {
                 model: 'gemini-3.1-flash-image-preview',
                 contents: {
                     parts: [
@@ -1096,7 +1102,7 @@ export const generateRoomPersonalization = async (
             - Ensure the end table is clearly visible and appropriately sized.
             - Return ONLY the edited image.`;
 
-            const response = await client.models.generateContent({
+            const response = await callGenAiProxy("generateContent", {
                 model: 'gemini-3.1-flash-image-preview',
                 contents: {
                     parts: [
@@ -1141,7 +1147,7 @@ export const generateRoomPersonalization = async (
 export const SEASONAL_THEMES = ["Halloween", "Thanksgiving", "Christmas", "Valentines Day", "Spring", "Summer"];
 
 export const generateSeasonalVariations = async (baseRoomImage: string): Promise<{ theme: string, image: string | null }[]> => {
-    const client = await getClient();
+    
 
     const generateSingle = async (theme: string): Promise<{ theme: string, image: string | null }> => {
         try {
@@ -1152,7 +1158,7 @@ export const generateSeasonalVariations = async (baseRoomImage: string): Promise
             - Maintain the same room layout and perspective.
             - Return ONLY the edited image.`;
 
-            const response = await client.models.generateContent({
+            const response = await callGenAiProxy("generateContent", {
                 model: 'gemini-3.1-flash-image-preview',
                 contents: {
                     parts: [
@@ -1182,7 +1188,7 @@ export const generateSeasonalVariations = async (baseRoomImage: string): Promise
 // --- Generative Site / Landing Page Logic ---
 
 export const generatePersonalizedProducts = async (userProfile: any, audienceContext: any = null): Promise<any> => {
-    const client = await getClient();
+    
     try {
         let audiencePrompt = "";
         if (audienceContext) {
@@ -1199,7 +1205,7 @@ export const generatePersonalizedProducts = async (userProfile: any, audienceCon
             `;
         }
 
-        const response = await client.models.generateContent({
+        const response = await callGenAiProxy("generateContent", {
             model: 'gemini-3-flash-preview',
             contents: {
                 parts: [{
@@ -1238,7 +1244,7 @@ export const generatePersonalizedProducts = async (userProfile: any, audienceCon
             config: { responseMimeType: "application/json" }
         });
 
-        const text = response?.text || "{}";
+        const text = extractTextFromResponse(response) || "{}";
         return JSON.parse(text);
     } catch (error) {
         console.error("Product generation error:", error);
@@ -1247,9 +1253,9 @@ export const generatePersonalizedProducts = async (userProfile: any, audienceCon
 };
 
 export const translateProducts = async (products: any[]): Promise<any> => {
-    const client = await getClient();
+    
     try {
-        const response = await client.models.generateContent({
+        const response = await callGenAiProxy("generateContent", {
             model: 'gemini-3-flash-preview', // lightweight model for translation
             contents: {
                 parts: [{
@@ -1263,7 +1269,7 @@ export const translateProducts = async (products: any[]): Promise<any> => {
             config: { responseMimeType: "application/json" }
         });
 
-        const text = response?.text || "{}";
+        const text = extractTextFromResponse(response) || "{}";
         return JSON.parse(text);
     } catch (error) {
         console.error("Translation error:", error);
@@ -1272,7 +1278,7 @@ export const translateProducts = async (products: any[]): Promise<any> => {
 };
 
 export const generatePersonalizedHeadlines = async (userProfile: any, audienceContext: any = null): Promise<any> => {
-    const client = await getClient();
+    
     try {
         let audiencePrompt = "";
         if (audienceContext) {
@@ -1286,7 +1292,7 @@ export const generatePersonalizedHeadlines = async (userProfile: any, audienceCo
             `;
         }
 
-        const response = await client.models.generateContent({
+        const response = await callGenAiProxy("generateContent", {
             model: 'gemini-3-flash-preview',
             contents: {
                 parts: [{
@@ -1315,7 +1321,7 @@ export const generatePersonalizedHeadlines = async (userProfile: any, audienceCo
             config: { responseMimeType: "application/json" }
         });
 
-        const text = response?.text || "{}";
+        const text = extractTextFromResponse(response) || "{}";
         return JSON.parse(text);
     } catch (error) {
         console.error("Headline generation error:", error);
@@ -1327,9 +1333,9 @@ export const generatePersonalizedHeadlines = async (userProfile: any, audienceCo
 };
 
 export const generatePersonalizedPDPContent = async (audience: string, productName: string): Promise<any> => {
-    const client = await getClient();
+    
     try {
-        const response = await client.models.generateContent({
+        const response = await callGenAiProxy("generateContent", {
             model: 'gemini-3-flash-preview',
             contents: {
                 parts: [{
@@ -1355,7 +1361,7 @@ export const generatePersonalizedPDPContent = async (audience: string, productNa
             config: { responseMimeType: "application/json" }
         });
 
-        const text = response?.text || "{}";
+        const text = extractTextFromResponse(response) || "{}";
         return JSON.parse(text);
     } catch (error) {
         console.error("PDP content generation error:", error);
@@ -1427,7 +1433,7 @@ const urlToRawBase64 = async (url: string): Promise<{ data: string, mimeType: st
     }
 };
 export const generateLifestyleScene = async (productImage: string, sceneDescription: string, mimeType: string = 'image/png'): Promise<string | null> => {
-    const client = await getClient();
+    
     try {
         // Always fetch image to base64 (client-side compatible)
         let imageBytes = productImage;
@@ -1478,23 +1484,17 @@ export const generateLifestyleScene = async (productImage: string, sceneDescript
             },
         ];
 
-        console.log("Generating lifestyle scene with stream (local base64)...");
+        console.log("Generating lifestyle scene (local base64)...");
         // @ts-ignore
-        const response = await client.models.generateContentStream({
+        const response = await callGenAiProxy("generateContent", {
             model,
             config,
             contents,
         });
 
-        for await (const chunk of response) {
-            if (chunk.candidates?.[0]?.content?.parts?.[0]?.inlineData) {
-                const inlineData = chunk.candidates[0].content.parts[0].inlineData;
-                // @ts-ignore
-                if (inlineData.data) {
-                    // @ts-ignore
-                    return `data:${inlineData.mimeType || 'image/png'};base64,${inlineData.data}`;
-                }
-            }
+        const imageBase64 = extractImageFromResponse(response);
+        if (imageBase64) {
+            return `data:image/jpeg;base64,${imageBase64}`;
         }
 
         return null;
@@ -1509,7 +1509,7 @@ export const generateLifestyleScene = async (productImage: string, sceneDescript
  * @deprecated Use generatePersonalizedPDPContent and generateLifestyleScene separately.
  */
 export const generatePersonalizedPDPCombined = async (audience: string, productName: string, referenceImageSource: string): Promise<{ image: string | null, content: any }> => {
-    const client = await getClient();
+    
     try {
         console.log(`Generating combined PDP asset for ${audience} using gemini-3-pro-image-preview...`);
 
@@ -1542,7 +1542,7 @@ export const generatePersonalizedPDPCombined = async (audience: string, productN
             }
         }
 
-        const response = await client.models.generateContent({
+        const response = await callGenAiProxy("generateContent", {
             model: 'gemini-3.1-flash-image-preview',
             contents: {
                 parts: [
@@ -1757,14 +1757,14 @@ export const generateVideo = async (
 // --- Synthetic Focus Group & Simulation Logic ---
 
 export const generateEmailBodies = async (headlines: string[], brief: MarketingBriefData): Promise<{ [headline: string]: string }> => {
-    const client = await getClient();
+    
     try {
         const prompt = `
         You are an expert email marketer for ${brandConfig.companyName}.
         
         **Product:** ${brief.productName}
         **Target Audience:** ${brief.audiences[0]?.name || "General Audience"}
-        **Key Goal:** Drive clicks and purchases.
+        **Key Goal:** Drive clicks, health plan enrollments, or health action engagement.
 
         **Task:**
         For EACH of the provided subject lines, write a short, persuasive email body (max 100 words).
@@ -1782,13 +1782,13 @@ export const generateEmailBodies = async (headlines: string[], brief: MarketingB
         Do not use markdown.
         `;
 
-        const response = await client.models.generateContent({
+        const response = await callGenAiProxy("generateContent", {
             model: 'gemini-3-flash-preview',
             contents: { parts: [{ text: prompt }] },
             config: { responseMimeType: "application/json" }
         });
 
-        const text = response?.text || "{}";
+        const text = extractTextFromResponse(response) || "{}";
         const cleanText = text.replace(/```json|```/g, '').trim();
         return JSON.parse(cleanText);
 
@@ -1801,9 +1801,9 @@ export const generateEmailBodies = async (headlines: string[], brief: MarketingB
 };
 
 export const generateWildcardAudience = async (context: string, existingAudiences: string[]): Promise<any> => {
-    const client = await getClient();
+    
     try {
-        const response = await client.models.generateContent({
+        const response = await callGenAiProxy("generateContent", {
             model: 'gemini-3-flash-preview',
             contents: {
                 parts: [{
@@ -1835,7 +1835,7 @@ export const generateWildcardAudience = async (context: string, existingAudience
             config: { responseMimeType: "application/json" }
         });
 
-        const text = response?.text || "{}";
+        const text = extractTextFromResponse(response) || "{}";
         const cleanText = text.replace(/```json|```/g, '').trim();
         return JSON.parse(cleanText);
     } catch (error) {
@@ -1845,9 +1845,9 @@ export const generateWildcardAudience = async (context: string, existingAudience
 };
 
 export const generateAudienceFromCriteria = async (context: string, criteria: string): Promise<any> => {
-    const client = await getClient();
+    
     try {
-        const response = await client.models.generateContent({
+        const response = await callGenAiProxy("generateContent", {
             model: 'gemini-3-flash-preview',
             contents: {
                 parts: [{
@@ -1879,7 +1879,7 @@ export const generateAudienceFromCriteria = async (context: string, criteria: st
             config: { responseMimeType: "application/json" }
         });
 
-        const text = response?.text || "{}";
+        const text = extractTextFromResponse(response) || "{}";
         const cleanText = text.replace(/```json|```/g, '').trim();
         return JSON.parse(cleanText);
     } catch (error) {
@@ -1895,7 +1895,7 @@ export const simulateMarketingFocusGroup = async (
     emailCampaigns: { subject: string, body: string }[],
     marketingMessages: string[] = []
 ): Promise<any[]> => {
-    const client = await getClient();
+    
     const BATCH_SIZE = 10;
     const results: any[] = [];
 
@@ -1913,7 +1913,7 @@ export const simulateMarketingFocusGroup = async (
             - Include **irrational bias**, **moodiness**, and **skepticism**.
             - Some users should HATE the campaign for petty reasons.
             - Some should LOVE it for random reasons.
-            - **Purchase decisions must be strict.** Most people DO NOT buy things unless they really need them or it's an amazing deal.
+            - **Enrollment decisions must be strict.** Most people DO NOT enroll in new health plans or add-ons unless they really need them or it's an amazing benefit.
             
             **THE MARKETING MATERIAL:**
             Campaign Goal: ${brief.campaignGoal}
@@ -1934,7 +1934,7 @@ export const simulateMarketingFocusGroup = async (
             1. **Brief Score**: Rate Interest, Clarity, and Relevance (0-100). 
                - **VARIANCE:** Scores should range widely. Do not average around 80. Use 20s, 40s, 90s.
             2. **Negative Feedback**: What would this specific persona dislike? Be blunt.
-            3. **Cart Selection**: Which of the provided products would they ACTUALLY buy right now? (True/False) and a short reason.
+            3. **Cart Selection**: Which of the provided Healthco plans or benefits would they ACTUALLY enroll in right now? (True/False) and a short reason.
             4. **Email Engagement**: 
                - Only OPEN if the SUBJECT resonates.
                - Only CLICK if the BODY persuades them.
@@ -1972,7 +1972,7 @@ export const simulateMarketingFocusGroup = async (
             Do not use markdown.
             `;
 
-            const response = await client.models.generateContent({
+            const response = await callGenAiProxy("generateContent", {
                 model: 'gemini-3-flash-preview',
                 contents: {
                     parts: [
@@ -1992,7 +1992,7 @@ export const simulateMarketingFocusGroup = async (
                 config: { responseMimeType: "application/json" }
             });
 
-            const text = response?.text || "[]";
+            const text = extractTextFromResponse(response) || "[]";
             const cleanText = text.replace(/```json|```/g, '').trim();
             return JSON.parse(cleanText);
 
@@ -2025,7 +2025,7 @@ export const simulateAcquisitionFocusGroup = async (
     personas: any[],
     offers: string[]
 ): Promise<any[]> => {
-    const client = await getClient();
+    
     const BATCH_SIZE = 10;
     const results: any[] = [];
 
@@ -2037,7 +2037,7 @@ export const simulateAcquisitionFocusGroup = async (
             
             **CONTEXT:**
             You are simulating ${batchPersonas.length} distinct synthetic personas.
-            **CRITICAL:** For this simulation, assume these personas are **NEW CUSTOMERS** who are considering ${brandConfig.companyName}.
+            **CRITICAL:** For this simulation, assume these personas are **NEW PROSPECTS** who are considering switching their health insurance to ${brandConfig.companyName}.
             
             **THE ACQUISITION OFFERS:**
             ${JSON.stringify(offers)}
@@ -2067,7 +2067,7 @@ export const simulateAcquisitionFocusGroup = async (
             Do not use markdown.
             `;
 
-            const response = await client.models.generateContent({
+            const response = await callGenAiProxy("generateContent", {
                 model: 'gemini-3-flash-preview',
                 contents: {
                     parts: [
@@ -2087,7 +2087,7 @@ export const simulateAcquisitionFocusGroup = async (
                 config: { responseMimeType: "application/json" }
             });
 
-            const text = response?.text || "[]";
+            const text = extractTextFromResponse(response) || "[]";
             const cleanText = text.replace(/```json|```/g, '').trim();
             return JSON.parse(cleanText);
 
@@ -2121,7 +2121,7 @@ export const simulateCreativeFocusGroup = async (
     personas: any[],
     assets: MarketingAssets
 ): Promise<any[]> => {
-    const client = await getClient();
+    
     const BATCH_SIZE = 5; // Smaller batch for multimodal
     const results: any[] = [];
 
@@ -2204,13 +2204,13 @@ export const simulateCreativeFocusGroup = async (
                 parts.splice(1, 0, mainImagePart);
             }
 
-            const response = await client.models.generateContent({
+            const response = await callGenAiProxy("generateContent", {
                 model: 'gemini-3-flash-preview',
                 contents: { parts },
                 config: { responseMimeType: "application/json" }
             });
 
-            const text = response?.text || "[]";
+            const text = extractTextFromResponse(response) || "[]";
             const cleanText = text.replace(/```json|```/g, '').trim();
             return JSON.parse(cleanText);
 
@@ -2322,7 +2322,7 @@ export const generateFeasibilityReport = async (aggregatedData: any): Promise<Fe
 };
 
 export const scoreAudienceSegments = async (personas: CombinedPersona[], context: string): Promise<{ propensity: number, value: number, reason: string }[]> => {
-    const client = await getClient();
+    
     try {
         const prompt = `
         You are a strategic marketing analyst.
@@ -2359,7 +2359,7 @@ export const scoreAudienceSegments = async (personas: CombinedPersona[], context
         Do not use markdown code blocks.
         `;
 
-        const response = await client.models.generateContent({
+        const response = await callGenAiProxy("generateContent", {
             model: 'gemini-3-flash-preview',
             contents: {
                 parts: [{ text: prompt }]
@@ -2367,7 +2367,7 @@ export const scoreAudienceSegments = async (personas: CombinedPersona[], context
             config: { responseMimeType: "application/json" }
         });
 
-        const text = response?.text || "[]";
+        const text = extractTextFromResponse(response) || "[]";
         const cleanText = text.replace(/```json|```/g, '').trim();
         return JSON.parse(cleanText);
     } catch (error) {
@@ -2382,10 +2382,10 @@ export const scoreAudienceSegments = async (personas: CombinedPersona[], context
 };
 
 export const conductQualitativeInterview = async (persona: CombinedPersona, context: string, initialQuestion: string): Promise<InterviewResult> => {
-    const client = await getClient();
+    
     try {
         const prompt = `
-        You are simulating a qualitative user interview.
+        You are simulating a qualitative user interview regarding health insurance, preventative care, and the "Healthco" brand. Let your answers reflect your specific healthcare needs and financial concerns.
         
         **Role**: act as ${persona.name} (${persona.personaName}), with the following details:
         - Bio: ${persona.bio || persona.details?.bio || "No bio available"}
@@ -2421,13 +2421,13 @@ export const conductQualitativeInterview = async (persona: CombinedPersona, cont
         Do not output markdown code blocks. Just the raw JSON.
         `;
 
-        const response = await client.models.generateContent({
+        const response = await callGenAiProxy("generateContent", {
             model: 'gemini-3-flash-preview',
             contents: { parts: [{ text: prompt }] },
             config: { responseMimeType: "application/json" }
         });
 
-        const text = response?.text || "{}";
+        const text = extractTextFromResponse(response) || "{}";
         const cleanText = text.replace(/```json|```/g, '').trim();
         const data = JSON.parse(cleanText);
 
@@ -2453,26 +2453,26 @@ export const conductQualitativeInterview = async (persona: CombinedPersona, cont
 };
 
 export const generateRegionalVariants = async (basePrompt: string): Promise<{ region: string, imagePrompt: string, image: string | null }[]> => {
-    const client = await getClient();
+    
     try {
         const regions = ["Generic", "Health-Focused (Condition Specific)", "Regional (Local Community)", "Value-Based (Pricing/Benefits)", "Emotional (Peace of Mind)"];
 
         const prompt = `
-        Take the following base marketing concept: "${basePrompt}"
+        Take the following base health insurance marketing concept for Healthco: "${basePrompt}"
         
         Adapt this concept for the following variations/themes, adding specific imagery or cultural cues relevant to each:
         ${regions.join(", ")}
         
-        Return a JSON object mapping each region name exactly as written to a highly detailed image generation prompt.
+        Return a JSON object mapping each region name exactly as written to a highly detailed image generation prompt. Include health insurance and wellness context in the prompts.
         `;
 
-        const response = await client.models.generateContent({
+        const response = await callGenAiProxy("generateContent", {
             model: 'gemini-3-flash-preview',
             contents: [{ role: "user", parts: [{ text: prompt }] }],
             config: { responseMimeType: "application/json" }
         });
 
-        const text = response?.text || "{}";
+        const text = extractTextFromResponse(response) || "{}";
         const cleanText = text.replace(/```json|```/g, '').trim();
         const data = JSON.parse(cleanText);
 
@@ -2495,14 +2495,14 @@ export const generateRegionalVariants = async (basePrompt: string): Promise<{ re
 };
 
 export const simulateABTestFocusGroup = async (pool: any[], variants: { region: string, image: string | null }[]): Promise<ABTestResult[]> => {
-    const client = await getClient();
+    
     if (!variants || variants.length === 0) return [];
 
     // Process each persona in parallel
     const promises = pool.map(async (persona) => {
         try {
             const prompt = `
-            You are evaluating marketing creative variants as a synthetic user.
+            You are evaluating health insurance marketing creative variants for Healthco as a synthetic user.
             
             Persona Profile:
             Name: ${persona.name}
@@ -2528,13 +2528,13 @@ export const simulateABTestFocusGroup = async (pool: any[], variants: { region: 
             }
             `;
 
-            const response = await client.models.generateContent({
+            const response = await callGenAiProxy("generateContent", {
                 model: 'gemini-3-flash-preview',
                 contents: [{ role: "user", parts: [{ text: prompt }] }],
                 config: { responseMimeType: "application/json" }
             });
 
-            const text = response?.text || "{}";
+            const text = extractTextFromResponse(response) || "{}";
             const cleanText = text.replace(/```json|```/g, '').trim();
             const data = JSON.parse(cleanText);
 
@@ -2559,4 +2559,77 @@ export const simulateABTestFocusGroup = async (pool: any[], variants: { region: 
     });
 
     return Promise.all(promises);
+};
+
+export const generateAgentSummary = async (customerText: string): Promise<any> => {
+    try {
+        const prompt = `
+        You are an expert health concierge assistant.
+        Analyze the following raw customer data and chat telemetry.
+        Extract the information into a highly structured JSON dashboard payload for a live health concierge to review during an incoming call.
+
+        RAW DATA:
+        ${customerText}
+
+        INSTRUCTIONS:
+        Output ONLY a valid JSON object matching this schema exactly:
+        {
+            "profile": {
+                "name": "Full Name",
+                "initials": "First & Last Initials",
+                "email": "Email Address",
+                "phone": "Phone Number",
+                "totalSaved": "Formatted string, e.g. $24,500",
+                "income": "Formatted string, e.g. $8,500/yr"
+            },
+            "familySummary": [
+                { "name": "Name", "relation": "Relation" }
+            ],
+            "recent_purchases": [
+                { "name": "Purchase/Claim Name", "brand": "e.g. In-Network", "price": 450, "type": "e.g. Provider Visit" }
+            ],
+            "upcoming_events": [
+                { "event_name": "Event Name", "target_date": "Upcoming", "notes": "High priority" }
+            ],
+            "aiSummary": "A 3-4 sentence engaging executive summary for the concierge. Describe the user's current health insurance needs, plan tier, and their immediate intent based on the chat logs.",
+            "nextActions": [
+                { "title": "Action Title", "description": "Action Details" }
+            ],
+            "marketingActivity": [
+                { "type": "Web|Email|App", "event": "Event Name", "time": "e.g. 2026-03-02", "details": "Viewed New Plans" }
+            ],
+            "engagementChart": {
+                "title": "Recent Digital Engagement",
+                "data": [
+                    { "name": "e.g. Web", "visits": 0, "clicks": 0 }
+                ]
+            }
+        }
+        
+        Ensure "nextActions" provides at least 2 distinct recommendations based on user intent in the logs.
+        Ensure "engagementChart.data" correctly tallies their recent online behavior (like Web Visits, Emails, App Usage).
+        Ensure "upcoming_events" provides context for the customer's health goals.
+        Extract "recent_purchases" and "upcoming_events" explicitly from the JSON payload. Format prices as integers.
+        Ensure "marketingActivity" includes a "type" field of either "Web", "Email", or "App".
+        Do not use markdown.
+        `;
+
+        const response = await callGenAiProxy("generateContent", {
+            model: 'gemini-3-flash-preview',
+            contents: [{ role: "user", parts: [{ text: prompt }] }],
+            config: { responseMimeType: "application/json" }
+        });
+
+        const text = extractTextFromResponse(response) || "{}";
+        const cleanText = text.replace(/```json|```/g, '').trim();
+        const data = JSON.parse(cleanText);
+        
+        console.log("Parsed Concierge Data:", JSON.stringify(data, null, 2));
+        
+        return data;
+
+    } catch (error) {
+        console.error("Agent summary generation error:", error);
+        throw error;
+    }
 };

@@ -371,7 +371,7 @@ export const SyntheticTesting: React.FC = () => {
 
             if (!currentAssets) {
                 setStatus("Generating new campaign assets...");
-                const productName = brief.productName || "Nike Product";
+                const productName = brief.productName || "Healthco Plan";
                 const targetAudience = brief.audiences[0]?.name || "General Audience";
                 const combinedGoal = `Goal: ${brief.campaignGoal}. Persona: ${targetAudience}`;
 

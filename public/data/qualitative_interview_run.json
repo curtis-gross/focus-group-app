@@ -1,13 +1,13 @@
 {
   "type": "INTERVIEW_SESSION",
-  "id": "interview_1772142063941",
+  "id": "interview_1773330964705",
   "name": "Interview: which of our insurance product...",
-  "timestamp": "2026-02-26T21:41:03.941Z",
+  "timestamp": "2026-03-12T15:56:04.705Z",
   "question": "which of our insurance products are most compelling?",
   "results": [
     {
-      "personaId": "p_1772142027269",
-      "personaName": "The Young Family",
+      "personaId": "p_1773330913802",
+      "personaName": "The Milestone Navigators",
       "transcript": [
         {
           "role": "interviewer",
@@ -15,32 +15,32 @@
         },
         {
           "role": "interviewee",
-          "content": "For a family like mine, the Freedom Blue PPO is definitely the most compelling. Between my job as a digital marketing specialist and navigating the chaos of early parenthood, I need the independence to choose specialists without jumping through hoops. The flexibility of a PPO aligns with our need for security while we're trying to establish a healthy foundation for our child."
+          "content": "As someone just starting out and looking toward the future, the Medicare Advantage Plus (MAP+) plan actually stands out, even if I'm not the primary user yet. It’s compelling because it signals a sense of long-term security and integrated care. For my family, seeing a plan that bundles everything together—wellness, dental, and vision—makes the brand feel like a stable foundation we can rely on as we grow."
         },
         {
           "role": "interviewer",
-          "content": "How does digital access influence your perception of 'security' when it comes to your family's healthcare?"
+          "content": "You mentioned 'long-term security' and 'integrated care.' How do those themes impact your decision-making when looking at health services for a growing household?"
         },
         {
           "role": "interviewee",
-          "content": "It’s everything. Security to me isn't just a financial safety net; it's the peace of mind that I can access care or check benefits at 2 AM while I'm up with the baby. If I can't manage our wellness through a seamless digital portal, the plan feels like a burden rather than a benefit. Healthco's focus on digital access makes me feel like the plan actually fits into a modern lifestyle."
+          "content": "It's all about reducing complexity. Between my job as a coordinator and managing a new marriage, I don't have time to juggle multiple providers or separate bills. Integrated care means I don't have to be the middleman for my own health information. Security for me means knowing that if my parents or eventually my own family need support, the system is already built to be comprehensive and easy to navigate."
         },
         {
           "role": "interviewer",
-          "content": "You mentioned the PPO's flexibility; would you sacrifice some of that 'independence' for the lower costs often found in the Security Blue HMO if it offered better wellness incentives?"
+          "content": "If you were to recommend MAP+ to an older family member based on your values of convenience, what specific feature would you highlight most?"
         },
         {
           "role": "interviewee",
-          "content": "Honestly, no. At this stage of our lives, our schedule is too unpredictable. The 'security' of the HMO feels restrictive because of the referral process. We prioritize convenience and immediate access to the best providers to ensure long-term wellness. The Freedom Blue PPO offers that layer of independence that allows us to manage our health on our own terms, which is worth the trade-off."
+          "content": "I would definitely highlight the one-stop-shop aspect of the wellness rewards and the all-in-one coverage. When life gets busy with work and starting a family, having everything integrated is a huge relief; it's one less thing to coordinate manually, which gives us more time to focus on our milestones rather than paperwork."
         }
       ],
-      "summary": "Alex Thompson prioritizes the Freedom Blue PPO for its flexibility and digital convenience, viewing independence and ease of access as the primary drivers for family security.",
-      "quote": "If I can't manage our wellness through a seamless digital portal, the plan feels like a burden rather than a benefit.",
+      "summary": "Alexandra prioritizes integrated, comprehensive plans like MAP+ because they reduce administrative complexity during busy life transitions and provide a sense of long-term family stability.",
+      "quote": "When life gets busy with work and starting a family, having everything integrated is a huge relief; it's one less thing to coordinate manually.",
       "sentiment": "Positive"
     },
     {
-      "personaId": "p_1772142033217",
-      "personaName": "The Active Senior",
+      "personaId": "p_1773330923881",
+      "personaName": "The Digital Care Managers",
       "transcript": [
         {
           "role": "interviewer",
@@ -48,32 +48,32 @@
         },
         {
           "role": "interviewee",
-          "content": "To be honest, the Freedom Blue PPO stands out the most to me. As I transition out of my role as an administrator, I don't want to feel restricted. I've spent years managing schedules and people; now I want the freedom to see the specialists I trust without a gatekeeper. That flexibility is key for me to stay active and keep my mobility up."
+          "content": "As a UX designer and someone dealing with a physical injury, the Medicare Advantage Plus (MAP+) plan is definitely the most compelling to me. The way it centers on the digital portal for tracking specialist visits and recovery metrics aligns perfectly with how I manage my life. I need that data-driven feedback to feel like I’m actually making progress."
         },
         {
           "role": "interviewer",
-          "content": "That makes sense. Why is avoiding a 'gatekeeper' or referral process specifically important for your lifestyle right now?"
+          "content": "You mentioned needing data-driven feedback to track progress—how does that digital integration influence your daily health decisions?"
         },
         {
           "role": "interviewee",
-          "content": "It comes down to independence. If I wake up with a stiff hip or a sports injury from pickleball, I want to address it immediately with a physical therapist I know. I don't want to wait two weeks for a primary care appointment just to get permission to see the person who actually fixes the problem. Staying active is my top priority for my retirement years."
+          "content": "It removes the mental load. If I can see my physical therapy benchmarks and my specialist's notes right on my phone, I don't have to guess if I'm overextending myself. It gives me the confidence to stay active because the data tells me exactly where my limits are, which is vital for maintaining my lifestyle while I'm healing."
         },
         {
           "role": "interviewer",
-          "content": "Beyond just the network flexibility, what role do wellness benefits play in your decision to enroll?"
+          "content": "In terms of the 'Security' theme we focus on, how does having all that info in a portal contribute to your peace of mind?"
         },
         {
           "role": "interviewee",
-          "content": "They are the foundation of my security. I look for plans that include SilverSneakers or similar wellness programs because they keep me connected to my community and physically fit. Prevention is much cheaper and more pleasant than recovery, so a plan that rewards me for staying healthy is a plan I'm going to stick with."
+          "content": "Security for me isn't just about money; it's about ownership of my information. Knowing that my entire medical history and upcoming schedule are accessible in one secure app means I'm never caught off guard. When I have that level of transparency, I feel independent and secure because I'm the one driving my recovery, not just waiting for a phone call from a doctor's office."
         }
       ],
-      "summary": "Casey favors the Freedom Blue PPO because the lack of referral requirements supports an independent, active lifestyle and immediate access to specialty care.",
-      "quote": "I’ve worked hard to reach this stage, and I don't want to spend my retirement waiting for a referral just to keep my knees in shape for my morning walks.",
+      "summary": "Jordan finds the MAP+ plan compelling because its digital integration and data transparency provide the autonomy and security needed to manage a physical recovery independently.",
+      "quote": "When I can see my health metrics and specialist notes in one portal, I don’t feel like I'm waiting for permission to live my life.",
       "sentiment": "Positive"
     },
     {
-      "personaId": "p_1772142041886",
-      "personaName": "The Wellness Seeker",
+      "personaId": "p_1773330933817",
+      "personaName": "The Longevity Optimizers",
       "transcript": [
         {
           "role": "interviewer",
@@ -81,27 +81,27 @@
         },
         {
           "role": "interviewee",
-          "content": "From my perspective as someone who focuses on holistic health, the Freedom Blue PPO is the most compelling because it emphasizes independence. I love the idea of not being restricted to a tight network when I'm looking for specific specialists who align with my preventive care philosophy, and the flexibility to manage my own path is essential for my lifestyle."
+          "content": "As a Senior Project Consultant nearing retirement, I find the Healthco Medicare Advantage Plus (MAP+) plan by far the most compelling. At 62, I don't just want a policy for when things go wrong; I want a strategy for staying healthy. MAP+ aligns with my view of health as a long-term investment, specifically through its focus on preventive care and maintaining the mobility I need to stay independent."
         },
         {
           "role": "interviewer",
-          "content": "That's interesting. You mentioned being 'proactive'—how do you see our digital wellness tools fitting into that proactive lifestyle?"
+          "content": "You mentioned health as an 'investment.' How do the personalized wellness and weight management features of MAP+ impact your sense of future security?"
         },
         {
           "role": "interviewee",
-          "content": "Digital integration is everything to me. If the plan offers seamless app connectivity for tracking my stress levels or rewarding preventive habits, it transforms insurance from a safety net into a daily wellness partner. I want my coverage to incentivize my mental health routines and wearable data usage, not just pay for a doctor's visit when I am already sick."
+          "content": "They are central to it. Staying at a healthy weight isn't about vanity for me; it's about joint health and cardiovascular endurance. Having a plan that offers personalized coaching means I have a roadmap to avoid the chronic issues that usually strip people of their independence. It gives me security to know I'm actively mitigating risks rather than just waiting for an illness to happen."
         },
         {
           "role": "interviewer",
-          "content": "Between the themes of Security and Independence, which one motivates your enrollment decision more deeply?"
+          "content": "In terms of your lifestyle as you transition toward retirement, what is the single most important 'independence' factor you look for in a health plan?"
         },
         {
           "role": "interviewee",
-          "content": "Independence is definitely the primary driver for me, though security is the necessary foundation. I want the independence to choose my own path to health and the freedom to optimize my well-being on my own terms without jumping through administrative hoops; that's the kind of innovation that actually makes me want to engage with a health plan."
+          "content": "The most important factor is proactive maintenance. I want a plan that supports my physical mobility so I can continue my consulting work on my own terms and enjoy an active retirement. If a plan like MAP+ helps me stay mobile and out of assisted living through its wellness innovations, that is the ultimate form of independence and financial security."
         }
       ],
-      "summary": "Morgan prioritizes the Freedom Blue PPO for its flexibility and expects insurance to act as a proactive, tech-integrated partner in their daily holistic wellness journey.",
-      "quote": "I want my coverage to incentivize my mental health routines, not just pay for a doctor's visit when I'm already sick.",
+      "summary": "Casey Montgomery views MAP+ as a strategic tool for maintaining physical mobility and independence through its preventive care and weight management features.",
+      "quote": "I don't just want a policy for when things go wrong; I want a strategy for staying healthy.",
       "sentiment": "Positive"
     },
     {
@@ -114,27 +114,27 @@
         },
         {
           "role": "interviewee",
-          "content": "To be perfectly honest, 'compelling' isn't a word I use for insurance. I look at the Freedom Blue PPO and the Security Blue HMO through a strictly fiscal lens. The PPO offers the independence to choose providers, which is a hedge against network volatility, but the premium delta needs to be justified. If the Security Blue HMO has restrictive tiers that lead to high out-of-pocket costs for specialists, the PPO might win, but only if the math for my expected annual healthcare spend pencils out."
+          "content": "To be perfectly honest, 'compelling' isn't a word I'd use for any of them yet. As an accountant, I look at the Healthco Medicare Advantage Plus (MAP+) and I see a lot of marketing around 'wellness' and 'independence,' but the actual ROI is buried in the fine print. I’m currently comparing the premium savings against the potential out-of-pocket maximums and the restrictive provider networks. None of it is compelling until the math proves it's cheaper than a traditional Medigap policy over a ten-year horizon."
         },
         {
           "role": "interviewer",
-          "content": "You mentioned the 'premium delta.' What specific data points would help you determine if the PPO's flexibility is worth that extra cost?"
+          "content": "You mentioned the out-of-pocket maximums. What specific financial data point would convince you that MAP+ offers a better value than a standard Medigap plan?"
         },
         {
           "role": "interviewee",
-          "content": "I need to see the actuarial value of the wellness programs and a side-by-side comparison of the maximum out-of-pocket limits versus the probability of utilizing out-of-network care. As an accountant, I'm looking for the 'break-even' point. If your 'Wellness' perks are just gym memberships baked into a higher premium, I view that as unnecessary overhead rather than a benefit."
+          "content": "I need to see a transparent breakdown of the drug formulary tiers and the specific co-insurance percentages for out-of-network specialists. Most plans hide behind a low monthly premium but then hit you with a 20% co-pay on specialty drugs that easily exceeds any initial savings. If you can show me a guaranteed cap on total cost of care that includes the 'wellness' benefits as actual cost-offsets rather than just perks, then we can talk about value."
         },
         {
           "role": "interviewer",
-          "content": "If we could provide a clear ROI report showing how the PPO's preventive care saves money on chronic condition management, would that shift your perspective?"
+          "content": "If we provided a transparent, real-time calculator that factored in your specific prescriptions and doctor preferences to show net annual savings, would that address your concerns?"
         },
         {
           "role": "interviewee",
-          "content": "It would be a start, provided the data isn't proprietary marketing fluff. I want to see the fine print on those contracted rates. If the PPO can prove it lowers the total annual cost of ownership for my health through better specialist access and early intervention, then it's a rational asset; otherwise, it's just an expensive safety net I'm overpaying for."
+          "content": "It would be a step in the right direction, but only if that calculator is legally binding and accounts for network volatility. I’ve seen providers exit these Advantage networks mid-year, leaving patients high and dry. If you want me to buy into 'Security,' you have to prove that my access to care won't be compromised for the sake of your administrative margins."
         }
       ],
-      "summary": "The user evaluates insurance plans strictly through cost-benefit analysis and actuarial value, dismissing marketing themes in favor of line-item ROI on premiums and wellness benefits.",
-      "quote": "If the 'wellness' perks are just gym memberships baked into a higher premium, I view that as unnecessary overhead rather than a benefit.",
+      "summary": "This user is a highly analytical skeptic who requires granular financial transparency and network stability guarantees before acknowledging any product value.",
+      "quote": "If you want me to buy into 'Security,' you have to prove that my access to care won't be compromised for the sake of your administrative margins.",
       "sentiment": "Negative"
     },
     {
@@ -147,27 +147,27 @@
         },
         {
           "role": "interviewee",
-          "content": "As a yoga instructor and someone who lives and breathes wellness, the Freedom Blue PPO is incredibly compelling because of the independence it offers. I need to be able to choose my own specialists for preventive care without jumping through hoops, and the PPO structure supports that flexibility. However, I also see the value in Security Blue HMO for those who want a more structured, all-in-one approach to their health security."
+          "content": "Honestly, the Healthco Medicare Advantage Plus plan stands out the most to me because of its heavy emphasis on proactive wellness. As a yoga instructor, I’m all about prevention rather than just treatment. The fact that it rewards you for step tracking and offers full coverage for regular screenings makes it incredibly compelling for someone who views health as a daily practice."
         },
         {
           "role": "interviewer",
-          "content": "You mentioned independence and preventive care; how do the specific wellness rewards influence your perception of these plans?"
+          "content": "That's interesting. How do those specific preventive rewards influence your perception of the brand's value?"
         },
         {
           "role": "interviewee",
-          "content": "The rewards are actually the highlight for me. When a plan offers incentives for hitting step goals or completing annual screenings, it turns health maintenance into a positive, proactive game. It makes me feel like the insurance provider is a partner in my health rather than just a safety net for when things go wrong."
+          "content": "It makes me feel like the company is an actual partner in my health. Most insurance feels like a safety net you only use when something goes wrong, but these rewards incentivize me to stay active and engaged. It turns a bureaucratic product into a lifestyle tool that supports my goal of staying functional and vibrant."
         },
         {
           "role": "interviewer",
-          "content": "If you had to pick one feature that would make you recommend these plans to other wellness seekers, what would it be?"
+          "content": "You mentioned staying functional and vibrant; how do these wellness features contribute to your sense of long-term independence?"
         },
         {
           "role": "interviewee",
-          "content": "It would definitely be the seamless integration of lifestyle benefits like SilverSneakers and the preventive care rewards. For a wellness seeker, a plan that honors the daily effort we put into our bodies—and rewards that discipline—is the ultimate differentiator."
+          "content": "Independence is everything. By having access to screenings and wellness incentives now, I feel secure knowing I'm catching potential issues early. It gives me the peace of mind that I can continue teaching and moving freely well into my later years without being sidelined by preventable illnesses. It’s about securing my future self's ability to live on my own terms."
         }
       ],
-      "summary": "The user prioritizes plans that offer high levels of independence and proactive rewards for maintaining a healthy lifestyle, viewing the insurer as a wellness partner.",
-      "quote": "When a plan offers incentives for hitting step goals or completing annual screenings, it turns health maintenance into a positive, proactive game.",
+      "summary": "The user values health insurance that acts as a proactive lifestyle partner by rewarding preventive behaviors and supporting long-term physical independence.",
+      "quote": "It turns a bureaucratic product into a lifestyle tool that supports my goal of staying functional and vibrant.",
       "sentiment": "Positive"
     },
     {
@@ -180,27 +180,27 @@
         },
         {
           "role": "interviewee",
-          "content": "To be honest, the Security Blue HMO is what caught my eye first because the monthly premiums are more manageable on a teacher's salary. I need to make sure my kids and I have security, but I'm constantly worried about those high deductibles and the 'hidden' costs like specialist copays. The Freedom Blue PPO sounds nice for the independence of picking doctors, but if it costs more per month, I just can't make the math work."
+          "content": "To be honest, as a teacher supporting a whole family, the Medicare Advantage Plus plan caught my eye because it seems to bundle more services together. I’m looking for something that provides long-term security without the hidden 'gotchas' of high deductibles or unpredictable out-of-pocket expenses that throw our monthly budget off track."
         },
         {
           "role": "interviewer",
-          "content": "You mentioned a tight budget; how do the out-of-pocket maximums influence your choice between the HMO and the Freedom Blue PPO?"
+          "content": "You mentioned avoiding 'gotchas.' How do predictable copays specifically impact your feeling of security as a parent?"
         },
         {
           "role": "interviewee",
-          "content": "The out-of-pocket maximum is basically my 'worst-case scenario' number. With the Security Blue HMO, I feel like I have a safety net that's more predictable. If one of the kids gets hurt at soccer, I need to know exactly what I'm on the hook for. The PPO's flexibility is a luxury, but predictability is what keeps me from losing sleep at night."
+          "content": "It’s everything. When one of the kids gets sick or I need a check-up, I need to know exactly what is coming out of my paycheck. A fixed copay means I don't have to choose between a doctor's visit and our grocery budget for the week; it gives me a sense of independence and control over our finances."
         },
         {
           "role": "interviewer",
-          "content": "What specific 'wellness' features would make you feel more secure about choosing the Security Blue HMO for your family?"
+          "content": "If Healthco MAP+ included a wellness reward program that discounted your premiums for hitting family health goals, would that change your view of the plan's value?"
         },
         {
           "role": "interviewee",
-          "content": "Anything that helps us stay ahead of illness is huge. Zero-dollar wellness visits and low-cost preventative screenings are essential because they keep us in the classroom and out of the ER. If the plan included perks for gym memberships or wellness apps, that would make me feel like Healthco is actually invested in our health, not just our premiums."
+          "content": "That would be a huge incentive. If I'm already working hard to keep us healthy and active, having that reflected in a lower monthly cost would make the plan feel like a partner in our wellness rather than just another bill to pay."
         }
       ],
-      "summary": "The user prioritizes the Security Blue HMO for its financial predictability and lower premiums, emphasizing that wellness benefits and low out-of-pocket maximums are critical for her family's financial security.",
-      "quote": "Predictability is what keeps me from losing sleep at night.",
+      "summary": "This user prioritizes financial predictability and fixed copays to maintain a stable household budget while balancing their role as a teacher and parent.",
+      "quote": "A fixed copay means I don't have to choose between a doctor's visit and our grocery budget for the week.",
       "sentiment": "Neutral"
     }
   ]
