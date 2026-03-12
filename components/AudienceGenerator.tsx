@@ -2,8 +2,42 @@ import React, { useState } from 'react';
 import { generateAudienceSegments, generateImageFromPrompt, generateSyntheticPersona } from '../services/geminiService';
 import { brandConfig } from '../config';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Users, TrendingUp, BarChart2, DollarSign, Briefcase, Heart, RotateCcw, ArrowLeft, Shield } from 'lucide-react';
+import { Users, TrendingUp, BarChart2, DollarSign, Briefcase, Heart, RotateCcw, ArrowLeft, Shield, Upload, FileText, Download } from 'lucide-react';
 import { CombinedPersona, DetailedPersona } from '../types';
+
+// Helper to parse CSV text into JSON objects
+const parseCSV = (csvText: string) => {
+  const lines = csvText.split('\n').filter(line => line.trim() !== '');
+  if (lines.length < 2) return [];
+  
+  const headers = lines[0].split(',').map(h => h.trim());
+  
+  return lines.slice(1).map(line => {
+    // Basic CSV split, ignores commas inside quotes
+    const values = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+    return headers.reduce((obj: any, header, index) => {
+      let val = values[index] ? values[index].trim() : '';
+      if (val.startsWith('"') && val.endsWith('"')) {
+        val = val.slice(1, -1);
+      }
+      obj[header] = val;
+      return obj;
+    }, {});
+  });
+};
+
+const SAMPLE_CUSTOMER_DATA = [
+  { email: 'alex@demo.com', name: 'Alex', topChannel: 'Portal', condition: "New Baby", location: 'Pennsylvania' },
+  { email: 'jordan@demo.com', name: 'Jordan', topChannel: 'App', condition: 'Type 2 Diabetes', location: 'New York' },
+  { email: 'casey@demo.com', name: 'Casey', topChannel: 'Phone', condition: 'Retiring Soon', location: 'Delaware' },
+  { email: 'taylor@demo.com', name: 'Taylor', topChannel: 'Email', condition: "Preventive Care", location: 'West Virginia' },
+  { email: 'morgan@demo.com', name: 'Morgan', topChannel: 'Portal', condition: "Mental Health", location: 'Pennsylvania' },
+  { email: 'riley@demo.com', name: 'Riley', topChannel: 'App', condition: 'Knee Surgery', location: 'Ohio' },
+  { email: 'jamie@demo.com', name: 'Jamie', topChannel: 'Phone', condition: "New Marriage", location: 'Pennsylvania' },
+  { email: 'quinn@demo.com', name: 'Quinn', topChannel: 'Email', condition: "Chronic Back Pain", location: 'New York' },
+  { email: 'avery@demo.com', name: 'Avery', topChannel: 'Portal', condition: 'Weight Loss', location: 'Delaware' },
+  { email: 'reese@demo.com', name: 'Reese', topChannel: 'App', condition: 'None', location: 'West Virginia' },
+];
 
 interface AudienceGeneratorProps {
   personas: CombinedPersona[];
@@ -16,6 +50,9 @@ export const AudienceGenerator: React.FC<AudienceGeneratorProps> = ({ personas, 
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingStep, setLoadingStep] = useState("");
+  const [useUploadData, setUseUploadData] = useState(false);
+  const [customData, setCustomData] = useState<any[]>([]);
+  const [fileName, setFileName] = useState("");
 
   React.useEffect(() => {
     if (personas.length > 0) {
@@ -58,7 +95,8 @@ export const AudienceGenerator: React.FC<AudienceGeneratorProps> = ({ personas, 
     setLoadingStep("Identifying Key Member Segments...");
 
     try {
-      const explicitContext = `${context}. Segment these customers into exactly three audiences based on the data. Data: ${JSON.stringify(SAMPLE_CUSTOMER_DATA)}`;
+      const targetData = useUploadData && customData.length > 0 ? customData : SAMPLE_CUSTOMER_DATA;
+      const explicitContext = `${context}. Segment these customers into exactly three audiences based on the data. Data: ${JSON.stringify(targetData)}`;
       const segments = await generateAudienceSegments(explicitContext);
 
       // Basic validation
@@ -69,7 +107,7 @@ export const AudienceGenerator: React.FC<AudienceGeneratorProps> = ({ personas, 
       setPersonas(segments);
       setStep(2);
 
-      setLoadingStep("Generating Synthetic Personas & Health Insights...");
+      setLoadingStep("Generating Synthetic Personas & Insights...");
 
       for (let index = 0; index < segments.length; index++) {
         const seg = segments[index];
@@ -118,27 +156,20 @@ export const AudienceGenerator: React.FC<AudienceGeneratorProps> = ({ personas, 
     }));
   };
 
-  const SAMPLE_CUSTOMER_DATA = [
-    { email: 'alex@demo.com', name: 'Alex', topChannel: 'Portal', condition: "New Baby", location: 'Pennsylvania' },
-    { email: 'jordan@demo.com', name: 'Jordan', topChannel: 'App', condition: 'Type 2 Diabetes', location: 'New York' },
-    { email: 'casey@demo.com', name: 'Casey', topChannel: 'Phone', condition: 'Retiring Soon', location: 'Delaware' },
-    { email: 'taylor@demo.com', name: 'Taylor', topChannel: 'Email', condition: "Preventive Care", location: 'West Virginia' },
-    { email: 'morgan@demo.com', name: 'Morgan', topChannel: 'Portal', condition: "Mental Health", location: 'Pennsylvania' },
-    { email: 'riley@demo.com', name: 'Riley', topChannel: 'App', condition: 'Knee Surgery', location: 'Ohio' },
-    { email: 'jamie@demo.com', name: 'Jamie', topChannel: 'Phone', condition: "New Marriage", location: 'Pennsylvania' },
-    { email: 'quinn@demo.com', name: 'Quinn', topChannel: 'Email', condition: "Chronic Back Pain", location: 'New York' },
-    { email: 'avery@demo.com', name: 'Avery', topChannel: 'Portal', condition: 'Weight Loss', location: 'Delaware' },
-    { email: 'reese@demo.com', name: 'Reese', topChannel: 'App', condition: 'None', location: 'West Virginia' },
-  ];
-
   return (
-    <div className="max-w-7xl mx-auto p-8 mb-20">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h2 className="section-header">Audience Generator</h2>
-          <p className="text-subtext mt-1">Segment member populations and generate detailed health personas.</p>
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <div className="page-header">
+        <div className="max-w-7xl mx-auto px-6 w-full">
+          <div className="flex items-center gap-3 mb-4">
+            <Users className="text-[#0077C8]" />
+            <h1 className="page-title">Audience Generator</h1>
+          </div>
+          <p className="text-subtext mt-1">Upload member lists or use sample data to generate detailed user personas.</p>
         </div>
       </div>
+
+      <div className="flex-1 bg-gray-50 p-6">
+        <div className="max-w-7xl mx-auto">
 
       {step === 1 && (
         <div className="content-card mb-12 animate-fadeIn">
@@ -168,43 +199,131 @@ export const AudienceGenerator: React.FC<AudienceGeneratorProps> = ({ personas, 
             </div>
           </div>
 
-          <div className="mb-6">
-            <label className="form-label">Context</label>
-            <input
-              type="text"
-              value={context}
-              onChange={(e) => setContext(e.target.value)}
-              className="input-field"
-              placeholder="Enter context (e.g. Healthco Health Member Segmentation)..."
-            />
-          </div>
+          {useUploadData ? (
+            <div>
+              <button onClick={() => setUseUploadData(false)} className="text-blue-500 text-sm mb-4 font-medium flex items-center gap-1 hover:underline">
+                <ArrowLeft size={14} /> Back to Options
+              </button>
+              <div className="mb-6">
+                <label className="form-label">Upload Member Data (CSV)</label>
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 flex flex-col items-center justify-center bg-gray-50">
+                  <Upload size={32} className="text-gray-400 mb-3" />
+                  <p className="text-gray-600 font-medium mb-1">Upload your customer list</p>
+                  <p className="text-gray-500 text-sm mb-4">CSV format only</p>
+                  <div className="flex gap-4 items-center">
+                    <label className="btn-secondary cursor-pointer">
+                      Browse Files
+                      <input 
+                        type="file" 
+                        accept=".csv" 
+                        className="hidden" 
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            setFileName(file.name);
+                            const reader = new FileReader();
+                            reader.onload = (event) => {
+                              const text = event.target?.result as string;
+                              const parsed = parseCSV(text);
+                              setCustomData(parsed);
+                            };
+                            reader.readAsText(file);
+                          }
+                        }} 
+                      />
+                    </label>
+                    <span className="text-gray-300">|</span>
+                    <a href="/data/sample_audience_data.csv" download className="btn-ghost flex items-center gap-2 text-sm text-[#0077C8] hover:bg-blue-50">
+                      <Download size={16} /> Download CSV Template
+                    </a>
+                  </div>
+                  {fileName && (
+                    <div className="mt-4 p-3 bg-blue-50 text-blue-800 rounded-md border border-blue-200 flex items-center gap-2">
+                       <FileText size={16} /> 
+                       <span className="font-medium">{fileName}</span>
+                       <span className="text-sm ml-2">({customData.length} records parsed)</span>
+                    </div>
+                  )}
+                </div>
+              </div>
 
-          <div className="overflow-x-auto mb-8 border border-gray-200 rounded-lg">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Email</th>
-                  <th>Name</th>
-                  <th>Top Channel</th>
-                  <th>Health Signal / Life Event</th>
-                  <th>Location</th>
-                </tr>
-              </thead>
-              <tbody>
-                {SAMPLE_CUSTOMER_DATA.map((row, index) => (
-                  <tr key={index}>
-                    <td>{row.email}</td>
-                    <td>{row.name}</td>
-                    <td><span className="badge badge-gray">{row.topChannel}</span></td>
-                    <td className="text-gray-600 font-medium">{row.condition}</td>
-                    <td>{row.location}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              <div className="mb-6">
+                <label className="form-label">
+                  Company & Data Description <span className="text-red-500 font-bold">*</span>
+                </label>
+                <textarea
+                  value={context}
+                  onChange={(e) => setContext(e.target.value)}
+                  className="input-field min-h-[100px]"
+                  placeholder="Required: Describe your company and the type of customer data you've uploaded (e.g. 'We are a health tech startup tracking user workout activities...'). This ensures accurate segmentation."
+                />
+              </div>
 
+              <div className="flex justify-end mt-8">
+                 <button
+                    onClick={handleGenerate}
+                    disabled={isLoading || customData.length === 0 || !context.trim()}
+                    className="btn-primary flex items-center gap-2 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed"
+                  >
+                    Generate Audiences
+                  </button>
+              </div>
+            </div>
+          ) : (
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                {/* Option 1: Upload */}
+                <div 
+                  className="border border-gray-200 rounded-xl p-8 hover:border-[#0077C8] hover:shadow-md transition-all cursor-pointer bg-white group flex flex-col h-full"
+                  onClick={() => setUseUploadData(true)}
+                >
+                  <div className="w-12 h-12 bg-blue-50 text-[#0077C8] rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <Upload size={24} />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">Upload Custom Data</h3>
+                  <p className="text-gray-500 text-sm flex-grow">Upload a CSV of customer records to analyze and segment into targeted persona profiles based on real data attributes.</p>
+                </div>
 
+                {/* Option 2: Sample Data */}
+                <div 
+                  className="border border-gray-200 rounded-xl p-8 hover:border-[#0077C8] hover:shadow-md transition-all cursor-pointer bg-white group flex flex-col h-full"
+                  onClick={() => {
+                     // Since useUploadData is false, it will use SAMPLE_CUSTOMER_DATA
+                     // But we want to show the preview instead of directly generating.
+                     // A simple way is to use a secondary state, or just let them generate.
+                     // For simplicity, directly generating or letting them edit context first:
+                     setUseUploadData(false); 
+                     // Setting a flag to show the classic view might be cleaner, but we can just use another step or state.
+                     // Let's repurpose a state. Let's make "useUploadData === false" mean we are in the selection screen,
+                     // unless we click "Use Sample Data", then we go to "Step 1.5" (the old view).
+                     // Actually, we can just trigger generate immediately with a default context, or show the old form.
+                  }}
+                >
+                  <div className="w-12 h-12 bg-green-50 text-green-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <Users size={24} />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">Use Sample Data</h3>
+                  <p className="text-gray-500 text-sm flex-grow mb-4">Use a pre-loaded synthetic dataset of users to instantly generate 3 distinct demographic segments.</p>
+                  
+                  {/* Inline Context Input for Sample Data */}
+                  <div className="mt-auto" onClick={(e) => e.stopPropagation()}>
+                    <input
+                      type="text"
+                      value={context}
+                      onChange={(e) => setContext(e.target.value)}
+                      className="w-full text-sm border-gray-300 rounded-md shadow-sm focus:ring-[#0077C8] focus:border-[#0077C8] mb-3"
+                      placeholder="Optional context override..."
+                    />
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleGenerate(); }}
+                      disabled={isLoading}
+                      className="w-full bg-[#0077C8] text-white py-2 rounded-md font-medium text-sm hover:bg-[#0060A0] transition-colors"
+                    >
+                      Generate with Demo Data
+                    </button>
+                  </div>
+                </div>
+             </div>
+          )}
         </div>
       )}
 
@@ -332,6 +451,8 @@ export const AudienceGenerator: React.FC<AudienceGeneratorProps> = ({ personas, 
           </div>
         </div>
       )}
+        </div>
+      </div>
     </div>
   );
 };

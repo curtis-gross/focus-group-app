@@ -5,7 +5,8 @@ import {
   Home,
   Menu,
   X,
-  Megaphone,
+  Users,
+  FileText,
   Sparkles,
   MessageSquare,
   TrendingUp,
@@ -24,12 +25,9 @@ export const Navigation: React.FC<NavigationProps> = ({ currentMode, setMode, is
 
   const navItems = [
     { id: AppMode.HOME, label: 'Home', icon: Home },
-    { id: AppMode.MARKETING_HUB, label: 'Marketing Hub', icon: Megaphone },
+    { id: AppMode.AUDIENCE_GEN, label: 'Audiences', icon: Users },
+    { id: AppMode.MARKETING_BRIEF, label: 'Marketing Brief', icon: FileText },
     { id: AppMode.SYNTHETIC_FOCUS_GROUP, label: 'Focus Group', icon: MessageSquare },
-    { id: AppMode.PDP_HUB, label: 'Product Hub', icon: Sparkles },
-    { id: AppMode.FEASIBILITY_ANALYSIS, label: 'Feasibility Analysis', icon: TrendingUp },
-    { id: AppMode.ASSISTANT, label: 'Assistant', icon: HeartHandshake },
-    { id: AppMode.CONCIERGE, label: 'Concierge', icon: Monitor },
   ];
 
   return (
@@ -51,7 +49,7 @@ export const Navigation: React.FC<NavigationProps> = ({ currentMode, setMode, is
         ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
       `}>
         <div className="hidden md:flex items-center justify-center p-6 border-b border-gray-200">
-          <span className="text-2xl font-bold text-[#0077C8]">Healthco</span>
+          <span className="text-2xl font-bold text-[#0077C8]">Focus Group AI</span>
         </div>
 
         <div className="p-4 space-y-2">

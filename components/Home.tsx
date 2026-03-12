@@ -2,7 +2,7 @@ import React from 'react';
 import { AppMode } from '../types';
 import { brandConfig } from '../config';
 import {
-    Megaphone, Sparkles, MessageSquare
+    Megaphone, Sparkles, MessageSquare, Users, FileText
 } from 'lucide-react';
 
 interface HomeProps {
@@ -12,16 +12,16 @@ interface HomeProps {
 export const Home: React.FC<HomeProps> = ({ setMode }) => {
     const tools = [
         {
-            mode: AppMode.MARKETING_HUB,
-            label: "Marketing Hub",
-            icon: <Megaphone size={24} />,
-            desc: "Campaign central & assets"
+            mode: AppMode.AUDIENCE_GEN,
+            label: "Audiences",
+            icon: <Users size={24} />,
+            desc: "Segment and view audiences"
         },
         {
-            mode: AppMode.PDP_HUB,
-            label: "Product Hub",
-            icon: <Sparkles size={24} />,
-            desc: "Product enrichment & variants"
+            mode: AppMode.MARKETING_BRIEF,
+            label: "Marketing Brief",
+            icon: <FileText size={24} />,
+            desc: "Generate targeted marketing briefs"
         },
         {
             mode: AppMode.SYNTHETIC_FOCUS_GROUP,
@@ -37,9 +37,27 @@ export const Home: React.FC<HomeProps> = ({ setMode }) => {
                 <h1 className="text-4xl md:text-6xl font-bold text-heading tracking-tight mb-4">
                     Welcome to <span className="text-[#0077C8]">{brandConfig.ui.welcomeTitle}</span>
                 </h1>
-                <p className="text-xl text-subtext max-w-2xl mx-auto">
-                    Select a tool to get started.
+                <p className="text-xl text-subtext max-w-2xl mx-auto mb-8">
+                    Select a tool to get started. Follow the workflow to generate dynamic campaigns:
                 </p>
+                
+                <div className="max-w-3xl mx-auto bg-white p-6 rounded-xl shadow-sm border border-gray-100 text-left mb-12">
+                    <h2 className="text-lg font-bold text-gray-900 mb-4">How to Use Focus Group AI</h2>
+                    <ul className="space-y-3 text-gray-600">
+                        <li className="flex items-start">
+                            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 text-[#0077C8] flex items-center justify-center font-bold text-sm mr-3">1</span>
+                            <span><strong>Generate Audiences:</strong> Start here to create specialized user personas based on your target demographic data.</span>
+                        </li>
+                        <li className="flex items-start">
+                            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 text-[#0077C8] flex items-center justify-center font-bold text-sm mr-3">2</span>
+                            <span><strong>Marketing Brief:</strong> Create a tailored marketing brief and assets for all your generated audiences.</span>
+                        </li>
+                        <li className="flex items-start">
+                            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 text-[#0077C8] flex items-center justify-center font-bold text-sm mr-3">3</span>
+                            <span><strong>Focus Group:</strong> Test the generated marketing brief and assets against your synthetic audiences to get simulated feedback.</span>
+                        </li>
+                    </ul>
+                </div>
             </div>
 
             <div className="dashboard-grid">

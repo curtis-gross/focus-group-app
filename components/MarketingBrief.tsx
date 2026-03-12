@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { generateMarketingBrief, generateMarketingCampaignAssets, MarketingAssets } from '../services/geminiService';
 import { brandConfig } from '../config';
-import { Briefcase, Send, Loader2, Globe, Target, TrendingUp, Calendar, ShieldCheck, Zap, Layout, ArrowLeft, Image, Search, Mail, Youtube, Share2, MessageCircle, ThumbsUp, Sparkles, Heart } from 'lucide-react';
+import { Briefcase, Send, Loader2, Globe, Target, TrendingUp, Calendar, ShieldCheck, Zap, Layout, ArrowLeft, Image, Search, Mail, Youtube, Share2, MessageCircle, ThumbsUp, Sparkles, Heart, FileText, Users, X } from 'lucide-react';
 import { MarketingBriefData } from '../types';
 
 export const MarketingBrief: React.FC = () => {
-  const [context, setContext] = useState(`${brandConfig.companyName} - Insurance & Wellness.`);
-  const [goal, setGoal] = useState(`Increase enrollments for Medicare Advantage plans. Key themes: Independence, Security, Wellness. Audiences: The Active Senior, The Young Family, The Wellness Seeker.`);
+  const [context, setContext] = useState("");
+  const [goal, setGoal] = useState("");
   const [brief, setBrief] = useState<MarketingBriefData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [language, setLanguage] = useState<'en' | 'es'>('en');
@@ -16,6 +16,8 @@ export const MarketingBrief: React.FC = () => {
   const [isAssetLoading, setIsAssetLoading] = useState(false);
   const [generationStatus, setGenerationStatus] = useState("");
   const [activeTab, setActiveTab] = useState<'social' | 'search' | 'email' | 'youtube' | 'website'>('social');
+  const [availableAudiences, setAvailableAudiences] = useState<any[]>([]);
+  const [selectedAudienceModal, setSelectedAudienceModal] = useState<any | null>(null);
 
   const currentAssets = campaignAssetsMap && selectedAudience ? campaignAssetsMap[selectedAudience] : null;
 
@@ -24,7 +26,7 @@ export const MarketingBrief: React.FC = () => {
     setGenerationStatus("Drafting Marketing Brief...");
     try {
       // 1. Generate Brief
-      const result = await generateMarketingBrief(context, goal);
+      const result = await generateMarketingBrief(context, goal, availableAudiences);
 
       if (result) {
         // 2. Generate Assets immediately
@@ -124,39 +126,53 @@ export const MarketingBrief: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    // Attempt to load generated audiences from the Audience Generator
+    const fetchAudiences = async () => {
+      try {
+        const response = await fetch('/api/load-run/audience_generator');
+        if (response.ok) {
+          const data = await response.json();
+          // The data might be an array of personas directly, or wrapped in an object
+          const personasData = Array.isArray(data) ? data : data.personas;
+          if (personasData && Array.isArray(personasData)) {
+            setAvailableAudiences(personasData);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch available audiences:", err);
+      }
+    };
+    fetchAudiences();
+  }, []);
+
   return (
-    <div className="max-w-6xl mx-auto p-8 mb-20">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h2 className="section-header">Marketing Brief Generator</h2>
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <div className="page-header">
+        <div className="max-w-7xl mx-auto px-6 w-full">
+          <div className="flex items-center gap-3 mb-4">
+            <FileText className="text-[#0077C8]" />
+            <h1 className="page-title">Marketing Brief Generator</h1>
+          </div>
           <p className="text-subtext mt-1">Generate comprehensive insurance marketing strategies and assets.</p>
         </div>
       </div>
 
+      <div className="flex-1 bg-gray-50 p-6">
+        <div className="max-w-7xl mx-auto">
+
       {step === 1 && (
         <div className="content-card mb-12 animate-fadeIn">
           <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="form-label">Company Context</label>
-                <input
-                  type="text"
-                  value={context}
-                  onChange={(e) => setContext(e.target.value)}
-                  className="input-field"
-                  placeholder={`e.g. ${brandConfig.companyName} - Insurance Provider`}
-                />
-              </div>
-              <div>
-                <label className="form-label">Product / Plan Focus</label>
-                <input
-                  type="text"
-                  value={brief?.productName || ""}
-                  readOnly
-                  className="input-field opacity-50 cursor-not-allowed"
-                  placeholder="Generated after clicking..."
-                />
-              </div>
+            <div className="mb-4">
+              <label className="form-label">Company Context</label>
+              <input
+                type="text"
+                value={context}
+                onChange={(e) => setContext(e.target.value)}
+                className="input-field"
+                placeholder={`e.g. ${brandConfig.companyName} - Consumer Retail`}
+              />
             </div>
             <div>
               <label className="form-label">Campaign Goal</label>
@@ -164,9 +180,29 @@ export const MarketingBrief: React.FC = () => {
                 value={goal}
                 onChange={(e) => setGoal(e.target.value)}
                 className="input-field h-24"
-                placeholder="Describe what you want to achieve (e.g., Increase MA enrollments)..."
+                placeholder="Describe what you want to achieve (e.g., Increase Q3 sales for new product line)..."
               />
             </div>
+            
+            {availableAudiences.length > 0 && (
+              <div className="mb-4">
+                <label className="form-label mb-2 block">Audiences - from Audience Generator</label>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {availableAudiences.map((aud, index) => (
+                    <div 
+                      key={index}
+                      onClick={() => setSelectedAudienceModal(aud)}
+                      className="p-3 rounded-lg border border-gray-200 bg-white hover:border-[#0077C8] hover:bg-blue-50 cursor-pointer shadow-sm transition-all"
+                    >
+                      <p className="font-bold text-gray-900 text-sm truncate">{aud.name}</p>
+                      <p className="text-xs text-gray-500 truncate mt-1">{aud.personaName || aud.bio || "Generated Audience"}</p>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-blue-600 mt-2">These audiences will automatically be included in your generated brief.</p>
+              </div>
+            )}
+            
             <div className="flex gap-4">
               <button
                 onClick={handleLoadLast}
@@ -178,8 +214,8 @@ export const MarketingBrief: React.FC = () => {
               </button>
               <button
                 onClick={handleGenerate}
-                disabled={isLoading}
-                className={`flex-1 btn-primary flex items-center justify-center gap-2`}
+                disabled={isLoading || !context.trim() || !goal.trim()}
+                className={`flex-1 btn-primary flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed`}
               >
                 {isLoading ? <Loader2 className="animate-spin" /> : <Send size={18} />}
                 {isLoading ? generationStatus : "Generate Brief & Assets"}
@@ -606,6 +642,74 @@ export const MarketingBrief: React.FC = () => {
           </div>
         </div>
       )}
+        </div>
+      </div>
+
+      {/* Audience Details Modal */}
+      {selectedAudienceModal && (
+          <div className="fixed inset-0 bg-heading/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+              <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] border border-gray-100 relative">
+                  <div className="absolute top-0 left-0 w-full h-2 bg-[#0077C8]"></div>
+                  {/* Header */}
+                  <div className="bg-white p-8 border-b border-gray-50 flex justify-between items-start">
+                      <div className="flex gap-6 hover:scale-[1.02] transition-transform">
+                          <div className="w-24 h-24 rounded-2xl bg-gray-50 overflow-hidden shadow-sm flex-shrink-0 border border-gray-100">
+                              {selectedAudienceModal.imageUrl ? <img src={selectedAudienceModal.imageUrl} className="w-full h-full object-cover" /> : <Users size={40} className="m-auto mt-8 text-subtext" />}
+                          </div>
+                          <div className="mt-2">
+                              <div className="flex items-center gap-3 mb-2">
+                                  <h3 className="text-3xl font-black text-heading">{selectedAudienceModal.name}</h3>
+                                  {selectedAudienceModal.isWildcard && <span className="px-3 py-1 bg-red-50 text-red-600 text-[10px] font-black rounded-full uppercase tracking-widest border border-red-100">Wildcard</span>}
+                              </div>
+                              <div className="text-subtext font-bold uppercase tracking-widest text-xs flex items-center gap-2">
+                                  <div className="w-2 h-2 rounded-full bg-[#0077C8]" />
+                                  {selectedAudienceModal.personaName}
+                              </div>
+                          </div>
+                      </div>
+                      <button onClick={() => setSelectedAudienceModal(null)} className="text-subtext hover:text-heading transition-all p-2 hover:bg-gray-100 rounded-full"><X size={24} /></button>
+                  </div>
+
+                  {/* Content */}
+                  <div className="p-10 overflow-y-auto space-y-8 custom-scrollbar">
+                      {/* Bio */}
+                      <div>
+                          <h4 className="text-[10px] font-black text-subtext uppercase tracking-widest mb-3">Bio & Lifestyle Persona</h4>
+                          <p className="text-heading text-lg leading-relaxed font-medium italic">"{selectedAudienceModal.bio}"</p>
+                      </div>
+
+                      {/* Demographics */}
+                      <div className="grid grid-cols-2 gap-8">
+                          <div>
+                              <h4 className="text-[10px] font-black text-subtext uppercase tracking-widest mb-3">Audience Demographics</h4>
+                              <div className="bg-gray-50 p-5 rounded-2xl border border-gray-100 font-bold text-heading text-sm shadow-sm">
+                                  {selectedAudienceModal.demographics || "N/A"}
+                              </div>
+                          </div>
+                          <div>
+                              <h4 className="text-[10px] font-black text-subtext uppercase tracking-widest mb-3">Interest Tags</h4>
+                              <div className="flex flex-wrap gap-2">
+                                  {selectedAudienceModal.details?.lifestyle_tags?.map((tag: string, i: number) => (
+                                      <span key={i} className="px-4 py-1.5 bg-blue-50 text-[#0077C8] rounded-xl text-xs font-black border border-blue-100 shadow-sm">{tag}</span>
+                                  )) || <span className="text-subtext italic">No specific tags identified.</span>}
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+
+                  {/* Footer */}
+                  <div className="p-6 border-t border-gray-800 bg-[#111] flex justify-end">
+                      <button
+                          onClick={() => setSelectedAudienceModal(null)}
+                          className="px-6 py-2 bg-white text-black rounded-lg font-bold hover:bg-gray-200 transition-colors"
+                      >
+                          Close
+                      </button>
+                  </div>
+              </div>
+          </div>
+      )}
+
     </div>
   );
 };

@@ -1,5 +1,5 @@
 export const brandConfig = {
-  companyName: "Healthco Health",
+  companyName: "Focus Group AI",
   logo: {
     sidebar: "/images/healthco-logo.svg",
     width: "w-[160px]",
@@ -13,7 +13,7 @@ export const brandConfig = {
     title: "Healthco Health AI Lab",
   },
   ui: {
-    welcomeTitle: "Healthco Intelligence",
+    welcomeTitle: "Focus Group AI",
     welcomeColor: "text-[#0077C8]",
     button: {
       primary: "btn-primary",

@@ -310,11 +310,11 @@ export const generateVibeMatches = async (base64Image: string): Promise<any> => 
                     {
                         text: `
                         Analyze this image to determine its aesthetic mood and color palette.
-                        Then, suggest 3 specific Health & Wellness focus areas or Insurance Benefits that would appeal to a person with this lifestyle vibe.
+                        Then, suggest 3 specific products, services, or focus areas that would appeal to a person with this lifestyle vibe based on the context of the requested application.
                         
                         For each recommendation, provide:
                         - A catchy name
-                        - A realistic monthly premium or value (e.g. "$0 copay", "$25/mo")
+                        - A realistic price or value metric (e.g. "$0", "$25/mo")
                         - A short description explaining why it fits
                         - A detailed image generation prompt to visualize a marketing asset for this benefit (lifestyle or abstract).
                         
@@ -345,7 +345,7 @@ export const generateVibeMatches = async (base64Image: string): Promise<any> => 
         // 2. Generate Images for each product in parallel
         if (data.products && Array.isArray(data.products)) {
             const productsWithImages = await Promise.all(data.products.map(async (prod: any) => {
-                const imageUrl = await generateImage(prod.imagePrompt + ", professional health marketing style, warm lighting, high resolution");
+                const imageUrl = await generateImage(prod.imagePrompt + ", professional marketing style, warm lighting, high resolution");
                 // Convert to data uri format if raw base64 returned from generateImage
                 return { ...prod, image: imageUrl ? `data:image/jpeg;base64,${imageUrl}` : null };
             }));
@@ -426,11 +426,11 @@ export const generateSyntheticPersona = async (personaName: string, audienceName
         ${audienceName}
 
         **DETAILED INSTRUCTIONS FOR THIS PERSONA:**
-        Develop a deeply realistic and empathetic persona that perfectly embodies this audience segment. You must define their core values, beliefs, communication tone, and specific health/insurance knowledge level appropriate for their demographic.
+        Develop a deeply realistic and empathetic persona that perfectly embodies this audience segment. You must define their core values, beliefs, communication tone, and specific industry knowledge level appropriate for their demographic.
 
         **CHART & BRAND DATA REQUIREMENTS:**
-        1. "preferred_products": Provide 3-4 specific, realistic ${context} plans, services, or benefits this persona would highly value (e.g., Telemedicine, specific health coverages, wellness programs).
-        2. "charts.brand_affinity": Provide 12 months of affinity data (0-100 scale) for ${context}. Generate a realistic 12-month trend line (e.g., spikes during open enrollment or periods relevant to their demographic).
+        1. "preferred_products": Provide 3-4 specific, realistic ${context} plans, products, or services this persona would highly value.
+        2. "charts.brand_affinity": Provide 12 months of affinity data (0-100 scale) for ${context}. Generate a realistic 12-month trend line.
 
         **Target Persona Name:**
         ${personaName}
@@ -498,13 +498,13 @@ export const generateMarketingCampaignAssets = async (productName: string, targe
                 
                 Task: Create marketing assets for a multi-channel campaign.
                 
-                1. **Image Prompt**: A detailed prompt to generate a high-quality lifestyle image of the health plan/concept that appeals to the target audience.
-                   CRITICAL: Ensure the image is diverse and inclusive, showing happy, healthy people in natural settings.
+                1. **Image Prompt**: A detailed prompt to generate a high-quality lifestyle image of the product/service that appeals to the target audience.
+                   CRITICAL: Ensure the image is diverse and inclusive, showing happy people in natural settings relevant to the product.
                 2. **Social Media Post**: An Instagram/Facebook style caption with relevant hashtags.
                 3. **Search Ad**: A punchy Google Search ad headline (max 30 chars) and description (max 90 chars).
                 4. **Email**: A catchy subject line, preheader text, and a short persuasive body paragraph.
                 5. **YouTube Short**: A title and a brief 15-second script/hook.
-                6. **Website Recommendations**: Suggest 3 distinct health plans or wellness perks that would be "frequently viewed together".
+                6. **Website Recommendations**: Suggest 3 distinct products, services, or perks that would be "frequently viewed together".
                    For each, provide a Name, Price (e.g. "$0"), and a detailed Image Prompt for a marketing icon or lifestyle shot.
                 
                 Return a valid JSON object with this structure:
@@ -512,12 +512,12 @@ export const generateMarketingCampaignAssets = async (productName: string, targe
                     "imagePrompt": "Photorealistic shot of...",
                     "social": {
                         "caption": "...",
-                        "hashtags": ["#health", "#healthco"]
+                        "hashtags": ["#marketing", "#campaign"]
                     },
                     "search": {
                         "headline": "...",
                         "description": "...",
-                        "url": "healthco.com/plans/${productName.replace(/\s+/g, '-').toLowerCase()}"
+                        "url": "example.com/products/${productName.replace(/\s+/g, '-').toLowerCase()}"
                     },
                     "email": {
                         "subject": "...",
@@ -875,15 +875,21 @@ export const generateProductSpinVideo = async (imageB64s: string[]): Promise<str
     }
 };
 
-export const generateMarketingBrief = async (context: string, goal: string): Promise<any> => {
+export const generateMarketingBrief = async (context: string, goal: string, sourceAudiences?: any[]): Promise<any> => {
     
     try {
         const timestamp = new Date().toLocaleString();
+        
+        const audienceContext = sourceAudiences && sourceAudiences.length > 0 
+            ? `\n**Target Demographic Constraint:** Your brief must specifically target the following ${sourceAudiences.length} personas. Focus your entire strategy on catering to these exact audiences.\n${sourceAudiences.map((aud, i) => `\n${i+1}. Name: ${aud.name}\n   Bio: ${aud.bio}\n   Demographics: ${aud.demographics}`).join('\n')}\n`
+            : "";
+
         const prompt = `
-        You are an expert Marketing Brief Agent for Healthco Health. Create a comprehensive marketing brief based on the following:
+        You are an expert Marketing Brief Agent. Create a comprehensive marketing brief based on the following:
         
         **Company Context:** ${context}
         **Campaign Goal:** ${goal}
+        ${audienceContext}
         
         CRITICAL: Follow the exact 8-section structure below. Be detailed, professional, and data-driven.
         
@@ -892,8 +898,8 @@ export const generateMarketingBrief = async (context: string, goal: string): Pro
             "title": "Marketing Brief: [A Catchy Campaign Title]",
             "timestamp": "${timestamp}",
             "campaignGoal": "${goal}",
-            "productName": "[Plan/Service Name]",
-            "companyName": "Healthco Health",
+            "productName": "[Product/Service Name]",
+            "companyName": "[Extracted Company Name from Context]",
             "assumptions": {
                 "budget": "...",
                 "timeline": "...",
@@ -919,8 +925,8 @@ export const generateMarketingBrief = async (context: string, goal: string): Pro
             ],
             "valueProp": {
                 "main": { "en": "...", "es": "..." },
-                "againstCompetitors": "[How we beat UPMC, Aetna, etc]",
-                "addressingTrends": "[Telehealth, Mental Health, Senior Independence, etc]"
+                "againstCompetitors": "[How we beat competitors]",
+                "addressingTrends": "[Relevant industry trends]"
             },
             "messaging": {
                 "primaryHook": { "en": "...", "es": "..." },
