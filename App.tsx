@@ -20,6 +20,7 @@ import { FeasibilityAnalysis } from './components/FeasibilityAnalysis';
 
 import { Assistant } from './components/Assistant';
 import { Concierge } from './components/Concierge';
+import { SyntheticUsers } from './components/SyntheticUsers';
 
 function App() {
   const [mode, setMode] = useState<AppMode>(AppMode.HOME);
@@ -29,6 +30,25 @@ function App() {
 
   useEffect(() => {
     document.title = brandConfig.meta.title;
+
+    // Load audiences from the file system explicitly if they exist
+    const loadAudiences = async () => {
+      try {
+        const res = await fetch('/api/load-run/audience_generator');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.personas && Array.isArray(data.personas)) {
+            setPersonas(data.personas);
+          }
+          if (data.context) {
+            setContext(data.context);
+          }
+        }
+      } catch (err) {
+        console.warn("No saved audience run found, starting empty.", err);
+      }
+    };
+    loadAudiences();
   }, []);
 
   const renderContent = () => {
@@ -62,6 +82,8 @@ function App() {
         return <MarketingBrief />;
       case AppMode.SYNTHETIC_CHAT:
         return <SyntheticChat />;
+      case AppMode.SYNTHETIC_USERS:
+        return <SyntheticUsers personas={personas} />;
       case AppMode.SYNTHETIC_FOCUS_GROUP:
         return <SyntheticTesting />;
       case AppMode.FEASIBILITY_ANALYSIS:

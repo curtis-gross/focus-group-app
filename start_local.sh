@@ -1,27 +1,18 @@
 #!/bin/bash
 
-# Check gcloud authentication
-echo "Checking gcloud authentication..."
-if ! gcloud auth print-access-token &> /dev/null; then
-  echo "Error: You are not authenticated with gcloud."
-  echo "Please run 'gcloud auth login' and 'gcloud auth application-default login' to authenticate."
-  exit 1
-fi
-echo "gcloud authentication verified."
+export NODE_ENV=development
 
-echo "Starting local development server..."
+echo "==========================================================="
+echo " Starting local development server with Hot Reloading..."
+echo " The application will be available at: http://localhost:3000"
+echo " (API calls will be automatically proxied to port 8080)"
+echo "==========================================================="
 
-# Build the frontend first
-echo "Building frontend..."
-npm run build
-
-# Check if build was successful
-if [ $? -eq 0 ]; then
-  echo "Build successful. Starting Node.js server..."
-  # Start the server
-  # Ensure GEMINI_API_KEY is set in your environment or add it here for testing
-  # export GEMINI_API_KEY="your_key_here" 
-  node server.js
-else
-  echo "Frontend build failed. Server not started."
-fi
+# Use npx to run concurrently to avoid needing a global install
+# - node --watch automatically restarts the backend on changes
+# - npm run dev starts the Vite HMR server on port 3000
+npx concurrently --kill-others \
+  --names "SERVER,CLIENT" \
+  --prefix-colors "blue,green" \
+  "node --watch server.js" \
+  "npm run dev"

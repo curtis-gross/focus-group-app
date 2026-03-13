@@ -35,7 +35,8 @@ export enum AppMode {
   MULTI_IMAGE = 'MULTI_IMAGE',
   CONTENT_VERSIONING = 'CONTENT_VERSIONING',
   FEASIBILITY_ANALYSIS = 'FEASIBILITY_ANALYSIS',
-  ASSISTANT = 'ASSISTANT'
+  ASSISTANT = 'ASSISTANT',
+  SYNTHETIC_USERS = 'SYNTHETIC_USERS'
 }
 
 export interface FeasibilityReport {
@@ -367,4 +368,40 @@ export interface CombinedPersona extends AudienceSegment {
     value: number;
     reason: string;
   };
+}
+
+export interface CognitiveStyle {
+  informationDensityPreference: string;
+  primaryTrustSignal: string;
+  decisionVelocity: string;
+  riskTolerance: string;
+}
+
+export interface LifestyleFriction {
+  dailyGrindContext: string;
+  financialMindset: string;
+  brandLoyaltyQuotient: string;
+  householdPowerDynamic: string;
+}
+
+export interface DigitalFootprint {
+  last3SearchQueries: string[];
+  unsubscribeTrigger: string;
+  platformEcosystem: string;
+  recentBigLifeEvent: string;
+}
+
+export interface PsychographicFlavor {
+  theOneLuxury: string;
+  aspirationVsReality: string;
+  socialCauseAlignment: string;
+}
+
+export interface SyntheticUserProfile extends CombinedPersona {
+  baseAudienceName?: string;
+  baseAudienceBio?: string;
+  cognitiveStyle?: CognitiveStyle;
+  lifestyleFriction?: LifestyleFriction;
+  digitalFootprint?: DigitalFootprint;
+  psychographicFlavor?: PsychographicFlavor;
 }

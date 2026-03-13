@@ -26,7 +26,7 @@ export const SIMULATION_PRODUCTS = [
 export const STANDARD_AUDIENCES = [
   {
     id: 'std_skeptic',
-    name: 'The Plan Skeptic',
+    name: 'Skeptic',
     personaName: 'Rational Evaluator',
     bio: 'Highly critical of insurance costs and coverage. meticulously reads the fine print. Needs clear proof of value and ROI.',
     demographics: '45-60, Suburban, Value-Conscious',
@@ -42,8 +42,8 @@ export const STANDARD_AUDIENCES = [
     isStandard: true
   },
   {
-    id: 'std_superfan',
-    name: 'The Health Enthusiast',
+    id: 'std_optimist',
+    name: 'Optimist',
     personaName: 'Wellness Advocate',
     bio: 'Proactive about health. Uses every benefit, tracks steps, gets all screenings. Loves preventive care rewards.',
     demographics: '30-45, Urban, Active',
@@ -59,15 +59,15 @@ export const STANDARD_AUDIENCES = [
     isStandard: true
   },
   {
-    id: 'std_budget',
-    name: 'The Budget-Conscious Family',
+    id: 'std_average_jane',
+    name: 'Average Jane',
     personaName: 'Practical Parent',
     bio: 'Needs coverage for the whole family but is on a tight budget. worried about deductibles and copays.',
     demographics: '35-50, Suburban, Family-Oriented',
     details: {
       age: 40,
       job_title: 'Teacher',
-      bio: 'Needs suretly that a broken arm wont break the bank.',
+      bio: 'Needs surety that a broken arm wont break the bank.',
       income: 'Low-Medium',
       lifestyle_tags: ['Family First', 'Budget Aware', 'Safety Net']
     },

@@ -1,207 +1,207 @@
 {
   "type": "INTERVIEW_SESSION",
-  "id": "interview_1773330964705",
-  "name": "Interview: which of our insurance product...",
-  "timestamp": "2026-03-12T15:56:04.705Z",
-  "question": "which of our insurance products are most compelling?",
+  "id": "interview_1773416886190",
+  "name": "Interview: what products are you most lik...",
+  "timestamp": "2026-03-13T15:48:06.190Z",
+  "question": "what products are you most likely to buy?",
   "results": [
     {
-      "personaId": "p_1773330913802",
-      "personaName": "The Milestone Navigators",
+      "personaId": "p_1773416847761",
+      "personaName": "The Milestone Navigator",
       "transcript": [
         {
           "role": "interviewer",
-          "content": "which of our insurance products are most compelling?"
+          "content": "what products are you most likely to buy?"
         },
         {
           "role": "interviewee",
-          "content": "As someone just starting out and looking toward the future, the Medicare Advantage Plus (MAP+) plan actually stands out, even if I'm not the primary user yet. It’s compelling because it signals a sense of long-term security and integrated care. For my family, seeing a plan that bundles everything together—wellness, dental, and vision—makes the brand feel like a stable foundation we can rely on as we grow."
+          "content": "Right now, I'm focusing on products that offer long-term stability and help me establish a routine in my new career, so I’m looking at high-quality basics like ergonomic office gear and reliable fitness equipment like Nike walking shoes that I know will last."
         },
         {
           "role": "interviewer",
-          "content": "You mentioned 'long-term security' and 'integrated care.' How do those themes impact your decision-making when looking at health services for a growing household?"
+          "content": "Given your current transition into the workforce, how do you decide which health-related purchases are worth the investment?"
         },
         {
           "role": "interviewee",
-          "content": "It's all about reducing complexity. Between my job as a coordinator and managing a new marriage, I don't have time to juggle multiple providers or separate bills. Integrated care means I don't have to be the middleman for my own health information. Security for me means knowing that if my parents or eventually my own family need support, the system is already built to be comprehensive and easy to navigate."
+          "content": "I prioritize items that come with a structured plan or a clear benefit; if a brand like Healthco partners with Nike to provide a roadmap for my cardiovascular health, it removes the guesswork and makes the financial commitment feel much safer."
         },
         {
           "role": "interviewer",
-          "content": "If you were to recommend MAP+ to an older family member based on your values of convenience, what specific feature would you highlight most?"
+          "content": "How much does the incentive or reward aspect of the Wellness Walkers initiative influence your decision to participate?"
         },
         {
           "role": "interviewee",
-          "content": "I would definitely highlight the one-stop-shop aspect of the wellness rewards and the all-in-one coverage. When life gets busy with work and starting a family, having everything integrated is a huge relief; it's one less thing to coordinate manually, which gives us more time to focus on our milestones rather than paperwork."
+          "content": "It’s a huge factor for me because it turns a preventative health goal into something manageable and rewarding, which is exactly the kind of administrative support I need while I'm still figuring out my new adult life."
         }
       ],
-      "summary": "Alexandra prioritizes integrated, comprehensive plans like MAP+ because they reduce administrative complexity during busy life transitions and provide a sense of long-term family stability.",
-      "quote": "When life gets busy with work and starting a family, having everything integrated is a huge relief; it's one less thing to coordinate manually.",
+      "summary": "Elena values structured health incentives and brand partnerships that provide a sense of stability and clear guidance during her transition into the workforce.",
+      "quote": "I prioritize items that come with a structured plan or a clear benefit; it removes the guesswork and makes the financial commitment feel much safer.",
       "sentiment": "Positive"
     },
     {
-      "personaId": "p_1773330923881",
-      "personaName": "The Digital Care Managers",
+      "personaId": "p_1773416854806",
+      "personaName": "The Digital Health Optimizer",
       "transcript": [
         {
           "role": "interviewer",
-          "content": "which of our insurance products are most compelling?"
+          "content": "what products are you most likely to buy?"
         },
         {
           "role": "interviewee",
-          "content": "As a UX designer and someone dealing with a physical injury, the Medicare Advantage Plus (MAP+) plan is definitely the most compelling to me. The way it centers on the digital portal for tracking specialist visits and recovery metrics aligns perfectly with how I manage my life. I need that data-driven feedback to feel like I’m actually making progress."
+          "content": "As an SRE, I'm all about optimization. I'm most likely to buy smart wearables, glucose monitors that sync via Bluetooth, and now, specifically those Nike walking shoes if they actually integrate with the Healthco app. I need products that contribute to my recovery data stream without adding manual overhead to my day."
         },
         {
           "role": "interviewer",
-          "content": "You mentioned needing data-driven feedback to track progress—how does that digital integration influence your daily health decisions?"
+          "content": "How does the integration of shoes like Nike into your existing health ecosystem affect your purchasing decision?"
         },
         {
           "role": "interviewee",
-          "content": "It removes the mental load. If I can see my physical therapy benchmarks and my specialist's notes right on my phone, I don't have to guess if I'm overextending myself. It gives me the confidence to stay active because the data tells me exactly where my limits are, which is vital for maintaining my lifestyle while I'm healing."
+          "content": "It’s a dealbreaker for me. If the shoes are just 'dumb' gear, I’m not interested. But if they feed gait analysis or step counts directly into my Healthco dashboard where I track my chronic condition recovery, they become a functional tool. I prioritize hardware that talks to my software."
         },
         {
           "role": "interviewer",
-          "content": "In terms of the 'Security' theme we focus on, how does having all that info in a portal contribute to your peace of mind?"
+          "content": "What specific features or incentives would make you choose these Nike shoes over a standard pair of walking shoes?"
         },
         {
           "role": "interviewee",
-          "content": "Security for me isn't just about money; it's about ownership of my information. Knowing that my entire medical history and upcoming schedule are accessible in one secure app means I'm never caught off guard. When I have that level of transparency, I feel independent and secure because I'm the one driving my recovery, not just waiting for a phone call from a doctor's office."
+          "content": "Auto-syncing data is number one, but from a financial side, I'd want to see my walking streaks translate into lower monthly premiums or Healthco credits. If I can prove my activity levels through the Nike integration to get a discount on my insurance, I'm buying them immediately."
         }
       ],
-      "summary": "Jordan finds the MAP+ plan compelling because its digital integration and data transparency provide the autonomy and security needed to manage a physical recovery independently.",
-      "quote": "When I can see my health metrics and specialist notes in one portal, I don’t feel like I'm waiting for permission to live my life.",
+      "summary": "Marcus is highly motivated by data integration and financial incentives that reward a tech-enabled healthy lifestyle.",
+      "quote": "If I can prove my activity levels through the Nike integration to get a discount on my insurance, I'm buying them immediately.",
       "sentiment": "Positive"
     },
     {
-      "personaId": "p_1773330933817",
-      "personaName": "The Longevity Optimizers",
+      "personaId": "p_1773416862909",
+      "personaName": "The Proactive Well-being Seeker",
       "transcript": [
         {
           "role": "interviewer",
-          "content": "which of our insurance products are most compelling?"
+          "content": "what products are you most likely to buy?"
         },
         {
           "role": "interviewee",
-          "content": "As a Senior Project Consultant nearing retirement, I find the Healthco Medicare Advantage Plus (MAP+) plan by far the most compelling. At 62, I don't just want a policy for when things go wrong; I want a strategy for staying healthy. MAP+ aligns with my view of health as a long-term investment, specifically through its focus on preventive care and maintaining the mobility I need to stay independent."
+          "content": "I'm most likely to invest in high-quality walking shoes, wearable fitness trackers, and monthly subscriptions for meditation or mental health apps. As a Digital Wellness Consultant, I prioritize products that integrate seamlessly into my proactive routine and support a holistic approach to my long-term health."
         },
         {
           "role": "interviewer",
-          "content": "You mentioned health as an 'investment.' How do the personalized wellness and weight management features of MAP+ impact your sense of future security?"
+          "content": "How does the idea of Healthco offering incentives for Nike walking shoes fit into your current buying habits?"
         },
         {
           "role": "interviewee",
-          "content": "They are central to it. Staying at a healthy weight isn't about vanity for me; it's about joint health and cardiovascular endurance. Having a plan that offers personalized coaching means I have a roadmap to avoid the chronic issues that usually strip people of their independence. It gives me security to know I'm actively mitigating risks rather than just waiting for an illness to happen."
+          "content": "It aligns perfectly because I already view gear as a form of preventative medicine. If Healthco makes it easier for me to access premium equipment like Nike shoes through the Wellness Walkers initiative, it removes the financial barrier to staying active and makes me feel like my insurer is actually a partner in my well-being."
         },
         {
           "role": "interviewer",
-          "content": "In terms of your lifestyle as you transition toward retirement, what is the single most important 'independence' factor you look for in a health plan?"
+          "content": "Does having access to a program like Wellness Walkers influence your overall loyalty to Healthco as a brand?"
         },
         {
           "role": "interviewee",
-          "content": "The most important factor is proactive maintenance. I want a plan that supports my physical mobility so I can continue my consulting work on my own terms and enjoy an active retirement. If a plan like MAP+ helps me stay mobile and out of assisted living through its wellness innovations, that is the ultimate form of independence and financial security."
+          "content": "Definitely. At 22, I'm looking for a brand that understands my generation's focus on preventative care rather than just reactive treatment; a company that rewards me for being healthy feels much more modern and worth sticking with long-term."
         }
       ],
-      "summary": "Casey Montgomery views MAP+ as a strategic tool for maintaining physical mobility and independence through its preventive care and weight management features.",
-      "quote": "I don't just want a policy for when things go wrong; I want a strategy for staying healthy.",
+      "summary": "Sarah views incentivized wellness gear as a vital component of preventative care and a key differentiator that builds brand loyalty with younger, health-conscious members.",
+      "quote": "If Healthco makes it easier for me to access premium equipment like Nike shoes, it removes the financial barrier to staying active and makes me feel like my insurer is actually a partner in my well-being.",
       "sentiment": "Positive"
     },
     {
       "personaId": "std_skeptic",
-      "personaName": "The Plan Skeptic",
+      "personaName": "Skeptic",
       "transcript": [
         {
           "role": "interviewer",
-          "content": "which of our insurance products are most compelling?"
+          "content": "what products are you most likely to buy?"
         },
         {
           "role": "interviewee",
-          "content": "To be perfectly honest, 'compelling' isn't a word I'd use for any of them yet. As an accountant, I look at the Healthco Medicare Advantage Plus (MAP+) and I see a lot of marketing around 'wellness' and 'independence,' but the actual ROI is buried in the fine print. I’m currently comparing the premium savings against the potential out-of-pocket maximums and the restrictive provider networks. None of it is compelling until the math proves it's cheaper than a traditional Medigap policy over a ten-year horizon."
+          "content": "As an accountant, I don't purchase products based on brand lifestyle; I buy based on utility and ROI. In the healthcare space, I'm only likely to buy products that are HSA-eligible or have a proven track record of reducing my long-term out-of-pocket expenses. If a product like these Nike shoes is being marketed through my insurance, my first instinct is to calculate whether the 'incentive' is just a way to justify higher premiums elsewhere."
         },
         {
           "role": "interviewer",
-          "content": "You mentioned the out-of-pocket maximums. What specific financial data point would convince you that MAP+ offers a better value than a standard Medigap plan?"
+          "content": "Healthco is offering specific incentives for Nike walking shoes as part of the Wellness Walkers program. How do you evaluate the value of a high-end shoe brand being subsidized by your insurance provider?"
         },
         {
           "role": "interviewee",
-          "content": "I need to see a transparent breakdown of the drug formulary tiers and the specific co-insurance percentages for out-of-network specialists. Most plans hide behind a low monthly premium but then hit you with a 20% co-pay on specialty drugs that easily exceeds any initial savings. If you can show me a guaranteed cap on total cost of care that includes the 'wellness' benefits as actual cost-offsets rather than just perks, then we can talk about value."
+          "content": "I evaluate it by looking at the net cost. If a $130 pair of Nikes is discounted to $90 through the program, but I can get a functionally equivalent shoe for $60 elsewhere, the 'benefit' is actually a $30 loss. I also look at the fine print: what data am I giving up to Healthco in exchange for this discount, and how does that data affect my future insurability or rate tier?"
         },
         {
           "role": "interviewer",
-          "content": "If we provided a transparent, real-time calculator that factored in your specific prescriptions and doctor preferences to show net annual savings, would that address your concerns?"
+          "content": "If we could provide data showing a direct correlation between this specific footwear and reduced cardiovascular incidents among members your age, would that change your cost-benefit analysis?"
         },
         {
           "role": "interviewee",
-          "content": "It would be a step in the right direction, but only if that calculator is legally binding and accounts for network volatility. I’ve seen providers exit these Advantage networks mid-year, leaving patients high and dry. If you want me to buy into 'Security,' you have to prove that my access to care won't be compromised for the sake of your administrative margins."
+          "content": "Only if that correlation translates into a guaranteed, contractual reduction in my monthly premium or a lower deductible. General health data is fine for a brochure, but I'm interested in the bottom line of my healthcare ledger; if my risk profile improves because of this initiative, I expect to see that reflected in my financial obligations to the insurer."
         }
       ],
-      "summary": "This user is a highly analytical skeptic who requires granular financial transparency and network stability guarantees before acknowledging any product value.",
-      "quote": "If you want me to buy into 'Security,' you have to prove that my access to care won't be compromised for the sake of your administrative margins.",
+      "summary": "The user views health incentives through a strictly financial lens, dismissing brand-name appeal in favor of verifiable premium reductions and net-cost calculations.",
+      "quote": "I'm not interested in 'wellness' as an abstract concept; I'm interested in the bottom line of my healthcare ledger.",
       "sentiment": "Negative"
     },
     {
-      "personaId": "std_superfan",
-      "personaName": "The Health Enthusiast",
+      "personaId": "std_optimist",
+      "personaName": "Optimist",
       "transcript": [
         {
           "role": "interviewer",
-          "content": "which of our insurance products are most compelling?"
+          "content": "what products are you most likely to buy?"
         },
         {
           "role": "interviewee",
-          "content": "Honestly, the Healthco Medicare Advantage Plus plan stands out the most to me because of its heavy emphasis on proactive wellness. As a yoga instructor, I’m all about prevention rather than just treatment. The fact that it rewards you for step tracking and offers full coverage for regular screenings makes it incredibly compelling for someone who views health as a daily practice."
+          "content": "As a yoga instructor and someone who is really proactive about movement, I'm always looking for high-quality athletic wear, sustainable yoga mats, and the latest wearable tech to track my heart rate and daily steps. I prioritize products that support a long-term healthy lifestyle and offer durability for my daily practice."
         },
         {
           "role": "interviewer",
-          "content": "That's interesting. How do those specific preventive rewards influence your perception of the brand's value?"
+          "content": "How would you feel about your health insurance, like Healthco, offering specific incentives for brands like Nike to help with those purchases?"
         },
         {
           "role": "interviewee",
-          "content": "It makes me feel like the company is an actual partner in my health. Most insurance feels like a safety net you only use when something goes wrong, but these rewards incentivize me to stay active and engaged. It turns a bureaucratic product into a lifestyle tool that supports my goal of staying functional and vibrant."
+          "content": "I would absolutely love that! It feels like the insurance company actually cares about my prevention rather than just treating me when I'm sick. Getting a discount or reward points for Nike shoes through the Healthco ecosystem would make me feel like my healthy habits are being recognized and supported financially."
         },
         {
           "role": "interviewer",
-          "content": "You mentioned staying functional and vibrant; how do these wellness features contribute to your sense of long-term independence?"
+          "content": "Regarding the Wellness Walkers Initiative, what specific feature would make you most likely to participate daily?"
         },
         {
           "role": "interviewee",
-          "content": "Independence is everything. By having access to screenings and wellness incentives now, I feel secure knowing I'm catching potential issues early. It gives me the peace of mind that I can continue teaching and moving freely well into my later years without being sidelined by preventable illnesses. It’s about securing my future self's ability to live on my own terms."
+          "content": "The integration between my step tracker and a tangible reward, like earning credit toward new walking shoes, is the biggest draw. I'm already tracking my steps, so having that data automatically unlock benefits for high-performance gear would turn my daily walks into a fun, rewarding challenge that directly impacts my cardiovascular health."
         }
       ],
-      "summary": "The user values health insurance that acts as a proactive lifestyle partner by rewarding preventive behaviors and supporting long-term physical independence.",
-      "quote": "It turns a bureaucratic product into a lifestyle tool that supports my goal of staying functional and vibrant.",
+      "summary": "The user is an enthusiastic wellness advocate who values brand partnerships that reward proactive physical activity and provide high-quality athletic gear.",
+      "quote": "I'm always looking for ways to bridge the gap between my daily movement and my healthcare, so a reward system for Nike shoes is a dream come true.",
       "sentiment": "Positive"
     },
     {
-      "personaId": "std_budget",
-      "personaName": "The Budget-Conscious Family",
+      "personaId": "std_average_jane",
+      "personaName": "Average Jane",
       "transcript": [
         {
           "role": "interviewer",
-          "content": "which of our insurance products are most compelling?"
+          "content": "what products are you most likely to buy?"
         },
         {
           "role": "interviewee",
-          "content": "To be honest, as a teacher supporting a whole family, the Medicare Advantage Plus plan caught my eye because it seems to bundle more services together. I’m looking for something that provides long-term security without the hidden 'gotchas' of high deductibles or unpredictable out-of-pocket expenses that throw our monthly budget off track."
+          "content": "As a teacher with a family, my budget is mostly dedicated to the basics like groceries and school supplies, but I'm always on the lookout for healthcare-related items that prevent bigger bills later. I usually buy generic brand sneakers or whatever is on clearance because I can't justify spending a hundred dollars on shoes when I have high deductibles and co-pays to worry about."
         },
         {
           "role": "interviewer",
-          "content": "You mentioned avoiding 'gotchas.' How do predictable copays specifically impact your feeling of security as a parent?"
+          "content": "If Healthco offered a significant discount or a reward system for Nike walking shoes through the Wellness Walkers program, would that change your interest in premium footwear?"
         },
         {
           "role": "interviewee",
-          "content": "It’s everything. When one of the kids gets sick or I need a check-up, I need to know exactly what is coming out of my paycheck. A fixed copay means I don't have to choose between a doctor's visit and our grocery budget for the week; it gives me a sense of independence and control over our finances."
+          "content": "It definitely would. I know quality shoes like Nikes are better for my back and joints, especially since I'm on my feet all day at school, but the price is usually the barrier. If Healthco made them affordable or if the program helped lower my family's out-of-pocket healthcare costs, I'd choose those over the cheap ones in a heartbeat."
         },
         {
           "role": "interviewer",
-          "content": "If Healthco MAP+ included a wellness reward program that discounted your premiums for hitting family health goals, would that change your view of the plan's value?"
+          "content": "What specific financial incentive would make you feel most supported by Healthco in this walking initiative?"
         },
         {
           "role": "interviewee",
-          "content": "That would be a huge incentive. If I'm already working hard to keep us healthy and active, having that reflected in a lower monthly cost would make the plan feel like a partner in our wellness rather than just another bill to pay."
+          "content": "The biggest win for me would be if my steps could earn credits toward my deductible or reduce my monthly premium. If I could 'walk off' some of those medical costs while wearing a pair of reliable Nikes that didn't break the bank, it would feel like the insurance company is actually partnerning with me to keep my family healthy and my budget intact."
         }
       ],
-      "summary": "This user prioritizes financial predictability and fixed copays to maintain a stable household budget while balancing their role as a teacher and parent.",
-      "quote": "A fixed copay means I don't have to choose between a doctor's visit and our grocery budget for the week.",
-      "sentiment": "Neutral"
+      "summary": "Jane is highly price-sensitive but would prioritize premium footwear if the program directly offsets her high out-of-pocket healthcare costs.",
+      "quote": "If I could 'walk off' some of those out-of-pocket costs while getting a reliable pair of shoes, it would feel like Healthco is actually looking out for my wallet and my heart at the same time.",
+      "sentiment": "Positive"
     }
   ]
 }

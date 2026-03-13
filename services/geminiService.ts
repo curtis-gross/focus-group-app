@@ -475,6 +475,68 @@ export const generateSyntheticPersona = async (personaName: string, audienceName
     }
 };
 
+export const generateSyntheticUsersBatch = async (basePersona: any, count: number, context: string): Promise<any[]> => {
+    try {
+        const prompt = `
+        You are an expert market researcher. Based on the provided base persona and company context, generate exactly ${count} unique synthetic user profiles. Each user should inherit the high-level traits of the base persona but have distinct details.
+
+        **Company Context:**
+        ${context}
+
+        **Base Persona:**
+        Name: ${basePersona.name || basePersona.personaName}
+        Bio: ${basePersona.bio || (basePersona.details ? basePersona.details.bio : '')}
+        Demographics: ${basePersona.demographics || (basePersona.details ? basePersona.details.age : '')}
+
+        **Output Requirements:**
+        Generate ONLY a valid JSON array of ${count} objects, with each object following this exact structure:
+        {
+            "name": "Unique Fake Name",
+            "personaName": "${basePersona.name || basePersona.personaName}",
+            "bio": "Unique 1 sentence bio tailored to this specific generated person.",
+            "demographics": "Specific age, location, and family status",
+            "cognitiveStyle": {
+                "informationDensityPreference": "e.g. TL;DR or technical whitepaper",
+                "primaryTrustSignal": "e.g. peer reviews, expert certifications",
+                "decisionVelocity": "e.g. impulsive or researcher",
+                "riskTolerance": "e.g. early adopter or laggard"
+            },
+            "lifestyleFriction": {
+                "dailyGrindContext": "e.g. commuter, remote worker",
+                "financialMindset": "e.g. value-seeker, premium-seeker",
+                "brandLoyaltyQuotient": "e.g. sticks for a decade or jumps for $5",
+                "householdPowerDynamic": "e.g. sole decision-maker or pitches to spouse"
+            },
+            "digitalFootprint": {
+                "last3SearchQueries": ["query 1", "query 2", "query 3"],
+                "unsubscribeTrigger": "What makes them annoyed? e.g. clickbait",
+                "platformEcosystem": "e.g. high-end iOS, Windows power user",
+                "recentBigLifeEvent": "e.g. recent move, new pet"
+            },
+            "psychographicFlavor": {
+                "theOneLuxury": "One thing they overspend on",
+                "aspirationVsReality": "e.g. buys organic but loves cheap snacks",
+                "socialCauseAlignment": "e.g. environmentalism, local-only"
+            }
+        }
+        `;
+
+        const response = await callGenAiProxy("generateContent", {
+            model: 'gemini-3-flash-preview',
+            contents: { parts: [{ text: prompt }] },
+            config: { responseMimeType: "application/json" }
+        });
+
+        const text = extractTextFromResponse(response) || "[]";
+        const cleanText = text.replace(/```json|```/g, '').trim();
+        return JSON.parse(cleanText);
+
+    } catch (error) {
+        console.error("Synthetic users batch generation error:", error);
+        return [];
+    }
+};
+
 export const generateImageFromPrompt = async (prompt: string): Promise<string> => {
     const imgData = await generateImage(prompt, 'gemini-3.1-flash-image-preview');
     if (imgData) {

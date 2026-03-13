@@ -11,7 +11,8 @@ import {
   MessageSquare,
   TrendingUp,
   HeartHandshake,
-  Monitor
+  Monitor,
+  UserPlus
 } from 'lucide-react';
 
 interface NavigationProps {
@@ -26,6 +27,7 @@ export const Navigation: React.FC<NavigationProps> = ({ currentMode, setMode, is
   const navItems = [
     { id: AppMode.HOME, label: 'Home', icon: Home },
     { id: AppMode.AUDIENCE_GEN, label: 'Audiences', icon: Users },
+    { id: AppMode.SYNTHETIC_USERS, label: 'Synthetic Users', icon: UserPlus },
     { id: AppMode.MARKETING_BRIEF, label: 'Marketing Brief', icon: FileText },
     { id: AppMode.SYNTHETIC_FOCUS_GROUP, label: 'Focus Group', icon: MessageSquare },
   ];

@@ -41,9 +41,9 @@ export const SyntheticTesting: React.FC = () => {
 
     // --- Tab Specific State ---
     // Member Simulation
+    const [syntheticUsers, setSyntheticUsers] = useState<SyntheticUserProfile[]>([]);
     const [memberResults, setMemberResults] = useState<SimulationResult[]>([]);
     const [isMemberLoading, setIsMemberLoading] = useState(false);
-    const [memberBatchCount, setMemberBatchCount] = useState(5);
     const [showMemberSettings, setShowMemberSettings] = useState(false);
     const [showProducts, setShowProducts] = useState(false);
     const [emailBodies, setEmailBodies] = useState<{ [key: string]: string }>({});
@@ -57,6 +57,10 @@ export const SyntheticTesting: React.FC = () => {
     // New Modal States
     const [selectedCartResult, setSelectedCartResult] = useState<SimulationResult | null>(null);
     const [selectedEmailStats, setSelectedEmailStats] = useState<{ subject: string, openRate: number, clickRate: number, body: string } | null>(null);
+    
+    // Purchase Products
+    const [simulationProducts, setSimulationProducts] = useState<string[]>(SIMULATION_PRODUCTS);
+    const [newProduct, setNewProduct] = useState("");
 
     // A/B Test 
     const [abTestResults, setAbTestResults] = useState<ABTestResult[]>([]);
@@ -143,6 +147,16 @@ export const SyntheticTesting: React.FC = () => {
                 }
             })
             .catch(e => console.log("No server history found"));
+
+        // Load Synthetic Users
+        fetch('/api/load-run/synthetic_users')
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.generatedUsers) {
+                    setSyntheticUsers(data.generatedUsers);
+                }
+            })
+            .catch(e => console.log("No synthetic users found"));
     }, []);
 
     // Auto-refresh when switching to Creative tab
@@ -260,14 +274,7 @@ export const SyntheticTesting: React.FC = () => {
         setIsAcquisitionLoading(true);
         setStatus("Simulating Net-New Acquisition...");
         try {
-            let pool: any[] = [];
-
-            // Combine Generated + Standard
-            const activePool = [...personas, ...STANDARD_AUDIENCES];
-
-            activePool.forEach(p => {
-                for (let i = 0; i < memberBatchCount; i++) pool.push({ ...p, id: `${p.id}_acq_${i}`, name: `${p.name} #${i + 1}`, isStandard: (p as any).isStandard });
-            });
+            let pool = [...syntheticUsers];
             const results = await simulateAcquisitionFocusGroup(pool, acquisitionOffers);
             setAcquisitionResults(results);
 
@@ -327,15 +334,10 @@ export const SyntheticTesting: React.FC = () => {
 
             const emailCampaigns = campaigns;
 
-            let pool: any[] = [];
-            const activePool = [...personas, ...STANDARD_AUDIENCES];
-
-            activePool.forEach(p => {
-                for (let i = 0; i < memberBatchCount; i++) pool.push({ ...p, id: `${p.id}_sim_${i}`, name: `${p.name} #${i + 1}`, isStandard: (p as any).isStandard });
-            });
+            let pool = [...syntheticUsers];
 
             setStatus(`Simulating ${pool.length} members...`);
-            const results = await simulateMarketingFocusGroup(pool, brief, SIMULATION_PRODUCTS, emailCampaigns, marketingMessages);
+            const results = await simulateMarketingFocusGroup(pool, brief, simulationProducts, emailCampaigns, marketingMessages);
             setMemberResults(results);
 
             // Auto Save
@@ -387,9 +389,6 @@ export const SyntheticTesting: React.FC = () => {
             if (!currentAssets) throw new Error("Failed to generate assets");
 
             setStatus("Simulating focus group reactions...");
-            // Just 1x batch for creative to start, or user selected batch count? Let's use 5 per persona max to avoid huge latency
-            // Limit to 20 per persona to avoid extreme latency, but allow 10x
-            const creativeBatchCount = Math.min(memberBatchCount, 20);
 
             let allResults: any[] = [];
 
@@ -409,16 +408,10 @@ export const SyntheticTesting: React.FC = () => {
                 const variantName = name || 'Default';
                 setStatus(`Testing variant for: ${variantName}...`);
 
-                // Create a pool of users for the creative test
-                // We use the variant name in the ID to ensure uniqueness across variants if we ever display them together
-                let pool: any[] = [];
-                const activePool = [...personas, ...STANDARD_AUDIENCES];
-
-                activePool.forEach(p => {
-                    for (let i = 0; i < creativeBatchCount; i++) {
-                        pool.push({ ...p, id: `${p.id}_creative_${variantName}_${i}`, name: `${p.name} #${i + 1}`, isStandard: (p as any).isStandard });
-                    }
-                });
+                let pool = syntheticUsers.map((u, i) => ({
+                    ...u,
+                    id: `${u.id}_creative_${variantName}_${i}`
+                }));
 
                 // Run Sim
                 const results = await simulateCreativeFocusGroup(pool, assets);
@@ -467,15 +460,10 @@ export const SyntheticTesting: React.FC = () => {
 
             setStatus("Simulating A/B Test focus group...");
 
-            // 20 users per audience from different areas
-            const abTestBatchCount = 20;
-            let pool: any[] = [];
-
-            personas.forEach(p => {
-                for (let i = 0; i < abTestBatchCount; i++) {
-                    pool.push({ ...p, id: `${p.id}_ab_${i}`, name: `${p.name} #${i + 1}` });
-                }
-            });
+            let pool = syntheticUsers.map((u, i) => ({
+                ...u,
+                id: `${u.id}_ab_${i}`
+            }));
 
             // Simulate A/B Test
             const results = await simulateABTestFocusGroup(pool, variants.map(v => ({ region: v.region, image: v.image })));
@@ -697,21 +685,12 @@ export const SyntheticTesting: React.FC = () => {
                             <div className="content-card flex justify-between items-center">
                                 <div>
                                     <h3 className="text-lg font-bold text-heading">Acquisition Simulation</h3>
-                                    <p className="text-sm text-subtext">Test offers against {personas.length * memberBatchCount} non-member prospects.</p>
+                                    <p className="text-sm text-subtext">Test offers against {syntheticUsers.length} non-member prospects.</p>
                                 </div>
                                 <div className="flex items-center gap-4">
                                     <div className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-lg border border-gray-100">
-                                        <span className="text-xs font-bold text-subtext uppercase">Batch Size</span>
-                                        <select
-                                            value={memberBatchCount}
-                                            onChange={e => setMemberBatchCount(Number(e.target.value))}
-                                            className="bg-transparent font-bold text-heading outline-none cursor-pointer"
-                                        >
-                                            <option value="1">1x</option>
-                                            <option value="5">5x</option>
-                                            <option value="10">10x</option>
-                                            <option value="30">30x</option>
-                                        </select>
+                                        <span className="text-xs font-bold text-subtext uppercase">Users Tested</span>
+                                        <span className="bg-transparent font-bold text-heading">{syntheticUsers.length}</span>
                                     </div>
                                     <button
                                         onClick={() => handleLoadLast('ACQUISITION_SIMULATION')}
@@ -723,8 +702,9 @@ export const SyntheticTesting: React.FC = () => {
                                     </button>
                                     <button
                                         onClick={handleRunAcquisition}
-                                        disabled={isAcquisitionLoading || !personas.length}
+                                        disabled={isAcquisitionLoading || syntheticUsers.length === 0}
                                         className="btn-primary flex items-center gap-2"
+                                        title={syntheticUsers.length === 0 ? "You must generate users in the Synthetic Users tab first." : ""}
                                     >
                                         {isAcquisitionLoading ? <div className="animate-spin h-5 w-5 border-b-2 border-white rounded-full" /> : <Play size={20} />}
                                         Run Simulation
@@ -828,21 +808,12 @@ export const SyntheticTesting: React.FC = () => {
                                         activeTab === 'BRIEF' ? 'Marketing Brief Feedback' :
                                             'Purchase Behavior & Product Mix'}
                                 </h3>
-                                <p className="text-sm text-subtext font-medium outline-none">Test brief against {(personas.length + 3) * memberBatchCount} members.</p>
+                                <p className="text-sm text-subtext font-medium outline-none">Test brief against {syntheticUsers.length} synthetic users.</p>
                             </div>
                             <div className="flex items-center gap-4">
                                 <div className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-lg border border-gray-100">
-                                    <span className="text-xs font-black text-subtext uppercase tracking-widest">Batch Size</span>
-                                    <select
-                                        value={memberBatchCount}
-                                        onChange={e => setMemberBatchCount(Number(e.target.value))}
-                                        className="bg-transparent font-black text-heading outline-none cursor-pointer"
-                                    >
-                                        <option value="1">1x</option>
-                                        <option value="5">5x</option>
-                                        <option value="10">10x</option>
-                                        <option value="30">30x</option>
-                                    </select>
+                                    <span className="text-xs font-black text-subtext uppercase tracking-widest">Users Tested</span>
+                                    <span className="bg-transparent font-black text-heading">{syntheticUsers.length}</span>
                                 </div>
                                 {activeTab === 'EMAIL' && (
                                     <button
@@ -850,6 +821,14 @@ export const SyntheticTesting: React.FC = () => {
                                         className="btn-secondary flex items-center gap-2"
                                     >
                                         <Edit2 size={16} /> Create/Edit Emails
+                                    </button>
+                                )}
+                                {activeTab === 'PURCHASE' && (
+                                    <button
+                                        onClick={() => setShowProducts(true)}
+                                        className="btn-secondary flex items-center gap-2"
+                                    >
+                                        <Edit2 size={16} /> Create/Edit Products
                                     </button>
                                 )}
                                 <button
@@ -862,7 +841,8 @@ export const SyntheticTesting: React.FC = () => {
                                 </button>
                                 <button
                                     onClick={() => handleRunMemberSim()}
-                                    disabled={isMemberLoading}
+                                    disabled={isMemberLoading || syntheticUsers.length === 0}
+                                    title={syntheticUsers.length === 0 ? "You must generate users in the Synthetic Users tab first." : ""}
                                     className="btn-primary px-6 py-3 flex items-center gap-2"
                                 >
                                     {isMemberLoading ? <div className="animate-spin h-5 w-5 border-b-2 border-white rounded-full" /> : <Play size={20} />}
@@ -1144,9 +1124,9 @@ export const SyntheticTesting: React.FC = () => {
                                             <div className="content-card text-center relative group cursor-help p-6 border-t-4 border-[#0077C8]">
                                                 <div className="text-5xl font-bold text-heading mb-2">{Math.round(interest)}</div>
                                                 <div className="text-xs font-bold text-subtext uppercase tracking-widest">Interest Score</div>
-                                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-48 bg-heading text-white text-xs font-medium p-3 rounded-xl shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+                                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-48 bg-gray-900 text-white text-xs font-medium p-3 rounded-xl shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
                                                     Measures how engaging and appealing the brief is to the target audience.
-                                                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-b-heading"></div>
+                                                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-b-gray-900"></div>
                                                 </div>
                                             </div>
                                         )
@@ -1157,9 +1137,9 @@ export const SyntheticTesting: React.FC = () => {
                                             <div className="content-card text-center relative group cursor-help p-6 border-t-4 border-green-500">
                                                 <div className="text-5xl font-bold text-green-500 mb-2">{Math.round(clarity)}</div>
                                                 <div className="text-xs font-bold text-subtext uppercase tracking-widest">Clarity Score</div>
-                                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-48 bg-heading text-white text-xs font-medium p-3 rounded-xl shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+                                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-48 bg-gray-900 text-white text-xs font-medium p-3 rounded-xl shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
                                                     Evaluates how easily the key message is understood by the audience.
-                                                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-b-heading"></div>
+                                                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-b-gray-900"></div>
                                                 </div>
                                             </div>
                                         )
@@ -1170,9 +1150,9 @@ export const SyntheticTesting: React.FC = () => {
                                             <div className="content-card text-center relative group cursor-help p-6 border-t-4 border-red-500">
                                                 <div className="text-5xl font-bold text-red-500 mb-2">{Math.round(rel)}</div>
                                                 <div className="text-xs font-bold text-subtext uppercase tracking-widest">Relevance Score</div>
-                                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-48 bg-heading text-white text-xs font-medium p-3 rounded-xl shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+                                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-48 bg-gray-900 text-white text-xs font-medium p-3 rounded-xl shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
                                                     Assess how well the brief addresses the audience's specific needs and pain points.
-                                                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-b-heading"></div>
+                                                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-b-gray-900"></div>
                                                 </div>
                                             </div>
                                         )
@@ -1213,8 +1193,13 @@ export const SyntheticTesting: React.FC = () => {
                                         {memberResults.slice(0, 50).map((r, i) => (
                                             <div key={i} className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
                                                 <div className="flex justify-between font-bold text-sm mb-2">
-                                                    <span className="text-heading">{r.personaName}</span>
-                                                    <span className="text-[#0077C8]">Int: {r.briefMetrics.interestScore}</span>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-heading">{r.personaName}</span>
+                                                        <span className="text-[10px] text-subtext font-black uppercase tracking-widest bg-gray-50 px-2 py-0.5 rounded border border-gray-100">
+                                                            {syntheticUsers.find(u => u.id === r.personaId)?.baseAudienceName || 'Standard Audience'}
+                                                        </span>
+                                                    </div>
+                                                    <span className="text-[#0077C8] flex items-center gap-1">Interest: {r.briefMetrics.interestScore}/10</span>
                                                 </div>
                                                 <div className="text-sm text-subtext leading-relaxed">"{r.briefMetrics.feedback}"</div>
                                             </div>
@@ -1234,11 +1219,11 @@ export const SyntheticTesting: React.FC = () => {
                                         <ShoppingCart size={18} className="text-[#0077C8]" /> Target Products
                                     </h3>
                                     <button onClick={() => setShowProducts(true)} className="text-xs font-bold text-[#0077C8] hover:opacity-80 transition-opacity uppercase tracking-wider">
-                                        View All {SIMULATION_PRODUCTS.length}
+                                        View All {simulationProducts.length}
                                     </button>
                                 </div>
                                 <div className="space-y-3">
-                                    {SIMULATION_PRODUCTS.slice(0, 6).map((p, i) => (
+                                    {simulationProducts.slice(0, 6).map((p, i) => (
                                         <div key={i} className="flex gap-4 p-3 bg-gray-50 rounded-xl border border-gray-100 hover:bg-white hover:shadow-sm transition-all">
                                             <div className="w-12 h-12 rounded-lg bg-white flex items-center justify-center border border-gray-100 text-subtext shadow-sm">
                                                 <ShoppingCart size={20} />
@@ -1362,20 +1347,12 @@ export const SyntheticTesting: React.FC = () => {
                             <div className="content-card flex justify-between items-center">
                                 <div>
                                     <h3 className="text-lg font-bold text-heading">Campaign Images Focus Group</h3>
-                                    <p className="text-sm text-subtext">Test generated assets against {personas.length * Math.min(memberBatchCount, 5)} synthetic users.</p>
+                                    <p className="text-sm text-subtext">Test generated assets against {syntheticUsers.length} synthetic users.</p>
                                 </div>
                                 <div className="flex items-center gap-4">
                                     <div className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-lg border border-gray-100">
-                                        <span className="text-xs font-bold text-subtext uppercase">Batch Size</span>
-                                        <select
-                                            value={memberBatchCount}
-                                            onChange={(e) => setMemberBatchCount(parseInt(e.target.value))}
-                                            className="bg-transparent text-heading font-bold text-sm outline-none cursor-pointer"
-                                        >
-                                            <option value="1">1x</option>
-                                            <option value="5">5x</option>
-                                            <option value="10">10x</option>
-                                        </select>
+                                        <span className="text-xs font-bold text-subtext uppercase">Users Tested</span>
+                                        <span className="bg-transparent text-heading font-bold text-sm">{syntheticUsers.length}</span>
                                     </div>
                                     <button
                                         onClick={() => handleLoadLast('CREATIVE_SIMULATION')}
@@ -1387,7 +1364,8 @@ export const SyntheticTesting: React.FC = () => {
                                     </button>
                                     <button
                                         onClick={handleRunCreativeSim}
-                                        disabled={isCreativeLoading}
+                                        disabled={isCreativeLoading || syntheticUsers.length === 0}
+                                        title={syntheticUsers.length === 0 ? "You must generate users in the Synthetic Users tab first." : ""}
                                         className="btn-primary px-6 py-3 flex items-center gap-2"
                                     >
                                         {isCreativeLoading ? <div className="animate-spin h-5 w-5 border-b-2 border-white rounded-full" /> : <Play size={20} />}
@@ -1436,7 +1414,8 @@ export const SyntheticTesting: React.FC = () => {
                                             </button>
                                             <button
                                                 onClick={handleRunCreativeSim}
-                                                disabled={isCreativeLoading}
+                                                disabled={isCreativeLoading || syntheticUsers.length === 0}
+                                                title={syntheticUsers.length === 0 ? "You must generate users in the Synthetic Users tab first." : ""}
                                                 className="btn-primary flex items-center gap-2"
                                             >
                                                 {isCreativeLoading ? <Loader2 className="animate-spin" size={20} /> : <Play size={20} />}
@@ -1622,7 +1601,7 @@ export const SyntheticTesting: React.FC = () => {
                             <div className="content-card flex justify-between items-center">
                                 <div>
                                     <h3 className="text-lg font-black text-heading">A/B Test Simulation</h3>
-                                    <p className="text-sm text-subtext">Generate regional variants & simulate multi-variant testing.</p>
+                                    <p className="text-sm text-subtext">Generate regional variants & simulate multi-variant testing on {syntheticUsers.length} synthetic users.</p>
                                 </div>
                                 <div className="flex gap-4">
                                     <button
@@ -1635,7 +1614,8 @@ export const SyntheticTesting: React.FC = () => {
                                     </button>
                                     <button
                                         onClick={handleRunABTestSim}
-                                        disabled={isABTestingLoading}
+                                        disabled={isABTestingLoading || syntheticUsers.length === 0}
+                                        title={syntheticUsers.length === 0 ? "You must generate users in the Synthetic Users tab first." : ""}
                                         className="btn-primary flex items-center gap-2"
                                     >
                                         {isABTestingLoading ? <div className="animate-spin h-5 w-5 border-b-2 border-white rounded-full" /> : <Play size={20} />}
@@ -1918,28 +1898,67 @@ export const SyntheticTesting: React.FC = () => {
             {showProducts && (
                 <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
                     <div className="bg-[#111] rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[80vh] border border-gray-800">
-                        <div className="bg-[#111] p-4 border-b border-gray-800 flex justify-between items-center">
+                        <div className="bg-[#111] p-6 border-b border-gray-800 flex justify-between items-center">
                             <div>
-                                <h3 className="font-bold text-white flex items-center gap-2">
-                                    <ShoppingCart size={18} className="text-red-500" />
-                                    Target Products ({SIMULATION_PRODUCTS.length})
+                                <h3 className="font-bold text-white flex items-center gap-2 text-xl">
+                                    <ShoppingCart size={22} className="text-red-500" />
+                                    Target Products ({simulationProducts.length})
                                 </h3>
-                                <p className="text-xs text-gray-500">Products available for purchase in this simulation.</p>
+                                <p className="text-sm text-gray-400 mt-1">Products available for purchase in this simulation.</p>
                             </div>
-                            <button onClick={() => setShowProducts(false)} className="text-gray-500 hover:text-white"><X size={18} /></button>
+                            <button onClick={() => setShowProducts(false)} className="text-gray-500 hover:text-white p-2"><X size={20} /></button>
                         </div>
 
-                        <div className="p-4 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            {SIMULATION_PRODUCTS.map((p, i) => (
-                                <div key={i} className="flex gap-3 p-3 bg-gray-900 rounded-xl border border-gray-800 hover:bg-gray-800 transition-colors">
-                                    <div className="w-10 h-10 rounded-lg bg-black flex items-center justify-center border border-gray-800 text-gray-500 flex-shrink-0">
-                                        <ShoppingCart size={16} />
+                        <div className="p-6 border-b border-gray-800 bg-gray-900/50">
+                            <label className="block text-xs font-bold text-gray-400 uppercase mb-2">Add New Product</label>
+                            <div className="flex gap-2">
+                                <input
+                                    value={newProduct}
+                                    onChange={e => setNewProduct(e.target.value)}
+                                    onKeyDown={e => {
+                                        if (e.key === 'Enter' && newProduct.trim()) {
+                                            setSimulationProducts([...simulationProducts, newProduct.trim()]);
+                                            setNewProduct("");
+                                        }
+                                    }}
+                                    placeholder="e.g. Premium Running Shoes"
+                                    className="flex-1 bg-black border border-gray-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-red-500 transition-colors"
+                                />
+                                <button
+                                    onClick={() => {
+                                        if (newProduct.trim()) {
+                                            setSimulationProducts([...simulationProducts, newProduct.trim()]);
+                                            setNewProduct("");
+                                        }
+                                    }}
+                                    disabled={!newProduct.trim()}
+                                    className="bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white px-6 py-3 rounded-xl font-bold transition-all flex items-center gap-2 justify-center"
+                                >
+                                    <Plus size={18} /> Add
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="p-6 overflow-y-auto custom-scrollbar flex-1">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                {simulationProducts.map((p, i) => (
+                                    <div key={i} className="group flex gap-3 p-3 bg-gray-900 rounded-xl border border-gray-800 hover:border-red-500/50 transition-colors">
+                                        <div className="w-10 h-10 rounded-lg bg-black flex items-center justify-center border border-gray-800 text-gray-500 flex-shrink-0">
+                                            <ShoppingCart size={16} />
+                                        </div>
+                                        <div className="flex-1 min-w-0 flex flex-col justify-center">
+                                            <div className="text-sm font-bold text-white truncate" title={p}>{p.split(':')[0]}</div>
+                                        </div>
+                                        <button
+                                            onClick={() => setSimulationProducts(simulationProducts.filter((_, idx) => idx !== i))}
+                                            className="text-gray-600 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-2"
+                                            title="Remove Product"
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
                                     </div>
-                                    <div className="flex-1 min-w-0 flex flex-col justify-center">
-                                        <div className="text-sm font-bold text-white truncate" title={p}>{p.split(':')[0]}</div>
-                                    </div>
-                                </div>
-                            ))}
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </div>
