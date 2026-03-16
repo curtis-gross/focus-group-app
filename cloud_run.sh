@@ -11,7 +11,7 @@ echo "gcloud authentication verified."
 
 # Configuration
 # CHANGE THIS TO YOUR APP NAME
-SERVICE_NAME="healthco-app"
+SERVICE_NAME="focusgroup-app"
 REGION="us-central1"
 
 echo "Deploying $SERVICE_NAME to Cloud Run..."
