@@ -4,7 +4,7 @@ import { brandConfig } from '../config';
 import { Image, Search, Mail, Youtube, Share2, Globe, ThumbsUp, MessageCircle } from 'lucide-react';
 
 export const MarketingCampaign: React.FC = () => {
-    const [product, setProduct] = useState("Nike Pegasus 41");
+    const [product, setProduct] = useState("Product Name");
     const AUDIENCES = ["The Plan Skeptic", "The Health Enthusiast", "The Budget-Conscious Family"];
     const [selectedAudience, setSelectedAudience] = useState<string>(AUDIENCES[0]);
     const [assetsMap, setAssetsMap] = useState<Record<string, MarketingAssets> | null>(null);
@@ -65,7 +65,7 @@ export const MarketingCampaign: React.FC = () => {
                             value={product}
                             onChange={(e) => setProduct(e.target.value)}
                             className="input-field mb-4"
-                            placeholder="e.g. Nike Alphafly 3"
+                            placeholder="e.g. Your Product"
                         />
 
                         <label className="form-label">Target Audiences</label>

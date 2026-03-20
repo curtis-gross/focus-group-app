@@ -43,7 +43,7 @@ type DebugLog = {
 
 export default function ChatWidget({ customerContextData }: { customerContextData?: any }) {
   const [apiKey, setApiKey] = useState(() => {
-    return localStorage.getItem('gemini_api_key') || import.meta.env.VITE_GEMINI_API_KEY || '';
+    return localStorage.getItem('gemini_api_key') || (import.meta as any).env.VITE_GEMINI_API_KEY || '';
   });
   const [isConnected, setIsConnected] = useState(false);
   const [isExpanded, setIsExpanded] = useState(() => {

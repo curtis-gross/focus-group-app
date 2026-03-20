@@ -84,8 +84,8 @@ export const Concierge: React.FC = () => {
     };
 
     const fetchCustomerData = async () => {
-        const response = await fetch('/data/healthco_customer_data.json');
-        if (!response.ok) throw new Error("Failed to load healthco_customer_data.json");
+        const response = await fetch('/data/qvc_customer_data.json');
+        if (!response.ok) throw new Error("Failed to load qvc_customer_data.json");
         const textData = await response.text();
         try {
             setRawCustomerData(JSON.parse(textData));
@@ -171,8 +171,8 @@ export const Concierge: React.FC = () => {
                 {isGenerating ? (
                     <div className="animate-pulse flex flex-col items-center">
                         <div className="w-24 h-24 border-4 border-[#0077C8]/30 border-t-[#0077C8] rounded-full animate-spin mb-8"></div>
-                        <h2 className="text-2xl font-bold text-heading mb-2">Analyzing Telemetry & Chat Logs...</h2>
-                        <p className="text-subtext font-medium">Gemini is structuring real-time insights for the Agent...</p>
+                        <h2 className="text-2xl font-bold text-heading mb-2">Analyzing Shopper History...</h2>
+                        <p className="text-subtext font-medium">Gemini is structuring real-time commerce insights...</p>
                     </div>
                 ) : (
                     <>
@@ -182,9 +182,9 @@ export const Concierge: React.FC = () => {
                                 <PhoneCall size={64} />
                             </div>
                         </div>
-                        <h1 className="text-4xl font-bold text-heading mb-4 tracking-tight">Incoming Priority Call</h1>
+                        <h1 className="text-4xl font-bold text-heading mb-4 tracking-tight">Priority Shopper Query</h1>
                         <p className="text-xl text-subtext mb-8 max-w-lg">
-                            Welcome agent, you are receiving a routed call from <strong className="text-heading">David Miller</strong>.
+                            Welcome agent, you are receiving a query from <strong className="text-heading">Sarah Jenkins</strong>.
                         </p>
                         <div className="flex items-center gap-4">
                             <button
@@ -192,7 +192,7 @@ export const Concierge: React.FC = () => {
                                 className="btn-primary px-8 py-4 rounded-full font-bold shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all text-lg flex items-center gap-3"
                             >
                                 <PhoneCall size={24} />
-                                Accept & Generate Profile
+                                Accept & Analyze Shopper
                             </button>
                             <button
                                 onClick={handleLoadLast}
@@ -215,11 +215,11 @@ export const Concierge: React.FC = () => {
             <div className="flex justify-between items-center mb-8 bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
                 <div className="flex items-center gap-6">
                     <div className="w-16 h-16 bg-[#0077C8] border border-[#0061a3] rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-md">
-                        {dashboardData.profile?.initials || "DM"}
+                        {dashboardData.profile?.initials || "SJ"}
                     </div>
                     <div>
                         <h2 className="text-2xl font-bold text-heading flex items-center gap-2">
-                            {dashboardData.profile?.name || "David Miller"}
+                            {dashboardData.profile?.name || "Sarah Jenkins"}
                             <span className="flex items-center gap-1 text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full font-bold ml-2">
                                 <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div> Active Call
                             </span>
@@ -229,13 +229,13 @@ export const Concierge: React.FC = () => {
                 </div>
                 <div className="flex gap-4 items-center">
                     <div className="text-right">
-                        <p className="text-xs font-bold text-subtext uppercase tracking-widest mb-1">Lifetime Value</p>
-                        <p className="text-2xl font-black text-[#0077C8]">{dashboardData.profile?.totalSaved || "$24,500"}</p>
+                        <p className="text-xs font-bold text-subtext uppercase tracking-widest mb-1">Lifetime Spend</p>
+                        <p className="text-2xl font-black text-[#0077C8]">{dashboardData.profile?.totalSaved || "$12,850"}</p>
                     </div>
                     <div className="w-px bg-gray-200 h-10 mx-2"></div>
                     <div className="text-right mr-4">
-                        <p className="text-xs font-bold text-subtext uppercase tracking-widest mb-1">Annual Premium</p>
-                        <p className="text-xl font-bold text-heading">{dashboardData.profile?.income || "$8,500/yr"}</p>
+                        <p className="text-xs font-bold text-subtext uppercase tracking-widest mb-1">Annual Spend</p>
+                        <p className="text-xl font-bold text-heading">{dashboardData.profile?.income || "$3,200/yr"}</p>
                     </div>
 
                     <div className="flex items-center gap-2 bg-gray-50 p-1 rounded-full border border-gray-200 ml-4">
@@ -375,7 +375,7 @@ export const Concierge: React.FC = () => {
                             {/* Style Goals & Events */}
                             <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-200">
                                 <h3 className="text-lg font-bold text-heading flex items-center gap-2 mb-6 pb-4 border-b border-gray-100">
-                                    <Target className="text-purple-500" size={20} /> Health Goals & Needs
+                                    <Target className="text-purple-500" size={20} /> Shopper Interests & Scaling
                                 </h3>
                                 <div className="space-y-6">
                                     {dashboardData.upcoming_events && dashboardData.upcoming_events.map((goal: any, i: number) => {

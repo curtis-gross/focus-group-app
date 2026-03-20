@@ -3,9 +3,11 @@ import { generateMarketingBrief, generateMarketingCampaignAssets, MarketingAsset
 import { brandConfig } from '../config';
 import { Briefcase, Send, Loader2, Globe, Target, TrendingUp, Calendar, ShieldCheck, Zap, Layout, ArrowLeft, Image, Search, Mail, Youtube, Share2, MessageCircle, ThumbsUp, Sparkles, Heart, FileText, Users, X } from 'lucide-react';
 import { MarketingBriefData } from '../types';
+import { useCompanyContext } from '../context/CompanyContext';
 
 export const MarketingBrief: React.FC = () => {
-  const [context, setContext] = useState("");
+  const { name, description } = useCompanyContext();
+  const [context, setContext] = useState(description);
   const [goal, setGoal] = useState("");
   const [brief, setBrief] = useState<MarketingBriefData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -15,7 +17,7 @@ export const MarketingBrief: React.FC = () => {
   const [selectedAudience, setSelectedAudience] = useState<string>("");
   const [isAssetLoading, setIsAssetLoading] = useState(false);
   const [generationStatus, setGenerationStatus] = useState("");
-  const [activeTab, setActiveTab] = useState<'social' | 'search' | 'email' | 'youtube' | 'website'>('social');
+  const [activeAssetTab, setActiveAssetTab] = useState<'social' | 'search' | 'email' | 'youtube' | 'website'>('social');
   const [availableAudiences, setAvailableAudiences] = useState<any[]>([]);
   const [selectedAudienceModal, setSelectedAudienceModal] = useState<any | null>(null);
 
@@ -26,7 +28,7 @@ export const MarketingBrief: React.FC = () => {
     setGenerationStatus("Drafting Marketing Brief...");
     try {
       // 1. Generate Brief
-      const result = await generateMarketingBrief(context, goal, availableAudiences);
+      const result = await generateMarketingBrief(description, goal, availableAudiences);
 
       if (result) {
         // 2. Generate Assets immediately
@@ -146,6 +148,11 @@ export const MarketingBrief: React.FC = () => {
     fetchAudiences();
   }, []);
 
+  // Sync context with global description when it changes
+  useEffect(() => {
+    setContext(description);
+  }, [description]);
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <div className="page-header">
@@ -154,7 +161,7 @@ export const MarketingBrief: React.FC = () => {
             <FileText className="text-[#0077C8]" />
             <h1 className="page-title">Marketing Brief Generator</h1>
           </div>
-          <p className="text-subtext mt-1">Generate comprehensive insurance marketing strategies and assets.</p>
+          <p className="text-subtext mt-1">Generate comprehensive marketing strategies and assets.</p>
         </div>
       </div>
 
@@ -413,32 +420,32 @@ export const MarketingBrief: React.FC = () => {
                     {/* Tabs */}
                     <div className="flex border-b border-gray-200 bg-white overflow-x-auto">
                       <button
-                        onClick={() => setActiveTab('social')}
-                        className={`flex-1 py-4 px-2 text-sm font-medium flex items-center justify-center gap-2 min-w-[80px] transition-colors ${activeTab === 'social' ? 'bg-gray-50 text-[#0077C8] border-t-2 border-[#0077C8]' : 'text-subtext hover:text-heading'}`}
+                        onClick={() => setActiveAssetTab('social')}
+                        className={`flex-1 py-4 px-2 text-sm font-medium flex items-center justify-center gap-2 min-w-[80px] transition-colors ${activeAssetTab === 'social' ? 'bg-gray-50 text-[#0077C8] border-t-2 border-[#0077C8]' : 'text-subtext hover:text-heading'}`}
                       >
                         <Share2 size={18} /> Social
                       </button>
                       <button
-                        onClick={() => setActiveTab('search')}
-                        className={`flex-1 py-4 px-2 text-sm font-medium flex items-center justify-center gap-2 min-w-[80px] transition-colors ${activeTab === 'search' ? 'bg-gray-50 text-[#0077C8] border-t-2 border-[#0077C8]' : 'text-subtext hover:text-heading'}`}
+                        onClick={() => setActiveAssetTab('search')}
+                        className={`flex-1 py-4 px-2 text-sm font-medium flex items-center justify-center gap-2 min-w-[80px] transition-colors ${activeAssetTab === 'search' ? 'bg-gray-50 text-[#0077C8] border-t-2 border-[#0077C8]' : 'text-subtext hover:text-heading'}`}
                       >
                         <Search size={18} /> Search
                       </button>
                       <button
-                        onClick={() => setActiveTab('email')}
-                        className={`flex-1 py-4 px-2 text-sm font-medium flex items-center justify-center gap-2 min-w-[80px] transition-colors ${activeTab === 'email' ? 'bg-gray-50 text-[#0077C8] border-t-2 border-[#0077C8]' : 'text-subtext hover:text-heading'}`}
+                        onClick={() => setActiveAssetTab('email')}
+                        className={`flex-1 py-4 px-2 text-sm font-medium flex items-center justify-center gap-2 min-w-[80px] transition-colors ${activeAssetTab === 'email' ? 'bg-gray-50 text-[#0077C8] border-t-2 border-[#0077C8]' : 'text-subtext hover:text-heading'}`}
                       >
                         <Mail size={18} /> Email
                       </button>
                       <button
-                        onClick={() => setActiveTab('youtube')}
-                        className={`flex-1 py-4 px-2 text-sm font-medium flex items-center justify-center gap-2 min-w-[80px] transition-colors ${activeTab === 'youtube' ? 'bg-gray-50 text-[#0077C8] border-t-2 border-[#0077C8]' : 'text-subtext hover:text-heading'}`}
+                        onClick={() => setActiveAssetTab('youtube')}
+                        className={`flex-1 py-4 px-2 text-sm font-medium flex items-center justify-center gap-2 min-w-[80px] transition-colors ${activeAssetTab === 'youtube' ? 'bg-gray-50 text-[#0077C8] border-t-2 border-[#0077C8]' : 'text-subtext hover:text-heading'}`}
                       >
                         <Youtube size={18} /> YouTube
                       </button>
                       <button
-                        onClick={() => setActiveTab('website')}
-                        className={`flex-1 py-4 px-2 text-sm font-medium flex items-center justify-center gap-2 min-w-[80px] transition-colors ${activeTab === 'website' ? 'bg-gray-50 text-[#0077C8] border-t-2 border-[#0077C8]' : 'text-subtext hover:text-heading'}`}
+                        onClick={() => setActiveAssetTab('website')}
+                        className={`flex-1 py-4 px-2 text-sm font-medium flex items-center justify-center gap-2 min-w-[80px] transition-colors ${activeAssetTab === 'website' ? 'bg-gray-50 text-[#0077C8] border-t-2 border-[#0077C8]' : 'text-subtext hover:text-heading'}`}
                       >
                         <Globe size={18} /> Website
                       </button>
@@ -446,9 +453,9 @@ export const MarketingBrief: React.FC = () => {
 
                     {/* Content Area */}
                     <div className="p-8 bg-gray-50 flex items-center justify-center min-h-[500px]">
-                      <div className={`w-full flex flex-col items-center ${activeTab === 'website' ? 'max-w-4xl' : 'max-w-lg'}`}>
+                      <div className={`w-full flex flex-col items-center ${activeAssetTab === 'website' ? 'max-w-4xl' : 'max-w-lg'}`}>
                         {/* Social Media Preview */}
-                        {activeTab === 'social' && (
+                        {activeAssetTab === 'social' && (
                           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden w-full">
                             <div className="p-3 flex items-center gap-3 border-b border-gray-100">
                               <div className="w-8 h-8 bg-[#0077C8] rounded-full"></div>
@@ -479,7 +486,7 @@ export const MarketingBrief: React.FC = () => {
                         )}
 
                         {/* Search Ad Preview */}
-                        {activeTab === 'search' && (
+                        {activeAssetTab === 'search' && (
                           <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 w-full">
                             <div className="flex items-center gap-2 mb-1">
                               <span className="font-bold text-black text-sm">Ad</span>
@@ -503,7 +510,7 @@ export const MarketingBrief: React.FC = () => {
                         )}
 
                         {/* Email Preview */}
-                        {activeTab === 'email' && (
+                        {activeAssetTab === 'email' && (
                           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden w-full">
                             <div className="bg-gray-50 p-3 border-b border-gray-200 text-xs text-gray-500 flex justify-between">
                               <span>From: {brandConfig.companyName}</span>
@@ -529,7 +536,7 @@ export const MarketingBrief: React.FC = () => {
                         )}
 
                         {/* YouTube Shorts Preview */}
-                        {activeTab === 'youtube' && (
+                        {activeAssetTab === 'youtube' && (
                           <div className="bg-black rounded-2xl shadow-xl overflow-hidden relative aspect-[9/16] max-h-[600px] mx-auto w-full max-w-[340px]">
                             {currentAssets.image && (
                               <img src={currentAssets.image} className="absolute inset-0 w-full h-full object-cover opacity-70" />
@@ -568,11 +575,11 @@ export const MarketingBrief: React.FC = () => {
                         )}
 
                         {/* Website Preview */}
-                        {activeTab === 'website' && (
+                        {activeAssetTab === 'website' && (
                           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col h-full w-full">
                             {/* Fake Nav */}
                             <div className="bg-white border-b border-gray-200 h-14 flex items-center justify-between px-4 gap-4 shrink-0">
-                              <div className="text-[#0077C8] font-bold text-xl tracking-tighter">Healthco</div>
+                              <div className="text-[#0077C8] font-bold text-xl tracking-tighter">{name}</div>
                               <div className="h-9 bg-gray-100 rounded-full w-full max-w-xs flex items-center px-4 text-gray-500 text-xs font-medium">
                                 <Search size={14} className="mr-2" /> Search
                               </div>
@@ -602,7 +609,7 @@ export const MarketingBrief: React.FC = () => {
                                 {/* Product Details */}
                                 <div className="w-full sm:w-1/2 flex flex-col justify-center">
                                   <div className="text-green-600 text-xs font-bold mb-2">Most Popular</div>
-                                  <h1 className="text-3xl font-bold text-heading leading-none tracking-tight mb-2">{brief.productName || "Healthco Plan"}</h1>
+                                  <h1 className="text-3xl font-bold text-heading leading-none tracking-tight mb-2">{brief.productName || `${name} Plan`}</h1>
                                   <h2 className="text-lg text-subtext font-medium mb-4">Individual & Family Plans</h2>
 
                                   <div className="mb-6">

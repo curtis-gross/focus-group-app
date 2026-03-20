@@ -1,6 +1,6 @@
-import { Schema, Video } from "@google/genai";
+import { Schema, Type, Video } from "@google/genai";
 import { brandConfig } from "../config";
-import type { GenerateVideoParams, GenerationMode, MarketingAssets, MarketingBriefData, FeasibilityReport, CombinedPersona, ABTestResult, InterviewResult } from "../types";
+import type { MarketingAssets, MarketingBriefData, FeasibilityReport, CombinedPersona, ABTestResult, InterviewResult } from "../types";
 export type { MarketingAssets };
 
 // --- Proxy Call Helper ---
@@ -193,7 +193,7 @@ export const fileToGenerativePart = (file: File): Promise<string> => {
     });
 };
 
-// --- Nike Logic ---
+// --- QVC Logic ---
 
 export const generateRoomDesign = async (roomImage: string, productImage: string, style: string = "modern"): Promise<string> => {
     
@@ -429,7 +429,7 @@ export const generateSyntheticPersona = async (personaName: string, audienceName
         Develop a deeply realistic and empathetic persona that perfectly embodies this audience segment. You must define their core values, beliefs, communication tone, and specific industry knowledge level appropriate for their demographic.
 
         **CHART & BRAND DATA REQUIREMENTS:**
-        1. "preferred_products": Provide 3-4 specific, realistic ${context} plans, products, or services this persona would highly value.
+        1. "preferred_products": Provide 3-4 specific, realistic products or categories from ${context} this persona would highly value.
         2. "charts.brand_affinity": Provide 12 months of affinity data (0-100 scale) for ${context}. Generate a realistic 12-month trend line.
 
         **Target Persona Name:**
@@ -555,6 +555,10 @@ export const generateMarketingCampaignAssets = async (productName: string, targe
             parts: [{
                 text: `
                 You are a creative director and marketing expert.
+                
+                **Company Context:**
+                ${brandConfig.companyName} - world-class retail and commerce provider.
+
                 Product: ${productName}
                 Target Audience: ${targetAudience}
                 
@@ -621,7 +625,7 @@ export const generateMarketingCampaignAssets = async (productName: string, targe
         console.log("Queueing Recommendation Images. Count:", (data.recommendations || []).length);
         for (const rec of (data.recommendations || [])) {
             console.log("Queueing Rec Image for:", rec.name, rec.imagePrompt);
-            const recPromise = generateImageFromPrompt(rec.imagePrompt + ", clean health marketing style, warm lighting").then(img => ({
+            const recPromise = generateImageFromPrompt(rec.imagePrompt + ", clean commerce marketing style, warm lighting").then(img => ({
                 name: rec.name,
                 price: rec.price,
                 image: img
@@ -639,7 +643,7 @@ export const generateMarketingCampaignAssets = async (productName: string, targe
         return {
             image: mainImage,
             social: data.social || { caption: "Check out our new offering!", hashtags: [] },
-            search: data.search || { headline: "New Offering", description: "Learn more today.", url: "healthco.com" },
+            search: data.search || { headline: "New Offering", description: "Learn more today.", url: "qvc.com" },
             email: data.email || { subject: "New Update", preheader: "Learn more inside.", body: "Explore our new offerings." },
             youtube: data.youtube || { title: "Overview", script: "Learn about our offerings in 15 seconds." },
             website: { recommendations }
@@ -1028,7 +1032,7 @@ export const generatePersonaChatResponse = async (persona: any, brief: any, mess
     
     try {
         // Find if the audience matches one of our archetypes for better instructions
-        const archetype = Object.values(PERSONA_ARCHETYPES).find(a => (persona.bio && persona.bio.includes(a.name)) || (persona.job_title && persona.job_title.includes(a.name))) || PERSONA_ARCHETYPES.young_family;
+        const archetype = { name: "General", representation: "A standard user", objectives: "Find good products", belief: "Values quality", value: "Price and value", tone: "Neutral", knowledge: "Basic" };
 
         let memoryContext = "";
         if (simulationContext) {
@@ -1063,7 +1067,7 @@ export const generatePersonaChatResponse = async (persona: any, brief: any, mess
         - Knowledge: ${archetype.knowledge}
         
         **THE TASK:**
-        You are a prospective or current member reviewing a health insurance marketing brief for Healthco's ${brief.productName}.
+        You are a prospective or current customer reviewing a marketing brief for ${brief.productName}.
         - Campaign Goal: ${brief.campaignGoal}
         - Value Proposition: ${brief.valueProp?.main?.en || 'N/A'}
 
@@ -1078,7 +1082,7 @@ export const generatePersonaChatResponse = async (persona: any, brief: any, mess
             model: 'gemini-3-flash-preview',
             contents: [
                 { role: "user", parts: [{ text: personaContext }] },
-                { role: "model", parts: [{ text: "Understood. I am now in character as " + persona.name + ". How can I help you today with the marketing brief?" }] },
+                { role: "model", parts: [{ text: "Understood. I am now in character as " + persona.name + ". How can I help you today?" }] },
                 ...chatHistory,
                 { role: "user", parts: [{ text: message }] }
             ]
@@ -1278,8 +1282,8 @@ export const generatePersonalizedProducts = async (userProfile: any, audienceCon
             contents: {
                 parts: [{
                     text: `
-                    Task: Generate 6 personalized Health Plan or Wellness Program recommendations for the user based on their data.
-                    The recommendations should be Healthco Health insurance products or related wellness services.
+                    Task: Generate 6 personalized product, plan, or service recommendations for the user based on their data.
+                    The recommendations should be relevant to the company's offerings and the provided context.
 
                     ${audiencePrompt}
 
@@ -1287,9 +1291,9 @@ export const generatePersonalizedProducts = async (userProfile: any, audienceCon
 
                     IMPORTANT for image_prompt: The image will be displayed on a clean, modern website.
                     Each image_prompt MUST specify:
-                    - Clean, professional imagery (lifestyle or abstract health concepts)
+                    - Clean, professional imagery (lifestyle or abstract concepts)
                     - Professional photography
-                    - Style should match Healthco's brand aesthetic (Trust/Care/Vitality) and target audience
+                    - Style should match the brand aesthetic (Premium/Trust/Quality) and target audience
                     - Good contrast to make the product stand out
                     - Clean, premium atmosphere
 
@@ -1365,15 +1369,14 @@ export const generatePersonalizedHeadlines = async (userProfile: any, audienceCo
             contents: {
                 parts: [{
                     text: `
-                    Task: Based on the user's data, write a short, catchy headline and a slightly more detailed subheadline for their personalized Healthco Health landing page.
+                    Task: Based on the user's data, write a short, catchy headline and a slightly more detailed subheadline for their personalized landing page.
 
                     ${audiencePrompt}
 
-                    - Focus on health coverage, peace of mind, and wellness.
-                    - Use a professional, caring, yet modern and accessible tone appropriate for Healthco's brand
-                    - Headlines should be concise, friendly, and make the user feel valued
-                    - Focus on personalization and the user's specific interests
-                    - Make it feel exclusive and curated for them
+                    - Use a professional, caring, yet modern and accessible tone appropriate for the brand.
+                    - Headlines should be concise, friendly, and make the user feel valued.
+                    - Focus on personalization and the user's specific interests.
+                    - Make it feel exclusive and curated for them.
 
                     For the subheadline use some details about them to help them realize this page is personalized to them, create a full paragraph of text for the subheadline.
                     Provide the text in both English and Spanish.
@@ -1691,135 +1694,9 @@ export const generatePersonalizedPDPCombined = async (audience: string, productN
  * Generates a video using Veo.
  */
 export const generateVideo = async (
-    params: GenerateVideoParams,
+    params: any,
 ): Promise<{ objectUrl: string; blob: Blob; uri: string; video: Video }> => {
-    console.log('Starting video generation with params:', params);
-
-    const key = await getApiKey();
-    const ai = await getClient();
-
-    const config: any = {
-        numberOfVideos: 1,
-        resolution: params.resolution,
-        durationSeconds: params.durationSeconds,
-        personGeneration: params.personGeneration || PersonGeneration.ALLOW_ADULT,
-    };
-
-    if (params.mode !== GenerationMode.EXTEND_VIDEO) {
-        config.aspectRatio = params.aspectRatio;
-    }
-
-    const generateVideoPayload: any = {
-        model: params.model,
-        config: config,
-    };
-
-    if (params.prompt) {
-        generateVideoPayload.prompt = params.prompt;
-    }
-
-    if (params.mode === GenerationMode.FRAMES_TO_VIDEO) {
-        if (params.startFrame) {
-            generateVideoPayload.image = {
-                imageBytes: params.startFrame.base64,
-                mimeType: params.startFrame.file.type,
-            };
-            console.log(`Generating with start frame: ${params.startFrame.file.name}`);
-        }
-
-        const finalEndFrame = params.isLooping ? params.startFrame : params.endFrame;
-        if (finalEndFrame) {
-            generateVideoPayload.config.lastFrame = {
-                imageBytes: finalEndFrame.base64,
-                mimeType: finalEndFrame.file.type,
-            };
-            if (params.isLooping) {
-                console.log(`Generating a looping video using start frame as end frame: ${finalEndFrame.file.name}`);
-            } else {
-                console.log(`Generating with end frame: ${finalEndFrame.file.name}`);
-            }
-        }
-    } else if (params.mode === GenerationMode.REFERENCES_TO_VIDEO) {
-        const referenceImagesPayload: VideoGenerationReferenceImage[] = [];
-
-        if (params.referenceImages) {
-            for (const img of params.referenceImages) {
-                console.log(`Adding reference image: ${img.file.name}`);
-                referenceImagesPayload.push({
-                    image: {
-                        imageBytes: img.base64,
-                        mimeType: img.file.type,
-                    },
-                    referenceType: VideoGenerationReferenceType.ASSET,
-                });
-            }
-        }
-
-        if (params.styleImage) {
-            console.log(`Adding style image as a reference: ${params.styleImage.file.name}`);
-            referenceImagesPayload.push({
-                image: {
-                    imageBytes: params.styleImage.base64,
-                    mimeType: params.styleImage.file.type,
-                },
-                referenceType: VideoGenerationReferenceType.STYLE,
-            });
-        }
-
-        if (referenceImagesPayload.length > 0) {
-            generateVideoPayload.config.referenceImages = referenceImagesPayload;
-        }
-    } else if (params.mode === GenerationMode.EXTEND_VIDEO) {
-        if (params.inputVideoObject) {
-            generateVideoPayload.video = params.inputVideoObject;
-            console.log(`Generating extension from input video object.`);
-        } else {
-            throw new Error('An input video object is required to extend a video.');
-        }
-    }
-
-    console.log('Submitting video generation request...', generateVideoPayload);
-    // @ts-ignore
-    let operation = await ai.models.generateVideos(generateVideoPayload);
-    console.log('Video generation operation started:', operation);
-
-    while (!operation.done) {
-        await new Promise((resolve) => setTimeout(resolve, 10000));
-        console.log('...Generating...');
-        // @ts-ignore
-        operation = await ai.operations.getVideosOperation({ operation: operation });
-    }
-
-    if (operation?.response) {
-        const videos = operation.response.generatedVideos;
-
-        if (!videos || videos.length === 0) {
-            throw new Error('No videos were generated.');
-        }
-
-        const firstVideo = videos[0];
-        if (!firstVideo?.video?.uri) {
-            throw new Error('Generated video is missing a URI.');
-        }
-        const videoObject = firstVideo.video;
-
-        const url = decodeURIComponent(videoObject.uri);
-        console.log('Fetching video from:', url);
-
-        const res = await fetch(`${url}&key=${key}`);
-
-        if (!res.ok) {
-            throw new Error(`Failed to fetch video: ${res.status} ${res.statusText}`);
-        }
-
-        const videoBlob = await res.blob();
-        const objectUrl = URL.createObjectURL(videoBlob);
-
-        return { objectUrl, blob: videoBlob, uri: url, video: videoObject };
-    } else {
-        console.error('Operation failed:', operation);
-        throw new Error('No videos generated.');
-    }
+    throw new Error("generateVideo is no longer supported in this context.");
 };
 
 // --- Synthetic Focus Group & Simulation Logic ---
@@ -2347,20 +2224,20 @@ export const generateFeasibilityReport = async (aggregatedData: any): Promise<Fe
     `;
 
     const schema: Schema = {
-        type: "OBJECT",
+        type: Type.OBJECT,
         properties: {
-            score: { type: "NUMBER" },
-            summary: { type: "STRING" },
-            risks: { type: "ARRAY", items: { type: "STRING" } },
-            opportunities: { type: "ARRAY", items: { type: "STRING" } },
+            score: { type: Type.NUMBER },
+            summary: { type: Type.STRING },
+            risks: { type: Type.ARRAY, items: { type: Type.STRING } },
+            opportunities: { type: Type.ARRAY, items: { type: Type.STRING } },
             tactical_improvements: {
-                type: "ARRAY",
+                type: Type.ARRAY,
                 items: {
-                    type: "OBJECT",
+                    type: Type.OBJECT,
                     properties: {
-                        area: { type: "STRING" },
-                        suggestion: { type: "STRING" },
-                        priority: { type: "STRING", enum: ["High", "Medium", "Low"] }
+                        area: { type: Type.STRING },
+                        suggestion: { type: Type.STRING },
+                        priority: { type: Type.STRING, enum: ["High", "Medium", "Low"] }
                     },
                     required: ["area", "suggestion", "priority"]
                 }
@@ -2621,7 +2498,9 @@ export const simulateABTestFocusGroup = async (pool: any[], variants: { region: 
                 personaName: persona.name,
                 selectedVariant: "Error",
                 rationale: "Simulation failed.",
-                sentiment: "Neutral"
+                sentiment: "Neutral",
+                rankings: [],
+                overallFeedback: "Simulation failed."
             };
         }
     });
@@ -2701,3 +2580,161 @@ export const generateAgentSummary = async (customerText: string): Promise<any> =
         throw error;
     }
 };
+
+export const analyzeRunwayVideo = async (videoUrl: string): Promise<any> => {
+    
+    try {
+        const prompt = `
+        You are a master fashion intelligence curator and archival expert for QVC. 
+        Your goal is to provide a high-fidelity, intellectually deep analysis of the following runway video: ${videoUrl}
+
+        **ANALYTICAL FRAMEWORK:**
+        - **Historical Context**: Connect the aesthetic to QVC's heritage (e.g., Old Money, Western Americana, Collegiate Prep) while identifying the modern "twist".
+        - **Trend Vectoring**: Instead of short bullets, provide rich, descriptive analysis of the trends. Why are they significant? What is the "mood"?
+        - **Outfit Breakdown**: Identify 3-4 specific, standout looks. Describe them in detail (fabrics, layering, accessories, silhouettes).
+
+        **SEASONAL CONTEXT:**
+        - If Spring 2025: Focus on coastal Hamptons elegance, Sailor-core, navy/white/tan palette, and flag sweaters. Look for "Modern Maritime".
+        - If Fall 2024: Focus on Ralph's New York, Camel Polo coats, and Western influences (cowboy buckles, fringe). Look for "Urban Frontiersman".
+        - If Purple Label Spring 2024: Focus on Amalfi Coast, Mediterranean luxury, and vibrant silks. Look for "The European Idler".
+
+        **REQUIRED OUTPUT (JSON Schema):**
+        {
+            "trends": [
+                { "title": "Trend Title", "description": "A deep, 2-3 sentence analysis of why this trend is dominant and its cultural resonance." }
+            ],
+            "outfit_breakdowns": [
+                 { "look": "e.g. Look 4: The Midnight Navy Tuxedo", "details": "Describe the specific garments, textures, and styling nuances that make this outfit a hero piece." }
+            ],
+            "takeaways": [
+                "Strategic Intelligence 1", 
+                "Cinematic Continuity: The World as a Set (Detailed breakdown of how the environment reflects the clothes)", 
+                "Archival Resilience (How this look honors the RL DNA)"
+            ],
+            "summary": "An expansive, 4-5 sentence Market Vision summary that captures the soul, business strategy, and aesthetic legacy of the collection.",
+            "timestamp": "${new Date().toLocaleString()}"
+        }
+        
+        Do not use markdown blocks. Output ONLY raw JSON.
+        `;
+
+        const videoPart = {
+            fileData: {
+                mimeType: 'video/*',
+                fileUri: videoUrl
+            }
+        };
+
+        const response = await callGenAiProxy("generateContent", {
+            model: 'gemini-3.1-pro-preview',
+            contents: [{
+                role: "user",
+                parts: [videoPart, { text: prompt }]
+            }],
+            config: {
+                responseMimeType: "application/json",
+                maxOutputTokens: 65535,
+                temperature: 1,
+                topP: 0.95,
+                seed: 0,
+                thinkingConfig: {
+                    thinkingLevel: "HIGH",
+                },
+                safetySettings: [
+                    { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'OFF' },
+                    { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'OFF' },
+                    { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'OFF' },
+                    { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'OFF' }
+                ]
+            }
+        });
+
+        const text = extractTextFromResponse(response) || "{}";
+        const cleanText = text.replace(/```json|```/g, '').trim();
+        return JSON.parse(cleanText);
+    } catch (error) {
+        console.error("Runway analysis error:", error);
+        return null;
+    }
+};
+
+
+
+export const compileRunwayAnalyses = async (analyses: any[]): Promise<any> => {
+    
+    try {
+        const prompt = `
+        You are a master fashion intelligence curator for QVC.
+        Your goal is to provide a high-fidelity, intellectually deep "Compiled Analysis" of overarching themes across multiple recent runway collections.
+        
+        **INPUT DATA (Individual Collection Analyses):**
+        ${JSON.stringify(analyses, null, 2)}
+
+        **ANALYTICAL FRAMEWORK:**
+        - **Overarching Themes**: Identify the unified vision or recurring motifs across these collections. What is the broader narrative QVC is telling?
+        - **Quick Takeaways**: Synthesize the most dominant trends into 3-4 punchy, high-impact bullet points for a quick executive brief.
+        - **Cross-Collection Trends**: Pinpoint specific materials, silhouettes, or aesthetic choices (e.g., elevated heritage, modern maritime, prep revival) that span across seasons or lines.
+        - **Strategic Market Vision**: Synthesize the individual summaries into one master market vision.
+        - **Actionable Insights**: Recommend strategic directions for QVC's future collections based on these cross-collection patterns.
+
+        **REQUIRED OUTPUT (JSON Schema):**
+        {
+            "quick_takeaways": [
+                "Dominant Trend 1: High-impact synthesis",
+                "Dominant Trend 2: High-impact synthesis"
+            ],
+            "trends": [
+                { "title": "Overarching Trend Title", "description": "A deep, 2-3 sentence analysis of why this trend spans across collections and its broader cultural resonance." }
+            ],
+            "outfit_breakdowns": [
+                 { "look": "e.g. The Cross-Seasonal Hero Piece", "details": "Describe a recurring archetypal garment or styling nuance consistently seen across the collections." }
+            ],
+            "takeaways": [
+                "Strategic Intelligence 1 (Macro view)", 
+                "Strategic Intelligence 2 (Macro view)",
+                "Archival Continuity (How the brand identity holds firm across varied contexts)"
+            ],
+            "actionable_insights": [
+                "Future Recommendation 1 (e.g., Doubling down on modern maritime prep architecture)",
+                "Future Recommendation 2"
+            ],
+            "summary": "An expansive, 4-5 sentence Overarching Market Vision summary that captures the brand's trajectory across these collections.",
+            "timestamp": "${new Date().toLocaleString()}"
+        }
+        
+        Do not use markdown blocks. Output ONLY raw JSON.
+        `;
+
+        const response = await callGenAiProxy("generateContent", {
+            model: 'gemini-3.1-pro-preview',
+            contents: [{
+                role: "user",
+                parts: [{ text: prompt }]
+            }],
+            config: {
+                responseMimeType: "application/json",
+                maxOutputTokens: 65535,
+                temperature: 0.9,
+                topP: 0.95,
+                seed: 0,
+                thinkingConfig: {
+                    thinkingLevel: "HIGH",
+                },
+                safetySettings: [
+                    { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'OFF' },
+                    { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'OFF' },
+                    { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'OFF' },
+                    { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'OFF' }
+                ]
+            }
+        });
+
+        const text = extractTextFromResponse(response) || "{}";
+        const cleanText = text.replace(/```json|```/g, '').trim();
+        return JSON.parse(cleanText);
+    } catch (error) {
+        console.error("Runway compiled analysis error:", error);
+        return null;
+    }
+};
+

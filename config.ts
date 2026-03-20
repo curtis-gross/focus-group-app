@@ -1,5 +1,5 @@
 export const brandConfig = {
-  companyName: "Focus Group AI",
+  companyName: "QVC AI",
   logo: {
     sidebar: "/images/healthco-logo.svg",
     width: "w-[160px]",
@@ -10,10 +10,10 @@ export const brandConfig = {
     accent: "#0077C8", // Healthco Blue
   },
   meta: {
-    title: "Healthco Health AI Lab",
+    title: "QVC AI Lab",
   },
   ui: {
-    welcomeTitle: "Focus Group AI",
+    welcomeTitle: "QVC AI",
     welcomeColor: "text-[#0077C8]",
     button: {
       primary: "btn-primary",

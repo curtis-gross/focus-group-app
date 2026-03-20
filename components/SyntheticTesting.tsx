@@ -2,13 +2,15 @@ import React, { useState, useEffect, useRef } from 'react';
 import { simulateMarketingFocusGroup, simulateAcquisitionFocusGroup, generateWildcardAudience, generateAudienceFromCriteria, generateSyntheticPersona, generateImageFromPrompt, simulateCreativeFocusGroup, generateMarketingCampaignAssets } from '../services/geminiService';
 import { brandConfig } from '../config';
 import { SimulationResult, MarketingBriefData, AcquisitionResult, SavedSimulation, Persona, ABTestResult } from '../types';
-import { Users, BarChart2, Save, Download, Play, ShoppingCart, Mail, MessageSquare, Settings, X, ChevronDown, ChevronUp, Sparkles, UserPlus, Zap, Trash2, Edit2, History, MessageCircle, Plus, Info, ShoppingBag, Image, CheckCircle2, XCircle } from 'lucide-react';
+import { Users, BarChart2, Save, Download, Play, ShoppingCart, Mail, MessageSquare, Settings, X, ChevronDown, ChevronUp, Sparkles, UserPlus, Zap, Trash2, Edit2, History, MessageCircle, Plus, Info, ShoppingBag, Image, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { SyntheticChat } from './SyntheticChat';
 import { SyntheticInterview } from './SyntheticInterview';
 import { SIMULATION_PRODUCTS, STANDARD_AUDIENCES } from '../data/simulationData';
+import { useCompanyContext } from '../context/CompanyContext';
 
 export const SyntheticTesting: React.FC = () => {
+    const { name, description } = useCompanyContext();
     // --- Global State ---
     const [personas, setPersonas] = useState<any[]>([]);
     const [brief, setBrief] = useState<MarketingBriefData | null>(null);
@@ -20,7 +22,7 @@ export const SyntheticTesting: React.FC = () => {
     const [status, setStatus] = useState("");
     const [isAddAudienceModalOpen, setIsAddAudienceModalOpen] = useState(false);
     const [audienceCriteria, setAudienceCriteria] = useState("");
-    const [selectedAudience, setSelectedAudience] = useState<Persona | null>(null);
+    const [selectedAudience, setSelectedAudience] = useState<any | null>(null);
     const [isHistoryOpen, setIsHistoryOpen] = useState(false);
     const [interviewPersona, setInterviewPersona] = useState<{ persona: Persona; result: any } | null>(null);
     const historyDropdownRef = useRef<HTMLDivElement>(null);
@@ -41,7 +43,7 @@ export const SyntheticTesting: React.FC = () => {
 
     // --- Tab Specific State ---
     // Member Simulation
-    const [syntheticUsers, setSyntheticUsers] = useState<SyntheticUserProfile[]>([]);
+    const [syntheticUsers, setSyntheticUsers] = useState<any[]>([]);
     const [memberResults, setMemberResults] = useState<SimulationResult[]>([]);
     const [isMemberLoading, setIsMemberLoading] = useState(false);
     const [showMemberSettings, setShowMemberSettings] = useState(false);
@@ -214,7 +216,7 @@ export const SyntheticTesting: React.FC = () => {
         }
     };
 
-    const handleLoadLast = (type: 'ACQUISITION_SIMULATION' | 'MEMBER_SIMULATION' | 'CREATIVE_SIMULATION') => {
+    const handleLoadLast = (type: 'ACQUISITION_SIMULATION' | 'MEMBER_SIMULATION' | 'CREATIVE_SIMULATION' | 'AB_TEST_SIMULATION') => {
         const lastRun = savedHistory.find(r => r.type === type);
         if (lastRun) {
             loadRun(lastRun);
@@ -240,7 +242,7 @@ export const SyntheticTesting: React.FC = () => {
 
             if (seedAudience) {
                 setStatus(`Developing profile for: ${seedAudience.name}...`);
-                const details = await generateSyntheticPersona(seedAudience.personaName, seedAudience.name, brandConfig.companyName, seedAudience.bio);
+                const details = await generateSyntheticPersona(seedAudience.personaName, seedAudience.name, `${brandConfig.companyName} - ${seedAudience.bio || ""}`);
                 let imageUrl = "";
                 try {
                     imageUrl = await generateImageFromPrompt(seedAudience.imagePrompt + " professional portrait, high quality, studio lighting");
@@ -1513,7 +1515,7 @@ export const SyntheticTesting: React.FC = () => {
                                         Object.values(displayedCreativeResults.reduce((acc, r) => {
                                             if (!acc[r.personaName]) acc[r.personaName] = r;
                                             return acc;
-                                        }, {} as Record<string, typeof displayedCreativeResults[0]>)).map((r, i) => (
+                                        }, {} as Record<string, typeof displayedCreativeResults[0]>)).map((r: any, i) => (
                                             <div key={i} className="border border-gray-100 rounded-2xl p-5 bg-gray-50 shadow-sm">
                                                 <div className="flex items-center gap-3 mb-4">
                                                     <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-[#0077C8] font-black text-xs border border-blue-100 shadow-sm">

@@ -17,16 +17,25 @@ import { SyntheticTesting } from './components/SyntheticTesting';
 import { Home } from './components/Home';
 import { ProjectHelper } from './components/ProjectHelper';
 import { FeasibilityAnalysis } from './components/FeasibilityAnalysis';
+import { RunwayAnalysis } from './components/RunwayAnalysis';
 
 import { Assistant } from './components/Assistant';
 import { Concierge } from './components/Concierge';
 import { SyntheticUsers } from './components/SyntheticUsers';
+import { CompanyProvider } from './context/CompanyContext';
 
 function App() {
+  return (
+    <CompanyProvider>
+      <AppContent />
+    </CompanyProvider>
+  );
+}
+
+function AppContent() {
   const [mode, setMode] = useState<AppMode>(AppMode.HOME);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [personas, setPersonas] = useState<CombinedPersona[]>([]);
-  const [context, setContext] = useState<string>('');
 
   useEffect(() => {
     document.title = brandConfig.meta.title;
@@ -40,9 +49,6 @@ function App() {
           if (data.personas && Array.isArray(data.personas)) {
             setPersonas(data.personas);
           }
-          if (data.context) {
-            setContext(data.context);
-          }
         }
       } catch (err) {
         console.warn("No saved audience run found, starting empty.", err);
@@ -55,6 +61,8 @@ function App() {
     switch (mode) {
       case AppMode.PDP_HUB:
         return <PDPHub />;
+      case AppMode.INSIGHTS:
+        return <RunwayAnalysis />;
       case AppMode.PDP_PERSONALIZATION:
         return <PDPPersonalization />;
       case AppMode.PDP_ENRICHMENT:
@@ -72,8 +80,6 @@ function App() {
           <AudienceGenerator 
             personas={personas} 
             setPersonas={setPersonas} 
-            context={context} 
-            setContext={setContext} 
           />
         );
       case AppMode.MARKETING_CAMPAIGN:

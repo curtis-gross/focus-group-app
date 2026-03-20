@@ -8,8 +8,11 @@ import { STANDARD_AUDIENCES } from '../data/simulationData';
 interface SyntheticUsersProps {
   personas: CombinedPersona[];
 }
+import { useCompanyContext } from '../context/CompanyContext';
 
-export const SyntheticUsers: React.FC<SyntheticUsersProps> = ({ personas }) => {
+export const SyntheticUsers: React.FC<{ personas: CombinedPersona[] }> = ({ personas }) => {
+    const { name: companyName, description: companyDescription } = useCompanyContext();
+    const [selectedPersona, setSelectedPersona] = useState<CombinedPersona | null>(personas[0] || null);
   // Combine dynamic personas with standard ones
   const allPersonas: CombinedPersona[] = [
     ...personas,
@@ -79,9 +82,9 @@ export const SyntheticUsers: React.FC<SyntheticUsersProps> = ({ personas }) => {
 
       for (const basePersona of selectedPersonasObjects) {
         const explicitContext = `Company Context: ${context}. We are expanding the persona ${basePersona.name}.`;
-        const users = await generateSyntheticUsersBatch(basePersona, count, explicitContext);
+        const batch = await generateSyntheticUsersBatch(selectedPersona, 6, companyDescription);
         
-        const newProfiles = users.map((u: any) => ({
+        const newProfiles = batch.map((u: any) => ({
           ...basePersona,
           baseAudienceName: basePersona.name,
           baseAudienceBio: basePersona.details?.bio || basePersona.bio,

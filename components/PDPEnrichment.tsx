@@ -70,7 +70,7 @@ export const PDPEnrichment: React.FC = () => {
     try {
       const promises = Array(6).fill(0).map(() =>
         generateImageWithReference(
-          `Professional lifestyle photography of ${productName} being used in a race or training run, athletic people, dynamic lighting, high quality, 4k, photorealistic, Nike branding style`,
+          `Professional lifestyle photography of ${productName} being used in a race or training run, athletic people, dynamic lighting, high quality, 4k, photorealistic, ${brandConfig.companyName} branding style`,
           uploadedImage
         )
       );
@@ -100,7 +100,7 @@ export const PDPEnrichment: React.FC = () => {
     try {
       const promises = Array(6).fill(0).map(() =>
         generateImageWithReference(
-          `Professional lifestyle photography of ${productName} being used in a race or training run, athletic people, dynamic lighting, high quality, 4k, photorealistic, Nike branding style`,
+          `Professional lifestyle photography of ${productName} being used in a race or training run, athletic people, dynamic lighting, high quality, 4k, photorealistic, ${brandConfig.companyName} branding style`,
           imageToUse
         )
       );

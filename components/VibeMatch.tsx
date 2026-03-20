@@ -32,7 +32,7 @@ export const VibeMatch: React.FC = () => {
         <div className="max-w-4xl mx-auto p-6">
             <div className="text-center mb-10">
                 <h2 className="section-header justify-center mb-2">Vibe Match</h2>
-                <p className="text-subtext">Upload an inspiration photo. We'll find the Nike style that fits.</p>
+                <p className="text-subtext">Upload an inspiration photo. We'll find the style that fits.</p>
             </div>
 
             <div className="content-card overflow-hidden">
@@ -81,7 +81,7 @@ export const VibeMatch: React.FC = () => {
                         </div>
 
                         <div>
-                            <h3 className="text-xl font-bold text-white mb-6">Matches from Nike</h3>
+                            <h3 className="text-xl font-bold text-white mb-6">Matches from Brand</h3>
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                                 {result.suggestedProducts.map((prod: any, idx: number) => (
                                     <div key={idx} className="group cursor-pointer">

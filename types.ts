@@ -1,5 +1,5 @@
 export enum AppMode {
-  // Existing Nike Modes
+  // Existing QVC Modes
   HOME = 'HOME', // Use Home as the dashboard
   PDP_PERSONALIZATION = 'PDP_PERSONALIZATION',
   PDP_ENRICHMENT = 'PDP_ENRICHMENT',
@@ -28,6 +28,7 @@ export enum AppMode {
   SYNTHETIC_CHAT = 'SYNTHETIC_CHAT',
 
   // New Modes
+  INSIGHTS = 'INSIGHTS',
   CONCIERGE = 'CONCIERGE',
   PDP_HUB = 'PDP_HUB',
   MARKETING_HUB = 'MARKETING_HUB',
@@ -362,6 +363,7 @@ export interface DetailedPersona {
 }
 
 export interface CombinedPersona extends AudienceSegment {
+  id?: string;
   details?: DetailedPersona;
   score?: {
     propensity: number;

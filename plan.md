@@ -1,31 +1,34 @@
-# Marketing Brief Audience Integration Plan
+# QVC AI Transformation: Branding, Navigation & Prompts
 
-## Goal Description
-Move "Audiences" above "Marketing Brief" in the navigation. Add an introduction to the home page explaining the 3-step workflow. Integrate the personas generated from the Audience Generator into the Marketing Brief page, including ALL generated audiences in the brief generation by default.
+## Strategic Planning: Analysis
+To complete the QVC transformation, we are auditing all AI prompts and application settings. This ensures that every AI-generated response, from the chat assistant to the marketing briefs, uses QVC's unique commerce language and strategic priorities (Live Broadcast, QCard, Daily Special Value) instead of the legacy medical or generic retail context.
 
-## User Review Required
-> [!IMPORTANT]
-> Please review this plan. Once approved, I will proceed to implementation.
+## Proposed File Changes
+- **`services/assistantService.ts`**: Rebrand the AI Assistant from "Healthco" to "QVC Commerce Advisor".
+- **`services/geminiService.ts`**: Global audit of prompts to remove medical/generic retail terminology.
+- **`config.ts`**: Finalize company metadata and logo scaling.
+- **`components/Home.tsx`**: Redesign as a "Navigation Hub".
+- **`public/data/`**: Rename and update `healthco_customer_data.json` to `qvc_customer_data.json`.
 
-## Proposed Changes
+## Technical Approach
+1.  **AI Assistant Persona**: Rewrite the `systemPrompt` in `assistantService.ts` to focus on commerce optimization and QVC-specific business metrics.
+2.  **Prompt Refinement**: 
+    - Use global search/replace for branding terms.
+    - Manually refine complex prompts in `geminiService.ts` to include retail-specific examples (Jewelry, Electronics, Flash sales).
+3.  **UI & Config**: 
+    - Scale logo to `h-16`.
+    - Implement the 3-column navigation grid in `Home.tsx`.
 
-### [MODIFY] `components/Navigation.tsx`
-- Reorder `navItems` array so that `AppMode.AUDIENCE_GEN` is second, directly after `AppMode.HOME`, and before `AppMode.MARKETING_BRIEF`. (Completed)
+## Potential Risks
+- **Prompt Regression**: Changing prompt wording might affect JSON parser reliability. We will verify this with Vitest.
+- **Data Path Broken**: Renaming JSON files requires updating all `fetch` calls in the application.
 
-### [MODIFY] `components/Home.tsx`
-- Reorder the `tools` array to match the navigation order. (Completed)
-- Add an introduction text section explaining the workflow. Update the language to say "Create a tailored marketing brief and assets for all your generated audiences." instead of selecting one.
+## Status: COMPLETED
+All branding, navigation, and prompt audit tasks have been successfully implemented. The application is now tailored as a QVC AI Lab with a commerce-first persona and data architecture.
 
-### [MODIFY] `components/MarketingBrief.tsx`
-- **State**: Fetch personas from `/api/load-run/audience_generator` on mount to populate an `availableAudiences` state array.
-- **UI**: Display the "Audiences - from Audience Generator" section to show ALL included audiences by default. Remove the selection logic since all are included.
-- **Submission**: Pass the entire `availableAudiences` array to `generateMarketingBrief`.
-
-### [MODIFY] `services/geminiService.ts`
-- **`generateMarketingBrief`**: Update the `sourceAudience` parameter to accept an array of Personas (`sourceAudiences?: any[]`). 
-- **Prompt Update**: If `sourceAudiences` is provided, iterate through them and inject their localized details into the prompt. This forces the LLM to write the brief targeting all the included segments.
-
-## Verification Plan
-1. Check the Home page language.
-2. Check the Marketing Brief page to see that audiences are displayed as included.
-3. Generate a brief and verify the LLM encompasses all audiences.
+### Final Verification Results
+- Sidebar Logo: `h-16` (Doubled size)
+- Home Page: 3-Column Navigation Hub
+- AI Persona: QVC Commerce Advisor
+- Customer Data: Sarah Jenkins (QCard Holder)
+- Prompts: Retail/Commerce context enabled globally.

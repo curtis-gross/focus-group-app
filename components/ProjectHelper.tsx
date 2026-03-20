@@ -35,8 +35,8 @@ export const ProjectHelper: React.FC = () => {
   // Auto-Save Effect
   useEffect(() => {
     // Skip auto-save if it's default data
-    const isDefault = projectTopic === "Marathon Training Event" &&
-      projectDetail === "A community gathering focused on long-distance training, running mechanics, and race-day preparation.";
+    const isDefault = projectTopic === "Home Decor Refresh" &&
+      projectDetail === "A project to refresh your living space with modern style, new lighting, and a cohesive color palette.";
 
     if (stage > 1 && (uploadedImage || projectTopic) && !isDefault) {
       const saveData = {
@@ -125,7 +125,7 @@ export const ProjectHelper: React.FC = () => {
     setLoading(true);
     setStatusMessage('Visualizing your experience...');
     try {
-      const prompt = `A high-quality, photorealistic image of a perfect event: ${projectDetail}. The image should be vibrant, showing happy athletic people and Nike branding in a professional, active setting.`;
+      const prompt = `A high-quality, photorealistic image of a perfect event: ${projectDetail}. The image should be vibrant, showing happy athletic people and ${brandConfig.companyName} branding in a professional, active setting.`;
       const imageBase64 = await generateImage(prompt);
       if (imageBase64) {
         setFinalProductImage(`data:image/jpeg;base64,${imageBase64}`);
@@ -177,7 +177,7 @@ export const ProjectHelper: React.FC = () => {
       };
 
       const prompt = `
-        You are an expert event planner for Nike. Your task is to take a user's idea and create a detailed plan. The concept is: "${projectTopic} - ${projectDetail}".
+        You are an expert event planner for ${brandConfig.companyName}. Your task is to take a user's idea and create a detailed plan. The concept is: "${projectTopic} - ${projectDetail}".
         
         **Instructions:**
         1. **Summary:** Write a brief, exciting summary of the experience.
@@ -198,7 +198,7 @@ export const ProjectHelper: React.FC = () => {
          const newGuide = { ...jsonResponse };
          
          const stepPromises = newGuide.project_guide.map(async (step: any) => {
-           const stepImg = await generateImage(step.step_image_prompt + " photorealistic, vibrant, Nike style");
+           const stepImg = await generateImage(step.step_image_prompt + ` photorealistic, vibrant, ${brandConfig.companyName} style`);
              if (stepImg) step.generated_image_url = `data:image/jpeg;base64,${stepImg}`;
              
              const toolPromises = (step.tools_and_materials || []).map(async (tool: any) => {
@@ -226,11 +226,11 @@ export const ProjectHelper: React.FC = () => {
   return (
     <div className="max-w-6xl mx-auto p-8 mb-20">
       <div className="text-center mb-10">
-        <h2 className="section-header justify-center mb-2">
-          <Sparkles size={32} className="text-white" /> Nike Experience Builder
+        <h2 className="section-header justify-center mb-2 text-gray-900">
+          <Sparkles size={32} className="text-[#0077C8]" /> {brandConfig.companyName} Experience Builder
         </h2>
         <p className="text-gray-400 max-w-2xl mx-auto">
-          Upload a photo of your space or describe an event, and we'll plan the perfect Nike experience.
+          Upload a photo of your space or describe an event, and we'll plan the perfect ${brandConfig.companyName} experience.
         </p>
 
       </div>
@@ -245,10 +245,10 @@ export const ProjectHelper: React.FC = () => {
             onChange={handleImageUpload}
           />
           <label htmlFor="image-upload" className="cursor-pointer flex flex-col items-center">
-            <div className="bg-white/10 p-6 rounded-full mb-4">
-              <Upload size={48} className="text-white" />
+            <div className="bg-[#0077C8]/10 p-6 rounded-full mb-4">
+              <Upload size={48} className="text-[#0077C8]" />
             </div>
-            <h3 className="text-xl font-bold text-white mb-2">Upload Event Space / Context</h3>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Upload Event Space / Context</h3>
             <p className="text-gray-400 mb-6">Or take a photo of where you want to host.</p>
             <span className="btn-primary px-6 py-3 rounded-lg font-semibold">
               Choose Image
@@ -259,7 +259,7 @@ export const ProjectHelper: React.FC = () => {
               e.preventDefault();
               handleLoadLast();
             }}
-            className="mt-6 text-white hover:text-gray-300 flex items-center gap-1 text-sm font-medium mx-auto bg-white/10 px-4 py-2 rounded-lg"
+            className="mt-6 text-gray-600 hover:text-gray-900 flex items-center gap-1 text-sm font-medium mx-auto bg-gray-100 px-4 py-2 rounded-lg"
           >
             <RotateCcw size={16} /> Load Last Experience
           </button>
@@ -267,8 +267,8 @@ export const ProjectHelper: React.FC = () => {
           <div className="mt-8 pt-8 border-t border-gray-800">
               <button 
                   onClick={() => {
-                setProjectTopic("Marathon Training Event");
-                setProjectDetail("A community gathering focused on long-distance training, running mechanics, and race-day preparation.");
+                setProjectTopic("Home Decor Refresh");
+                setProjectDetail("A project to refresh your living space with modern style, new lighting, and a cohesive color palette.");
                       setStage(2);
                   }}
               className="text-gray-500 hover:text-gray-300 text-sm font-medium"
@@ -292,9 +292,9 @@ export const ProjectHelper: React.FC = () => {
 
           <div className="mb-6 flex justify-center">
             {uploadedImage && (
-              <div className="relative w-full h-64 bg-[#111] rounded-xl overflow-hidden shadow-inner border border-gray-800">
+              <div className="relative w-full h-64 bg-gray-100 rounded-xl overflow-hidden shadow-inner border border-gray-200">
                 <img src={uploadedImage} alt="Context" className="w-full h-full object-cover" />
-                <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                <div className="absolute bottom-2 right-2 bg-white/70 text-gray-900 text-xs px-2 py-1 rounded">
                   Reference Image
                 </div>
               </div>

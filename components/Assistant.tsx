@@ -10,9 +10,11 @@ interface Message {
   images?: string[];
   html?: string;
 }
+import { useCompanyContext } from '../context/CompanyContext';
 
-export const Assistant = () => {
-  const [messages, setMessages] = useState<Message[]>([
+export const Assistant: React.FC = () => {
+    const { name, description } = useCompanyContext();
+    const [messages, setMessages] = useState<Message[]>([
     {
       text: `Hello! I am your ${brandConfig.companyName} Assistant. How can I help you with your health plan today?`,
       sender: 'bot',
@@ -115,7 +117,7 @@ export const Assistant = () => {
     try {
       // Include history (simplified)
       const history = messages.map(m => ({ sender: m.sender, text: m.text }));
-      const response = await generateAssistantResponse(userMsg.text, history, base64Images);
+      const response = await generateAssistantResponse(msgText, messages, name, description, base64Images);
 
       setMessages(prev => [...prev, {
         text: "Response generated",

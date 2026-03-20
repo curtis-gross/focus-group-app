@@ -4,6 +4,7 @@ import { brandConfig } from '../config';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Users, TrendingUp, BarChart2, DollarSign, Briefcase, Heart, RotateCcw, ArrowLeft, Shield, Upload, FileText, Download } from 'lucide-react';
 import { CombinedPersona, DetailedPersona } from '../types';
+import { useCompanyContext } from '../context/CompanyContext';
 
 // Helper to parse CSV text into JSON objects
 const parseCSV = (csvText: string) => {
@@ -27,32 +28,28 @@ const parseCSV = (csvText: string) => {
 };
 
 const SAMPLE_CUSTOMER_DATA = [
-  { email: 'alex@demo.com', name: 'Alex', topChannel: 'Portal', condition: "New Baby", location: 'Pennsylvania' },
-  { email: 'jordan@demo.com', name: 'Jordan', topChannel: 'App', condition: 'Type 2 Diabetes', location: 'New York' },
-  { email: 'casey@demo.com', name: 'Casey', topChannel: 'Phone', condition: 'Retiring Soon', location: 'Delaware' },
-  { email: 'taylor@demo.com', name: 'Taylor', topChannel: 'Email', condition: "Preventive Care", location: 'West Virginia' },
-  { email: 'morgan@demo.com', name: 'Morgan', topChannel: 'Portal', condition: "Mental Health", location: 'Pennsylvania' },
-  { email: 'riley@demo.com', name: 'Riley', topChannel: 'App', condition: 'Knee Surgery', location: 'Ohio' },
-  { email: 'jamie@demo.com', name: 'Jamie', topChannel: 'Phone', condition: "New Marriage", location: 'Pennsylvania' },
-  { email: 'quinn@demo.com', name: 'Quinn', topChannel: 'Email', condition: "Chronic Back Pain", location: 'New York' },
-  { email: 'avery@demo.com', name: 'Avery', topChannel: 'Portal', condition: 'Weight Loss', location: 'Delaware' },
-  { email: 'reese@demo.com', name: 'Reese', topChannel: 'App', condition: 'None', location: 'West Virginia' },
+  { name: 'Jane Smith', email: 'jane.smith@email.com', primaryCategory: 'Jewelry', topChannel: 'QVC1 Broadcast', loyaltyStatus: 'QCard Member', lastPurchase: 'Diamonique 2ct Ring', avgOrderValue: '$125' },
+  { name: 'Mary Johnson', email: 'mary.j@email.com', primaryCategory: 'Home & Kitchen', topChannel: 'QVC.com', loyaltyStatus: 'Premier Member', lastPurchase: 'Shark Vacuum', avgOrderValue: '$89' },
+  { name: 'Robert Brown', email: 'r.brown@email.com', primaryCategory: 'Electronics/Tech', topChannel: 'Mobile App', loyaltyStatus: 'New Member', lastPurchase: 'Bose Headphones', avgOrderValue: '$150' },
+  { name: 'Linda Davis', email: 'linda.d@email.com', primaryCategory: 'Beauty/Skincare', topChannel: 'QVC2', loyaltyStatus: 'QCard Member', lastPurchase: 'Tatcha Skincare Set', avgOrderValue: '$65' },
+  { name: 'Susan Wilson', email: 'susan.w@email.com', primaryCategory: 'Fashion Forward', topChannel: 'QVC.com', loyaltyStatus: 'Brand Loyalist', lastPurchase: 'Susan Graver Blazer', avgOrderValue: '$110' },
+  { name: 'Karen Taylor', email: 'karen.t@email.com', primaryCategory: 'Garden & Patio', topChannel: 'QVC1 Broadcast', loyaltyStatus: 'Value Seeker', lastPurchase: 'Solar Garden Lights', avgOrderValue: '$75' },
+  { name: 'Patricia Moore', email: 'p.moore@email.com', primaryCategory: 'Jewelry/Gifts', topChannel: 'Mobile App', loyaltyStatus: 'High Frequency', lastPurchase: 'Gold Hoop Earrings', avgOrderValue: '$200' },
+  { name: 'Elizabeth White', email: 'e.white@email.com', primaryCategory: 'Health & Wellness', topChannel: 'QVC.com', loyaltyStatus: 'Wellness Advocate', lastPurchase: 'Yoga Mat Set', avgOrderValue: '$45' },
+  { name: 'Barbara Harris', email: 'b.harris@email.com', primaryCategory: 'Kitchen Gadgets', topChannel: 'QVC2', loyaltyStatus: 'Family Shopper', lastPurchase: 'Air Fryer XL', avgOrderValue: '$135' },
+  { name: 'Jennifer Clark', email: 'j.clark@email.com', primaryCategory: 'Handbags & Accessories', topChannel: 'Mobile App', loyaltyStatus: 'Trend Follower', lastPurchase: 'Dooney & Bourke Bag', avgOrderValue: '$95' },
 ];
 
 interface AudienceGeneratorProps {
   personas: CombinedPersona[];
   setPersonas: React.Dispatch<React.SetStateAction<CombinedPersona[]>>;
-  context: string;
-  setContext: React.Dispatch<React.SetStateAction<string>>;
 }
 
-export const AudienceGenerator: React.FC<AudienceGeneratorProps> = ({ personas, setPersonas, context, setContext }) => {
+export const AudienceGenerator: React.FC<AudienceGeneratorProps> = ({ personas, setPersonas }) => {
+  const { name, description } = useCompanyContext();
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingStep, setLoadingStep] = useState("");
-  const [useUploadData, setUseUploadData] = useState(false);
-  const [customData, setCustomData] = useState<any[]>([]);
-  const [fileName, setFileName] = useState("");
 
   React.useEffect(() => {
     if (personas.length > 0) {
@@ -61,11 +58,11 @@ export const AudienceGenerator: React.FC<AudienceGeneratorProps> = ({ personas, 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           featureId: 'audience_generator',
-          data: { personas, context }
+          data: { personas, context: description }
         })
       }).catch(err => console.error("Failed to save audience run:", err));
     }
-  }, [personas, context]);
+  }, [personas, description]);
 
   const handleLoadLast = async () => {
     setIsLoading(true);
@@ -79,7 +76,6 @@ export const AudienceGenerator: React.FC<AudienceGeneratorProps> = ({ personas, 
         setPersonas(data.personas);
         setStep(2);
       }
-      if (data.context) setContext(data.context);
     } catch (error) {
       console.warn(error);
       alert("No previous session found.");
@@ -95,8 +91,8 @@ export const AudienceGenerator: React.FC<AudienceGeneratorProps> = ({ personas, 
     setLoadingStep("Identifying Key Member Segments...");
 
     try {
-      const targetData = useUploadData && customData.length > 0 ? customData : SAMPLE_CUSTOMER_DATA;
-      const explicitContext = `${context}. Segment these customers into exactly three audiences based on the data. Data: ${JSON.stringify(targetData)}`;
+      const targetData = SAMPLE_CUSTOMER_DATA;
+      const explicitContext = `${description}. Segment these customers into exactly three audiences based on the data. Data: ${JSON.stringify(targetData)}`;
       const segments = await generateAudienceSegments(explicitContext);
 
       // Basic validation
@@ -164,7 +160,7 @@ export const AudienceGenerator: React.FC<AudienceGeneratorProps> = ({ personas, 
             <Users className="text-[#0077C8]" />
             <h1 className="page-title">Audience Generator</h1>
           </div>
-          <p className="text-subtext mt-1">Upload member lists or use sample data to generate detailed user personas.</p>
+          <p className="text-subtext mt-1">Preview member data and generate detailed QVC user personas.</p>
         </div>
       </div>
 
@@ -199,131 +195,42 @@ export const AudienceGenerator: React.FC<AudienceGeneratorProps> = ({ personas, 
             </div>
           </div>
 
-          {useUploadData ? (
-            <div>
-              <button onClick={() => setUseUploadData(false)} className="text-blue-500 text-sm mb-4 font-medium flex items-center gap-1 hover:underline">
-                <ArrowLeft size={14} /> Back to Options
-              </button>
-              <div className="mb-6">
-                <label className="form-label">Upload Member Data (CSV)</label>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 flex flex-col items-center justify-center bg-gray-50">
-                  <Upload size={32} className="text-gray-400 mb-3" />
-                  <p className="text-gray-600 font-medium mb-1">Upload your customer list</p>
-                  <p className="text-gray-500 text-sm mb-4">CSV format only</p>
-                  <div className="flex gap-4 items-center">
-                    <label className="btn-secondary cursor-pointer">
-                      Browse Files
-                      <input 
-                        type="file" 
-                        accept=".csv" 
-                        className="hidden" 
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            setFileName(file.name);
-                            const reader = new FileReader();
-                            reader.onload = (event) => {
-                              const text = event.target?.result as string;
-                              const parsed = parseCSV(text);
-                              setCustomData(parsed);
-                            };
-                            reader.readAsText(file);
-                          }
-                        }} 
-                      />
-                    </label>
-                    <span className="text-gray-300">|</span>
-                    <a href="/data/sample_audience_data.csv" download className="btn-ghost flex items-center gap-2 text-sm text-[#0077C8] hover:bg-blue-50">
-                      <Download size={16} /> Download CSV Template
-                    </a>
-                  </div>
-                  {fileName && (
-                    <div className="mt-4 p-3 bg-blue-50 text-blue-800 rounded-md border border-blue-200 flex items-center gap-2">
-                       <FileText size={16} /> 
-                       <span className="font-medium">{fileName}</span>
-                       <span className="text-sm ml-2">({customData.length} records parsed)</span>
-                    </div>
-                  )}
-                </div>
-              </div>
+          <div className="overflow-x-auto mb-8 border border-gray-100 rounded-xl">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Category</th>
+                  <th>Top Channel</th>
+                  <th>Loyalty Status</th>
+                  <th>Spend (LTM)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {SAMPLE_CUSTOMER_DATA.map((customer, idx) => (
+                  <tr key={idx}>
+                    <td className="font-medium text-gray-900">{customer.name}</td>
+                    <td><span className="badge badge-blue">{customer.primaryCategory}</span></td>
+                    <td>{customer.topChannel}</td>
+                    <td><span className="badge badge-gray">{customer.loyaltyStatus}</span></td>
+                    <td className="font-bold">{customer.avgOrderValue}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
-              <div className="mb-6">
-                <label className="form-label">
-                  Company & Data Description <span className="text-red-500 font-bold">*</span>
-                </label>
-                <textarea
-                  value={context}
-                  onChange={(e) => setContext(e.target.value)}
-                  className="input-field min-h-[100px]"
-                  placeholder="Required: Describe your company and the type of customer data you've uploaded (e.g. 'We are a health tech startup tracking user workout activities...'). This ensures accurate segmentation."
-                />
-              </div>
-
-              <div className="flex justify-end mt-8">
-                 <button
-                    onClick={handleGenerate}
-                    disabled={isLoading || customData.length === 0 || !context.trim()}
-                    className="btn-primary flex items-center gap-2 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed"
-                  >
-                    Generate Audiences
-                  </button>
-              </div>
-            </div>
-          ) : (
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                {/* Option 1: Upload */}
-                <div 
-                  className="border border-gray-200 rounded-xl p-8 hover:border-[#0077C8] hover:shadow-md transition-all cursor-pointer bg-white group flex flex-col h-full"
-                  onClick={() => setUseUploadData(true)}
-                >
-                  <div className="w-12 h-12 bg-blue-50 text-[#0077C8] rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <Upload size={24} />
-                  </div>
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">Upload Custom Data</h3>
-                  <p className="text-gray-500 text-sm flex-grow">Upload a CSV of customer records to analyze and segment into targeted persona profiles based on real data attributes.</p>
-                </div>
-
-                {/* Option 2: Sample Data */}
-                <div 
-                  className="border border-gray-200 rounded-xl p-8 hover:border-[#0077C8] hover:shadow-md transition-all cursor-pointer bg-white group flex flex-col h-full"
-                  onClick={() => {
-                     // Since useUploadData is false, it will use SAMPLE_CUSTOMER_DATA
-                     // But we want to show the preview instead of directly generating.
-                     // A simple way is to use a secondary state, or just let them generate.
-                     // For simplicity, directly generating or letting them edit context first:
-                     setUseUploadData(false); 
-                     // Setting a flag to show the classic view might be cleaner, but we can just use another step or state.
-                     // Let's repurpose a state. Let's make "useUploadData === false" mean we are in the selection screen,
-                     // unless we click "Use Sample Data", then we go to "Step 1.5" (the old view).
-                     // Actually, we can just trigger generate immediately with a default context, or show the old form.
-                  }}
-                >
-                  <div className="w-12 h-12 bg-green-50 text-green-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <Users size={24} />
-                  </div>
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">Use Sample Data</h3>
-                  <p className="text-gray-500 text-sm flex-grow mb-4">Use a pre-loaded synthetic dataset of users to instantly generate 3 distinct demographic segments.</p>
-                  
-                  {/* Inline Context Input for Sample Data */}
-                  <div className="mt-auto" onClick={(e) => e.stopPropagation()}>
-                    <input
-                      type="text"
-                      value={context}
-                      onChange={(e) => setContext(e.target.value)}
-                      className="w-full text-sm border-gray-300 rounded-md shadow-sm focus:ring-[#0077C8] focus:border-[#0077C8] mb-3"
-                      placeholder="Optional context override..."
-                    />
-                    <button
-                      onClick={(e) => { e.stopPropagation(); handleGenerate(); }}
-                      disabled={isLoading}
-                      className="w-full bg-[#0077C8] text-white py-2 rounded-md font-medium text-sm hover:bg-[#0060A0] transition-colors"
-                    >
-                      Generate with Demo Data
-                    </button>
-                  </div>
-                </div>
-             </div>
-          )}
+          <div className="mb-6 p-4 bg-blue-50/50 rounded-xl border border-blue-100/50">
+            <h4 className="text-xs font-bold text-[#0077C8] uppercase tracking-wider mb-2 flex items-center gap-2">
+              <Shield size={14} /> Active Strategy Context
+            </h4>
+            <p className="text-sm text-gray-700 italic">
+              "{description}"
+            </p>
+            <p className="mt-2 text-[10px] text-gray-400">
+              Update this context via the gear icon in the sidebar.
+            </p>
+          </div>
         </div>
       )}
 

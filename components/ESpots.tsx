@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { generateJson, generateImage } from '../services/geminiService';
 import { brandConfig } from '../config';
-import { Schema } from "@google/genai";
+import { Schema, Type } from "@google/genai";
 import { RotateCcw, Play, ArrowLeft, Shield, Heart, Activity } from 'lucide-react';
 
 const consumerData = [
@@ -75,17 +75,17 @@ export const ESpots: React.FC = () => {
       setLoadingMessage("Analyzing member data & identifying health segments...");
       const prompt = `Analyze this member data and group them into 3 distinct segments for Healthco Health outreach. Data: ${JSON.stringify(consumerData)}`;
       const schema: Schema = {
-        type: "OBJECT",
+        type: Type.OBJECT,
         properties: {
           audiences: {
-            type: "ARRAY",
+            type: Type.ARRAY,
             items: {
-              type: "OBJECT",
+              type: Type.OBJECT,
               properties: {
-                name: { type: "STRING" },
-                description: { type: "STRING" },
-                key_characteristics: { type: "ARRAY", items: { type: "STRING" } },
-                target_user_ids: { type: "ARRAY", items: { type: "NUMBER" } }
+                name: { type: Type.STRING },
+                description: { type: Type.STRING },
+                key_characteristics: { type: Type.ARRAY, items: { type: Type.STRING } },
+                target_user_ids: { type: Type.ARRAY, items: { type: Type.NUMBER } }
               },
               required: ["name", "description", "key_characteristics", "target_user_ids"]
             }
@@ -105,11 +105,11 @@ export const ESpots: React.FC = () => {
       const promises = generatedAudiences.map(async (aud: Audience, idx: number) => {
         const copyPrompt = `Create a marketing campaign for the audience "${aud.name}" for Healthco's "Complete Care" plans. Description: ${aud.description}. Write a reassuring, benefit-focused headline and a VERY short Call to Action (CTA) of less than 5 words.`;
         const copySchema: Schema = {
-          type: "OBJECT",
+          type: Type.OBJECT,
           properties: {
-            headline: { type: "STRING" },
-            subhead: { type: "STRING" },
-            cta: { type: "STRING" }
+            headline: { type: Type.STRING },
+            subhead: { type: Type.STRING },
+            cta: { type: Type.STRING }
           },
           required: ["headline", "subhead", "cta"]
         };
