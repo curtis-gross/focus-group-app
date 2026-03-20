@@ -545,7 +545,7 @@ export const generateImageFromPrompt = async (prompt: string): Promise<string> =
     return "https://via.placeholder.com/400x400?text=Generation+Failed";
 };
 
-export const generateMarketingCampaignAssets = async (productName: string, targetAudience: string): Promise<MarketingAssets> => {
+export const generateMarketingCampaignAssets = async (productName: string, targetAudience: string, context: string): Promise<MarketingAssets> => {
     
 
     // 1. Generate the Image Prompt and Copy concurrently
@@ -1249,7 +1249,7 @@ export const generateSeasonalVariations = async (baseRoomImage: string): Promise
             return { theme, image: null };
 
         } catch (error) {
-            console.error(`Failed to generate variation for ${theme}:`, error);
+                console.error(`Failed to generate variation for ${theme}:`, error);
             return { theme, image: null };
         }
     };
@@ -1259,7 +1259,7 @@ export const generateSeasonalVariations = async (baseRoomImage: string): Promise
 
 // --- Generative Site / Landing Page Logic ---
 
-export const generatePersonalizedProducts = async (userProfile: any, audienceContext: any = null): Promise<any> => {
+export const generatePersonalizedProducts = async (userProfile: any, audienceContext: any = null, companyName: string = "AI"): Promise<any> => {
     
     try {
         let audiencePrompt = "";
@@ -1349,7 +1349,7 @@ export const translateProducts = async (products: any[]): Promise<any> => {
     }
 };
 
-export const generatePersonalizedHeadlines = async (userProfile: any, audienceContext: any = null): Promise<any> => {
+export const generatePersonalizedHeadlines = async (userProfile: any, audienceContext: any = null, companyName: string = "AI"): Promise<any> => {
     
     try {
         let audiencePrompt = "";
@@ -1403,7 +1403,7 @@ export const generatePersonalizedHeadlines = async (userProfile: any, audienceCo
     }
 };
 
-export const generatePersonalizedPDPContent = async (audience: string, productName: string): Promise<any> => {
+export const generatePersonalizedPDPContent = async (audience: string, productName: string, companyName: string = "AI"): Promise<any> => {
     
     try {
         const response = await callGenAiProxy("generateContent", {
@@ -1412,6 +1412,10 @@ export const generatePersonalizedPDPContent = async (audience: string, productNa
                 parts: [{
                     text: `
                     Task: Write personalized product detail page (PDP) content for "${productName}" targeting the audience: "${audience}".
+                    Industry: Services
+                    Company: ${companyName}
+                    Product: ${productName}
+                    Audience: ${audience}
                     
                     Return a JSON object with:
                     1. "whyPerfect": A single, punchy sentence (max 15 words) explaining why this product is perfect for this specific audience.
@@ -1879,7 +1883,7 @@ export const simulateMarketingFocusGroup = async (
             1. **Brief Score**: Rate Interest, Clarity, and Relevance (0-100). 
                - **VARIANCE:** Scores should range widely. Do not average around 80. Use 20s, 40s, 90s.
             2. **Negative Feedback**: What would this specific persona dislike? Be blunt.
-            3. **Cart Selection**: Which of the provided Healthco plans or benefits would they ACTUALLY enroll in right now? (True/False) and a short reason.
+            3. **Cart Selection**: Which of the provided ${brief.companyName} plans or benefits would they ACTUALLY enroll in right now? (True/False) and a short reason.
             4. **Email Engagement**: 
                - Only OPEN if the SUBJECT resonates.
                - Only CLICK if the BODY persuades them.
@@ -1968,7 +1972,9 @@ export const simulateMarketingFocusGroup = async (
 
 export const simulateAcquisitionFocusGroup = async (
     personas: any[],
-    offers: string[]
+    offers: string[],
+    companyName: string = "AI",
+    productContext: string = "health insurance"
 ): Promise<any[]> => {
     
     const BATCH_SIZE = 10;
@@ -1982,7 +1988,7 @@ export const simulateAcquisitionFocusGroup = async (
             
             **CONTEXT:**
             You are simulating ${batchPersonas.length} distinct synthetic personas.
-            **CRITICAL:** For this simulation, assume these personas are **NEW PROSPECTS** who are considering switching their health insurance to ${brandConfig.companyName}.
+            **CRITICAL:** For this simulation, assume these personas are **NEW PROSPECTS** who are considering switching their ${productContext} to ${companyName}.
             
             **THE ACQUISITION OFFERS:**
             ${JSON.stringify(offers)}
@@ -2064,7 +2070,8 @@ export const simulateAcquisitionFocusGroup = async (
 
 export const simulateCreativeFocusGroup = async (
     personas: any[],
-    assets: MarketingAssets
+    assets: MarketingAssets,
+    companyName: string = "AI"
 ): Promise<any[]> => {
     
     const BATCH_SIZE = 5; // Smaller batch for multimodal
@@ -2099,12 +2106,12 @@ export const simulateCreativeFocusGroup = async (
             For EACH participant, evaluate these creative assets.
             
             1. **Visual Appeal**: (0-100). Does the image look good to THEM?
-            2. **Brand Fit**: (0-100). Does it feel perfectly aligned with Healthco's brand identity and values?
+            2. **Brand Fit**: (0-100). Does it feel perfectly aligned with ${companyName}'s brand identity and values?
                - **Explanation**: Why/Why not?
             3. **Resonance**: (0-100). How much would this persona care?
                - **Explanation**: Specific triggers.
             4. **Constructive Feedback**: Specific ways to improve the image or copy to better fit the persona.
-               - **Suggested Product**: If they don't like this product, what specific Healthco health plan or service would they prefer? (e.g. "Aha! Plan", "Blue Flex").
+               - **Suggested Product**: If they don't like this product, what specific ${companyName} product or service would they prefer? (e.g. "Aha! Plan", "Blue Flex").
                - **Suggested Messaging**: What angle would work better? (e.g. "Focus on coverage", "Focus on savings").
                - **Suggested Image**: Describe a specific alternative image concept that would resonate better with THIS specific persona.
                - **Copy Edit**: Rewrite the Social Caption or Search Headline to better appeal to them.
@@ -2326,11 +2333,11 @@ export const scoreAudienceSegments = async (personas: CombinedPersona[], context
     }
 };
 
-export const conductQualitativeInterview = async (persona: CombinedPersona, context: string, initialQuestion: string): Promise<InterviewResult> => {
+export const conductQualitativeInterview = async (persona: CombinedPersona, context: string, initialQuestion: string, companyName: string = "AI"): Promise<InterviewResult> => {
     
     try {
         const prompt = `
-        You are simulating a qualitative user interview regarding health insurance, preventative care, and the "Healthco" brand. Let your answers reflect your specific healthcare needs and financial concerns.
+        You are simulating a qualitative user interview regarding the "${context}" and ${companyName}. Let your answers reflect your specific needs and concerns.
         
         **Role**: act as ${persona.name} (${persona.personaName}), with the following details:
         - Bio: ${persona.bio || persona.details?.bio || "No bio available"}
@@ -2397,13 +2404,13 @@ export const conductQualitativeInterview = async (persona: CombinedPersona, cont
     }
 };
 
-export const generateRegionalVariants = async (basePrompt: string): Promise<{ region: string, imagePrompt: string, image: string | null }[]> => {
+export const generateRegionalVariants = async (basePrompt: string, companyName: string = "AI", productContext: string = "health insurance"): Promise<{ region: string, imagePrompt: string, image: string | null }[]> => {
     
     try {
         const regions = ["Generic", "Health-Focused (Condition Specific)", "Regional (Local Community)", "Value-Based (Pricing/Benefits)", "Emotional (Peace of Mind)"];
 
         const prompt = `
-        Take the following base health insurance marketing concept for Healthco: "${basePrompt}"
+        Take the following marketing concept for ${companyName}: "${basePrompt}"
         
         Adapt this concept for the following variations/themes, adding specific imagery or cultural cues relevant to each:
         ${regions.join(", ")}
@@ -2447,7 +2454,7 @@ export const simulateABTestFocusGroup = async (pool: any[], variants: { region: 
     const promises = pool.map(async (persona) => {
         try {
             const prompt = `
-            You are evaluating health insurance marketing creative variants for Healthco as a synthetic user.
+            You are evaluating marketing creative variants for ${companyName} as a synthetic user.
             
             Persona Profile:
             Name: ${persona.name}

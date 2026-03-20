@@ -44,7 +44,12 @@ const DEFAULT_AUDIENCES: Audience[] = [
     }
 ];
 
-export const PDPPersonalization: React.FC = () => {
+interface PDPPersonalizationProps {
+    companyContext: { name: string, description: string, guidelines: string };
+}
+
+export const PDPPersonalization: React.FC<PDPPersonalizationProps> = ({ companyContext }) => {
+    const productName = `${companyContext.name} ${DEFAULT_PRODUCT_NAME}`;
     console.log("PDPPersonalization rendering...");
     const [audiences, setAudiences] = useState<Audience[]>(DEFAULT_AUDIENCES);
     const [selectedAudienceId, setSelectedAudienceId] = useState<string>('default_standard');
@@ -90,13 +95,13 @@ export const PDPPersonalization: React.FC = () => {
 
         try {
             // 1. Generate Text Content
-            const contentPromise = generatePersonalizedPDPContent(newAudienceName, DEFAULT_PRODUCT_NAME);
+            const contentPromise = generatePersonalizedPDPContent(newAudienceName, productName, companyContext.name);
             const content = await contentPromise;
 
             let scenePrompt = content.imagePrompt || `A clean, athletic, dynamic shot of ${DEFAULT_PRODUCT_NAME} for ${newAudienceName}`;
 
             // Add specific product constraints
-            scenePrompt += `. CRITICAL: Create a photorealistic lifestyle image representing the health insurance needs of ${newAudienceName}. The image should NOT show any physical products or footwear. Focus on health, wellness, security, and a lifestyle appropriate for the audience. Use a clean, bright, and professional aesthetic aligned with Healthco Health.`;
+            scenePrompt += `. CRITICAL: Create a photorealistic lifestyle image representing the promotional needs of ${newAudienceName} for ${companyContext.name}. The image should NOT show any physical products or footwear unless they are essential. Focus on the core benefits: ${companyContext.description}. Guidelines: ${companyContext.guidelines}. Use a clean, bright, and professional aesthetic.`;
 
             // Save debug info before image generation
             console.log("FINAL PROMPT SENT TO SERVICE:", scenePrompt);

@@ -1,8 +1,8 @@
 /* 
- * Healthco Health App - Centralized Semantic Styles
+ * Brand AI Assistant - Centralized Semantic Styles
  * This file contains semantic classes to replace inline Tailwind utility classes.
  * It manages the visual styling for components to ensure global consistency.
- * THEME: LIGHT (Healthco Blue)
+ * THEME: LIGHT (Brand Blue)
  */
 
 /*=================================
@@ -111,7 +111,7 @@
 
 .panel-card:hover {
   border-color: #0077C8;
-  /* Healthco Blue */
+  /* Brand Blue */
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 

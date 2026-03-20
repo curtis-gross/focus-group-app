@@ -27,6 +27,8 @@ interface NavigationProps {
   setMode: (mode: AppMode) => void;
   isMobileMenuOpen: boolean;
   setIsMobileMenuOpen: (isOpen: boolean) => void;
+  companyContext: { name: string, description: string, guidelines: string };
+  setCompanyContext: (context: { name: string, description: string, guidelines: string }) => void;
 }
 
 export const Navigation: React.FC<NavigationProps> = ({ currentMode, setMode, isMobileMenuOpen, setIsMobileMenuOpen }) => {
@@ -84,7 +86,7 @@ export const Navigation: React.FC<NavigationProps> = ({ currentMode, setMode, is
       <div className={`md:hidden fixed top-0 left-0 w-full ${brandConfig.ui.button.primary} h-16 flex items-center justify-between px-4 z-50 text-white shadow-md`}>
         <div className="flex items-center gap-2">
           {/* Fallback to text if logo missing, but trying image first */}
-          <span className="font-bold text-xl tracking-tight">{brandConfig.companyName}</span>
+          <span className="font-bold text-xl tracking-tight">{companyContext.name}</span>
         </div>
         <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
           {isMobileMenuOpen ? <X /> : <Menu />}
@@ -105,22 +107,41 @@ export const Navigation: React.FC<NavigationProps> = ({ currentMode, setMode, is
             const Icon = item.icon!;
             const isActive = currentMode === item.id;
             return (
-              <button
-                key={item.id}
-                onClick={() => {
-                  setMode(item.id as AppMode);
-                  setIsMobileMenuOpen(false);
-                }}
-                className={`
-                  w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 font-medium text-sm
-                  ${isActive
-                    ? `${brandConfig.ui.button.primary}`
-                    : `text-gray-600 hover:bg-gray-100 hover:text-[#0077C8]`}
-                `}
-              >
-                <Icon size={18} />
-                <span>{item.label}</span>
-              </button>
+              <React.Fragment key={item.id}>
+                <button
+                  onClick={() => {
+                    setMode(item.id as AppMode);
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`
+                    w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 font-medium text-sm
+                    ${isActive
+                      ? `${brandConfig.ui.button.primary}`
+                      : `text-gray-600 hover:bg-gray-100 hover:text-[#0077C8]`}
+                  `}
+                >
+                  <Icon size={18} />
+                  <span>{item.label}</span>
+                </button>
+                
+                {item.id === AppMode.HOME && (
+                  <button
+                    onClick={() => {
+                      setMode(AppMode.COMPANY_CONTEXT);
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className={`
+                      w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 font-medium text-sm
+                      ${currentMode === AppMode.COMPANY_CONTEXT
+                        ? `${brandConfig.ui.button.primary}`
+                        : `text-gray-600 hover:bg-gray-50 hover:text-[#0077C8] border border-transparent hover:border-gray-100`}
+                    `}
+                  >
+                    <Settings size={18} />
+                    <span>Company Context</span>
+                  </button>
+                )}
+              </React.Fragment>
             );
           })}
         </div>

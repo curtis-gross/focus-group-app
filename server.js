@@ -405,7 +405,7 @@ app.post('/api/debug-log', async (req, res) => {
 
 app.post('/api/generate-audio-summary', async (req, res) => {
     try {
-        const { textData, voiceName = 'Zephyr', language = 'english' } = req.body;
+        const { textData, voiceName = 'Zephyr', language = 'english', companyName = 'AI' } = req.body;
         if (!textData) return res.status(400).json({ error: "No text data provided" });
 
         // This specific feature requires the Gemini Developer API Key (AI Studio) 
@@ -460,7 +460,7 @@ app.post('/api/generate-audio-summary', async (req, res) => {
             ? "Speak the entire summary fluently in Mandarin Chinese." 
             : "Speak the entire summary fluently in English.";
             
-        const promptParam = `Here is the customer data for a client. Act as a Healthco Concierge Director and give a highly engaging, professional spoken summary of this client's profile in 2-3 sentences. Talk directly to the Concierge preparing for the call. ${langInstruction}\n${textData}`;
+        const promptParam = `Here is the customer data for a client. Act as the ${companyName} Concierge Director and give a highly engaging, professional spoken summary of this client's profile in 2-3 sentences. Talk directly to the Concierge preparing for the call. ${langInstruction}\n${textData}`;
 
         session.sendClientContent({
             turns: [{ role: 'user', parts: [{ text: promptParam }] }],

@@ -16,7 +16,7 @@ export const SyntheticTesting: React.FC = () => {
     const [brief, setBrief] = useState<MarketingBriefData | null>(null);
     const [activeTab, setActiveTab] = useState<'ACQUISITION' | 'CHAT' | 'EMAIL' | 'BRIEF' | 'PURCHASE' | 'CREATIVE' | 'AB_TEST'>('CHAT');
     const [savedHistory, setSavedHistory] = useState<SavedSimulation[]>([]);
-    const [marketingMessages, setMarketingMessages] = useState<string[]>(["Healthcare that works for you", "Innovation for every patient", "Better health for everyone", "Your health, our priority"]);
+    const [marketingMessages, setMarketingMessages] = useState<string[]>(["Innovative solutions for you", "Excellence in every detail", "Your goals, our priority", "Leading with vision"]);
     const [newMessage, setNewMessage] = useState("");
     const [isGeneratingWildcard, setIsGeneratingWildcard] = useState(false);
     const [status, setStatus] = useState("");
@@ -89,11 +89,11 @@ export const SyntheticTesting: React.FC = () => {
     // For this V1 Hub, we will render SyntheticChat directly.
 
     const EMAIL_HEADLINES = [
-        "Welcome to Your New Health Plan",
-        "Understanding Your Benefits: Deductibles Explained",
-        "It's Time for Your Annual Wellness Visit",
-        "Save Money with Mail Order Prescriptions",
-        "Join the Wellness Rewards Program Today"
+        `Welcome to ${companyContext.name}`,
+        "Understanding Your Benefits & Features",
+        "Maximize Your Experience Today",
+        "Exclusive Offers Just for You",
+        "Join Our Community Program"
     ];
 
     const refreshBriefData = async () => {
@@ -234,10 +234,10 @@ export const SyntheticTesting: React.FC = () => {
         try {
             let seedAudience;
             if (criteria) {
-                seedAudience = await generateAudienceFromCriteria(brandConfig.companyName, criteria);
+                seedAudience = await generateAudienceFromCriteria(companyContext.name, criteria);
             } else {
                 const existingNames = personas.map(p => p.name);
-                seedAudience = await generateWildcardAudience(brandConfig.companyName, existingNames);
+                seedAudience = await generateWildcardAudience(companyContext.name, existingNames);
             }
 
             if (seedAudience) {
@@ -375,11 +375,11 @@ export const SyntheticTesting: React.FC = () => {
 
             if (!currentAssets) {
                 setStatus("Generating new campaign assets...");
-                const productName = brief.productName || "Healthco Plan";
+                const productName = brief.productName || "Product";
                 const targetAudience = brief.audiences[0]?.name || "General Audience";
-                const combinedGoal = `Goal: ${brief.campaignGoal}. Persona: ${targetAudience}`;
+                const combinedGoal = `Goal: ${brief.campaignGoal}. Persona: ${targetAudience}. Context: ${companyContext.description}`;
 
-                currentAssets = await generateMarketingCampaignAssets(productName, combinedGoal);
+                currentAssets = await generateMarketingCampaignAssets(productName, combinedGoal, combinedGoal);
 
                 // Update local state and storage with new assets
                 const updatedBrief = { ...brief, campaignAssets: currentAssets };

@@ -1,13 +1,13 @@
 export const brandConfig = {
   companyName: "QVC AI",
   logo: {
-    sidebar: "/images/healthco-logo.svg",
+    sidebar: "/images/logo.svg",
     width: "w-[160px]",
   },
   colors: {
     primary: "#FFFFFF", // White
     secondary: "#111827", // Gray-900
-    accent: "#0077C8", // Healthco Blue
+    accent: "#0077C8", // Brand Blue
   },
   meta: {
     title: "QVC AI Lab",
