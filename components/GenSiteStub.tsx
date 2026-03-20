@@ -12,11 +12,12 @@ interface CustomerProfile {
     browse_history: string[];
 }
 
-interface GenSiteStubProps {
-  companyContext: { name: string, description: string, guidelines: string };
-}
 
-export const GenSiteStub: React.FC<GenSiteStubProps> = ({ companyContext }) => {
+
+import { useCompanyContext } from '../context/CompanyContext';
+
+export const GenSiteStub: React.FC = () => {
+    const { name, description } = useCompanyContext();
     const [selectedCustomer, setSelectedCustomer] = useState<CustomerProfile | null>(null);
     const [step, setStep] = useState(1);
     const [isGenerating, setIsGenerating] = useState(false);
@@ -86,13 +87,13 @@ export const GenSiteStub: React.FC<GenSiteStubProps> = ({ companyContext }) => {
             const [productsData, headlineData] = await Promise.all([
                 generatePersonalizedProducts(customer, { 
                     name: customer.condition, 
-                    bio: `Customer interested in ${customer.browse_history.join(', ')}. Context: ${companyContext.description}`, 
+                    bio: `Customer interested in ${customer.browse_history.join(', ')}. Context: ${description}`, 
                     details: { goals: [customer.condition], preferred_products: [] } 
-                }, companyContext.name),
+                }, name),
                 generatePersonalizedHeadlines(customer, { 
                     name: customer.condition, 
-                    details: { bio: `Customer interested in ${customer.browse_history.join(', ')}. Context: ${companyContext.description}`, goals: [customer.condition] } 
-                }, companyContext.name)
+                    details: { bio: `Customer interested in ${customer.browse_history.join(', ')}. Context: ${description}`, goals: [customer.condition] } 
+                }, name)
             ]);
 
             // 2. Translate if needed (Simulation)
@@ -120,7 +121,7 @@ export const GenSiteStub: React.FC<GenSiteStubProps> = ({ companyContext }) => {
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>${companyContext.name} - Personalized Quote</title>
+        <title>${name} - Personalized Quote</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <style>
             @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
@@ -132,7 +133,7 @@ export const GenSiteStub: React.FC<GenSiteStubProps> = ({ companyContext }) => {
         <!-- Navigation -->
         <nav class="bg-white border-b border-gray-100 py-4">
             <div class="max-w-6xl mx-auto px-4 flex justify-between items-center">
-                <div class="font-bold text-2xl text-[#0077C8]">${companyContext.name}</div>
+                <div class="font-bold text-2xl text-[#0077C8]">${name}</div>
                 <div class="hidden md:flex gap-8 text-sm font-medium text-gray-500">
                     <a href="#" class="hover:text-[#0077C8]">Plans</a>
                     <a href="#" class="hover:text-[#0077C8]">Find a Doctor</a>
@@ -368,7 +369,7 @@ export const GenSiteStub: React.FC<GenSiteStubProps> = ({ companyContext }) => {
                                         <div className="w-3 h-3 rounded-full bg-green-400"></div>
                                     </div>
                                     <div className="bg-white rounded-md px-4 py-1.5 text-xs text-gray-400 flex-1 text-center font-mono mx-8">
-                                        {companyContext.name.toLowerCase().replace(/\s+/g, '')}.com/quote/{selectedCustomer?.name.toLowerCase().replace(' ', '-')}
+                                        {name.toLowerCase().replace(/\s+/g, '')}.com/quote/{selectedCustomer?.name.toLowerCase().replace(' ', '-')}
                                     </div>
                                 </div>
                                 <iframe

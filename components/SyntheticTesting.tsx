@@ -89,7 +89,7 @@ export const SyntheticTesting: React.FC = () => {
     // For this V1 Hub, we will render SyntheticChat directly.
 
     const EMAIL_HEADLINES = [
-        `Welcome to ${companyContext.name}`,
+        `Welcome to ${name}`,
         "Understanding Your Benefits & Features",
         "Maximize Your Experience Today",
         "Exclusive Offers Just for You",
@@ -234,10 +234,10 @@ export const SyntheticTesting: React.FC = () => {
         try {
             let seedAudience;
             if (criteria) {
-                seedAudience = await generateAudienceFromCriteria(companyContext.name, criteria);
+                seedAudience = await generateAudienceFromCriteria(name, criteria);
             } else {
                 const existingNames = personas.map(p => p.name);
-                seedAudience = await generateWildcardAudience(companyContext.name, existingNames);
+                seedAudience = await generateWildcardAudience(name, existingNames);
             }
 
             if (seedAudience) {
@@ -377,7 +377,7 @@ export const SyntheticTesting: React.FC = () => {
                 setStatus("Generating new campaign assets...");
                 const productName = brief.productName || "Product";
                 const targetAudience = brief.audiences[0]?.name || "General Audience";
-                const combinedGoal = `Goal: ${brief.campaignGoal}. Persona: ${targetAudience}. Context: ${companyContext.description}`;
+                const combinedGoal = `Goal: ${brief.campaignGoal}. Persona: ${targetAudience}. Context: ${description}`;
 
                 currentAssets = await generateMarketingCampaignAssets(productName, combinedGoal, combinedGoal);
 

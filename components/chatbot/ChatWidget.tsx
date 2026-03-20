@@ -40,8 +40,10 @@ type DebugLog = {
   type: string;
   message: string;
 };
+import { useCompanyContext } from '../../context/CompanyContext';
 
 export default function ChatWidget({ customerContextData }: { customerContextData?: any }) {
+  const { name, description } = useCompanyContext();
   const [apiKey, setApiKey] = useState(() => {
     return localStorage.getItem('gemini_api_key') || (import.meta as any).env.VITE_GEMINI_API_KEY || '';
   });
@@ -166,7 +168,7 @@ export default function ChatWidget({ customerContextData }: { customerContextDat
 
     const client = new GeminiLiveClient({
       apiKey,
-      systemInstruction: `You are the ${companyContext.name} Concierge Director, designed to help agents expertly handle client requests for our services and programs.${companyContext.description ? `\n\nCompany Description: ${companyContext.description}` : ''}${companyContext.guidelines ? `\n\nBrand Guidelines: ${companyContext.guidelines}` : ''}${dynamicContext}`,
+      systemInstruction: `You are the ${name} Concierge Director, designed to help agents expertly handle client requests for our services and programs.${description ? `\n\nCompany Description: ${description}` : ''}${dynamicContext}`,
       tools: TOOLS
     }, (msg) => {
       if (msg.type === 'connected') {
@@ -278,7 +280,7 @@ export default function ChatWidget({ customerContextData }: { customerContextDat
         <button className="chat-bubble-btn shadow-xl ring-2 ring-white/20" onClick={toggleExpand}>
           <img
             src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Google_Gemini_icon_2025.svg/500px-Google_Gemini_icon_2025.svg.png"
-            alt={`${companyContext.name} Agent`}
+            alt={`${name} Agent`}
             className="bubble-icon"
             style={{ width: '40px', height: '40px', objectFit: 'contain' }}
           />
@@ -287,7 +289,7 @@ export default function ChatWidget({ customerContextData }: { customerContextDat
         <>
           <header className="chat-widget-header" style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
             <div className="logo-area">
-              <span className="font-bold text-gray-900 text-lg tracking-widest uppercase">{companyContext.name} Concierge</span>
+              <span className="font-bold text-gray-900 text-lg tracking-widest uppercase">{name} Concierge</span>
             </div>
             <div className="header-controls">
               <button
@@ -353,7 +355,7 @@ export default function ChatWidget({ customerContextData }: { customerContextDat
             {!isConnected && messages.length === 0 ? (
               <div className="setup-screen">
                 <p className="description" style={{ color: '#666', fontSize: '14px', marginBottom: '20px' }}>
-                  Elevated AI insights and preparation for {companyContext.name} Concierge.
+                  Elevated AI insights and preparation for {name} Concierge.
                 </p>
                 {(!apiKey || apiKey.trim() === '') && (
                   <input

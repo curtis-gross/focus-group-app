@@ -16,11 +16,11 @@ export const Assistant: React.FC = () => {
     const { name, description } = useCompanyContext();
     const [messages, setMessages] = useState<Message[]>([
     {
-      text: `Hello! I am your ${companyContext.name} Assistant. How can I help you today?`,
+      text: `Hello! I am your ${name} Assistant. How can I help you today?`,
       sender: 'bot',
       html: `
                 <div class="bg-gray-50 p-4 rounded-xl shadow-sm border border-gray-200">
-                    <p class="mb-3 text-gray-900">Hello! I am your ${companyContext.name} Assistant. How can I help you today?</p>
+                    <p class="mb-3 text-gray-900">Hello! I am your ${name} Assistant. How can I help you today?</p>
                     <div class="grid grid-cols-2 gap-2 mt-2">
                         <button 
                             data-action="suggested-prompt" 
@@ -151,7 +151,7 @@ export const Assistant: React.FC = () => {
             <Sparkles size={20} className="text-blue-600" />
           </div>
           <div>
-            <h2 className="section-header leading-tight text-gray-900">{companyContext.name} Assistant</h2>
+            <h2 className="section-header leading-tight text-gray-900">{name} Assistant</h2>
             <div className="flex items-center gap-2 text-xs opacity-90">
               <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
               Online • Member Support

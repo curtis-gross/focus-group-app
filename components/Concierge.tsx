@@ -25,11 +25,9 @@ import {
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
-interface ConciergeProps {
-  companyContext: { name: string, description: string, guidelines: string };
-}
 
-export const Concierge: React.FC<ConciergeProps> = ({ companyContext }) => {
+
+export const Concierge: React.FC<ConciergeProps> = () => {
     const [isGenerating, setIsGenerating] = useState(false);
     const [dashboardData, setDashboardData] = useState<any>(null);
     const [rawCustomerData, setRawCustomerData] = useState<any>(null);
@@ -473,7 +471,7 @@ export const Concierge: React.FC<ConciergeProps> = ({ companyContext }) => {
             )}
             
             {/* Live Gemini Chat Bot */}
-            <ChatWidget customerContextData={dashboardData} companyContext={companyContext} />
+            <ChatWidget customerContextData={dashboardData} />
         </div>
     );
 };

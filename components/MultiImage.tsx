@@ -236,7 +236,7 @@ export const MultiImage: React.FC = () => {
                                             </button>
                                             <a
                                                 href={img}
-                                                download={`nike_variant_${idx + 1}.jpg`}
+                                                download={`qvc_variant_${idx + 1}.jpg`}
                                                 className="bg-white text-gray-900 px-4 py-2 rounded-full font-bold shadow-lg hover:bg-gray-100 transition-colors flex items-center gap-2 transform scale-90 group-hover:scale-100 duration-200"
                                             >
                                                 <Download size={18} /> Download

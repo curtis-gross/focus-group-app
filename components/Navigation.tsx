@@ -27,8 +27,8 @@ interface NavigationProps {
   setMode: (mode: AppMode) => void;
   isMobileMenuOpen: boolean;
   setIsMobileMenuOpen: (isOpen: boolean) => void;
-  companyContext: { name: string, description: string, guidelines: string };
-  setCompanyContext: (context: { name: string, description: string, guidelines: string }) => void;
+  
+  
 }
 
 export const Navigation: React.FC<NavigationProps> = ({ currentMode, setMode, isMobileMenuOpen, setIsMobileMenuOpen }) => {
@@ -86,7 +86,7 @@ export const Navigation: React.FC<NavigationProps> = ({ currentMode, setMode, is
       <div className={`md:hidden fixed top-0 left-0 w-full ${brandConfig.ui.button.primary} h-16 flex items-center justify-between px-4 z-50 text-white shadow-md`}>
         <div className="flex items-center gap-2">
           {/* Fallback to text if logo missing, but trying image first */}
-          <span className="font-bold text-xl tracking-tight">{companyContext.name}</span>
+          <span className="font-bold text-xl tracking-tight">{name}</span>
         </div>
         <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
           {isMobileMenuOpen ? <X /> : <Menu />}
@@ -99,7 +99,7 @@ export const Navigation: React.FC<NavigationProps> = ({ currentMode, setMode, is
         ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
       `}>
         <div className="hidden md:flex items-center justify-center p-6 border-b border-gray-200">
-          <img src="/images/qvc-logo.webp" alt="QVC AI" className="h-16 w-auto" />
+          <img src={brandConfig.logo.sidebar} alt="QVC AI" className="h-16 w-auto" />
         </div>
 
         <div className="p-4 space-y-2">
@@ -124,23 +124,7 @@ export const Navigation: React.FC<NavigationProps> = ({ currentMode, setMode, is
                   <span>{item.label}</span>
                 </button>
                 
-                {item.id === AppMode.HOME && (
-                  <button
-                    onClick={() => {
-                      setMode(AppMode.COMPANY_CONTEXT);
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className={`
-                      w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 font-medium text-sm
-                      ${currentMode === AppMode.COMPANY_CONTEXT
-                        ? `${brandConfig.ui.button.primary}`
-                        : `text-gray-600 hover:bg-gray-50 hover:text-[#0077C8] border border-transparent hover:border-gray-100`}
-                    `}
-                  >
-                    <Settings size={18} />
-                    <span>Company Context</span>
-                  </button>
-                )}
+                {/* Company Context button removed from here, accessible via user settings instead */}
               </React.Fragment>
             );
           })}

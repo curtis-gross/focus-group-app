@@ -26,11 +26,12 @@ interface Audience {
   target_user_ids: number[];
 }
 
-interface ESpotsProps {
-  companyContext: { name: string, description: string, guidelines: string };
-}
 
-export const ESpots: React.FC<ESpotsProps> = ({ companyContext }) => {
+
+import { useCompanyContext } from '../context/CompanyContext';
+
+export const ESpots: React.FC = () => {
+  const { name, description } = useCompanyContext();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("");
@@ -77,7 +78,7 @@ export const ESpots: React.FC<ESpotsProps> = ({ companyContext }) => {
 
     try {
       setLoadingMessage("Analyzing data & identifying segments...");
-      const prompt = `Analyze this consumer data and group them into 3 distinct segments for ${companyContext.name} outreach. Context: ${companyContext.description}. Data: ${JSON.stringify(consumerData)}`;
+      const prompt = `Analyze this consumer data and group them into 3 distinct segments for ${name} outreach. Context: ${description}. Data: ${JSON.stringify(consumerData)}`;
       const schema: Schema = {
         type: Type.OBJECT,
         properties: {
@@ -107,7 +108,7 @@ export const ESpots: React.FC<ESpotsProps> = ({ companyContext }) => {
       setLoadingMessage("Designing personalized health copy & banners...");
 
       const promises = generatedAudiences.map(async (aud: Audience, idx: number) => {
-        const copyPrompt = `Create a marketing campaign for the audience "${aud.name}" for ${companyContext.name}'s products. Context: ${companyContext.description}. Description: ${aud.description}. Write a reassuring, benefit-focused headline and a VERY short Call to Action (CTA) of less than 5 words.`;
+        const copyPrompt = `Create a marketing campaign for the audience "${aud.name}" for ${name}'s products. Context: ${description}. Description: ${aud.description}. Write a reassuring, benefit-focused headline and a VERY short Call to Action (CTA) of less than 5 words.`;
         const copySchema: Schema = {
           type: Type.OBJECT,
           properties: {
@@ -124,7 +125,7 @@ export const ESpots: React.FC<ESpotsProps> = ({ companyContext }) => {
             
             **TEXT REQUIREMENT:**
             You MUST legally and clearly write the HEADLINE text: "${copyResult.headline}" directly onto the image.
-            The text should be stylized, readable, and integrated into the design (e.g., elegant typography, ${companyContext.name} brand colors).
+            The text should be stylized, readable, and integrated into the design (e.g., elegant typography, ${name} brand colors).
             
             **VISUALS:**
             - Subject: ${aud.description} (Family care, doctor patient interaction, active seniors, wellness)

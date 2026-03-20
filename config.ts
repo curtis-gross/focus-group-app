@@ -1,7 +1,7 @@
 export const brandConfig = {
   companyName: "QVC AI",
   logo: {
-    sidebar: "/images/logo.svg",
+    sidebar: "/images/qvc-logo.png",
     width: "w-[160px]",
   },
   colors: {

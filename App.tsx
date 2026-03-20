@@ -57,34 +57,10 @@ function AppContent() {
     };
     loadAudiences();
 
-    const loadCompanyContext = async () => {
-      try {
-        const res = await fetch('/api/load-run/company_context');
-        if (res.ok) {
-          const data = await res.json();
-          if (data && data.name) {
-            setCompanyContext(data);
-          }
-        }
-      } catch (err) {
-        console.warn("No saved company context found, using defaults.", err);
-      }
-    };
-    loadCompanyContext();
+    
   }, []);
 
-  const saveCompanyContext = async (newContext: typeof companyContext) => {
-    setCompanyContext(newContext);
-    try {
-      await fetch('/api/save-run', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ featureId: 'company_context', data: newContext })
-      });
-    } catch (err) {
-      console.error("Failed to save company context:", err);
-    }
-  };
+  
 
   const renderContent = () => {
     switch (mode) {
@@ -93,17 +69,17 @@ function AppContent() {
       case AppMode.INSIGHTS:
         return <RunwayAnalysis />;
       case AppMode.PDP_PERSONALIZATION:
-        return <PDPPersonalization companyContext={companyContext} />;
+        return <PDPPersonalization />;
       case AppMode.PDP_ENRICHMENT:
         return <PDPEnrichment />;
       case AppMode.MULTI_IMAGE:
         return <MultiImage />;
       case AppMode.E_SPOTS:
-        return <ESpots companyContext={companyContext} />;
+        return <ESpots />;
       case AppMode.CONTENT_VERSIONING:
         return <ContentVersioning />;
       case AppMode.GEN_SITE:
-        return <GenSiteStub companyContext={companyContext} />;
+        return <GenSiteStub />;
       case AppMode.AUDIENCE_GEN:
         return (
           <AudienceGenerator 
@@ -114,23 +90,23 @@ function AppContent() {
       case AppMode.MARKETING_CAMPAIGN:
         return <MarketingCampaign />;
       case AppMode.MARKETING_BRIEF:
-        return <MarketingBrief companyContext={companyContext} />;
+        return <MarketingBrief />;
       case AppMode.SYNTHETIC_CHAT:
-        return <SyntheticChat companyContext={companyContext} />;
+        return <SyntheticChat />;
       case AppMode.SYNTHETIC_USERS:
         return <SyntheticUsers personas={personas} />;
       case AppMode.SYNTHETIC_FOCUS_GROUP:
-        return <SyntheticTesting companyContext={companyContext} />;
+        return <SyntheticTesting />;
       case AppMode.FEASIBILITY_ANALYSIS:
         return <FeasibilityAnalysis />;
       case AppMode.PROJECT_HELPER:
         return <ProjectHelper />;
       case AppMode.ASSISTANT:
-        return <Assistant companyContext={companyContext} />;
+        return <Assistant />;
       case AppMode.CONCIERGE:
-        return <Concierge companyContext={companyContext} />;
+        return <Concierge />;
       case AppMode.COMPANY_CONTEXT:
-        return <CompanyContext companyContext={companyContext} setCompanyContext={setCompanyContext} />;
+        return <CompanyContext  />;
       case AppMode.HOME:
       default:
         return (
@@ -146,8 +122,7 @@ function AppContent() {
         setMode={setMode}
         isMobileMenuOpen={isMobileMenuOpen}
         setIsMobileMenuOpen={setIsMobileMenuOpen}
-        companyContext={companyContext}
-        setCompanyContext={saveCompanyContext}
+        
       />
 
       <main className={`

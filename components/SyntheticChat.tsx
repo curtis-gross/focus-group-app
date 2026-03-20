@@ -5,11 +5,12 @@ import { MessageSquare, Users, Send, Loader2, User, Bot, AlertCircle, RotateCcw,
 import { Persona, MarketingBriefData, InterviewResult, CombinedPersona, SavedSimulation } from '../types';
 import { SIMULATION_PRODUCTS, STANDARD_AUDIENCES } from '../data/simulationData';
 
-interface SyntheticChatProps {
-  companyContext: { name: string, description: string, guidelines: string };
-}
 
-export const SyntheticChat: React.FC<SyntheticChatProps> = ({ companyContext }) => {
+
+import { useCompanyContext } from '../context/CompanyContext';
+
+export const SyntheticChat: React.FC = () => {
+  const { name, description } = useCompanyContext();
   // State
   const [personas, setPersonas] = useState<CombinedPersona[]>([]);
   const [brief, setBrief] = useState<MarketingBriefData | null>(null);
@@ -54,8 +55,8 @@ export const SyntheticChat: React.FC<SyntheticChatProps> = ({ companyContext }) 
       try {
         // Determine context from brief or generic
         const context = brief
-          ? `Product: ${brief.productName}. Goal: ${brief.campaignGoal}. Company: ${companyContext.name}. Context: ${companyContext.description}`
-          : `Company: ${companyContext.name}. Context: ${companyContext.description}`;
+          ? `Product: ${brief.productName}. Goal: ${brief.campaignGoal}. Company: ${name}. Context: ${description}`
+          : `Company: ${name}. Context: ${description}`;
 
         const result = await conductQualitativeInterview(p, context, question);
         newResults.push(result);

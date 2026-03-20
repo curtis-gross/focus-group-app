@@ -2,12 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Settings, Save, Globe, Info, FileText, Sparkles } from 'lucide-react';
 import { brandConfig } from '../config';
 
-interface CompanyContextProps {
-  companyContext: { name: string, description: string, guidelines: string };
-  setCompanyContext: (context: { name: string, description: string, guidelines: string }) => void;
-}
 
-export const CompanyContext: React.FC<CompanyContextProps> = ({ companyContext, setCompanyContext }) => {
+
+export const CompanyContext: React.FC<CompanyContextProps> = () => {
   const [editedContext, setEditedContext] = useState(companyContext);
   const [isSaved, setIsSaved] = useState(false);
 

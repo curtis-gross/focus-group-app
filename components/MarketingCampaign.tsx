@@ -277,7 +277,7 @@ export const MarketingCampaign: React.FC = () => {
 
                                             <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
                                                 <div className="flex items-center gap-3 mb-4">
-                                                            <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center font-bold text-xs text-black">N</div>
+                                                            <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center font-bold text-xs text-black">Q</div>
                                                             <span className="font-bold text-sm">@{brandConfig.companyName.replace(/\s+/g, '').toLowerCase()}</span>
                                                     <button className="bg-white text-black text-xs font-bold px-3 py-1.5 rounded-full">Subscribe</button>
                                                 </div>
@@ -311,7 +311,7 @@ export const MarketingCampaign: React.FC = () => {
                                                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col h-full w-full">
                                             {/* Fake Nav */}
                                                     <div className={`bg-white border-b border-gray-200 h-14 flex items-center px-4 gap-4 shrink-0`}>
-                                                        <div className="text-black font-bold text-xl tracking-tighter italic">NIKE</div>
+                                                        <div className="text-black font-bold text-xl tracking-tighter italic">QVC</div>
                                                         <div className="h-9 bg-gray-100 rounded-full w-full max-w-md mx-auto flex items-center px-4 text-gray-500 text-xs font-medium">
                                                             <Search size={14} className="mr-2" /> Search
                                                         </div>

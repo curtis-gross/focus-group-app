@@ -33,7 +33,7 @@ export const MarketingBrief: React.FC = () => {
       if (result) {
         // 2. Generate Assets immediately
         setGenerationStatus("Designing Campaign Assets (Social, Search, Email, YouTube)...");
-        const productName = result.productName || `${companyContext.name} Product`;
+        const productName = result.productName || `${name} Product`;
 
         let finalAssetsMap: Record<string, MarketingAssets> | null = null;
         try {
@@ -84,7 +84,7 @@ export const MarketingBrief: React.FC = () => {
     if (!brief) return;
     setIsAssetLoading(true);
     try {
-      const productName = brief.productName || `${companyContext.name} Product`;
+      const productName = brief.productName || `${name} Product`;
       // Parallelize asset regeneration across audiences
       const assetPromises = brief.audiences.map(async (aud) => {
         const combinedGoal = `Goal: ${brief.campaignGoal}. Persona: ${aud.name}`;
