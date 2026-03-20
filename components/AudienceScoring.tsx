@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { CombinedPersona } from '../types';
 import { ResponsiveContainer, ScatterChart, Scatter, XAxis, YAxis, ZAxis, Tooltip, CartesianGrid, Cell, Label } from 'recharts';
-import { Brain, TrendingUp, Info, RotateCcw } from 'lucide-react';
+import { Brain, TrendingUp, Info, RotateCcw, Users } from 'lucide-react';
 import { brandConfig } from '../config';
 
 interface AudienceScoringProps {

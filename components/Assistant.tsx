@@ -11,14 +11,18 @@ interface Message {
   html?: string;
 }
 
-export const Assistant = () => {
+interface AssistantProps {
+  companyContext: { name: string, description: string, guidelines: string };
+}
+
+export const Assistant: React.FC<AssistantProps> = ({ companyContext }) => {
   const [messages, setMessages] = useState<Message[]>([
     {
-      text: `Hello! I am your ${brandConfig.companyName} Assistant. How can I help you with your health plan today?`,
+      text: `Hello! I am your ${companyContext.name} Assistant. How can I help you today?`,
       sender: 'bot',
       html: `
                 <div class="bg-gray-50 p-4 rounded-xl shadow-sm border border-gray-200">
-                    <p class="mb-3 text-gray-900">Hello! I am your ${brandConfig.companyName} Assistant. How can I help you with your health plan today?</p>
+                    <p class="mb-3 text-gray-900">Hello! I am your ${companyContext.name} Assistant. How can I help you today?</p>
                     <div class="grid grid-cols-2 gap-2 mt-2">
                         <button 
                             data-action="suggested-prompt" 
@@ -115,7 +119,7 @@ export const Assistant = () => {
     try {
       // Include history (simplified)
       const history = messages.map(m => ({ sender: m.sender, text: m.text }));
-      const response = await generateAssistantResponse(userMsg.text, history, base64Images);
+      const response = await generateAssistantResponse(userMsg.text, history, base64Images, companyContext);
 
       setMessages(prev => [...prev, {
         text: "Response generated",
@@ -149,7 +153,7 @@ export const Assistant = () => {
             <Sparkles size={20} className="text-blue-600" />
           </div>
           <div>
-            <h2 className="section-header leading-tight text-gray-900">{brandConfig.companyName} Assistant</h2>
+            <h2 className="section-header leading-tight text-gray-900">{companyContext.name} Assistant</h2>
             <div className="flex items-center gap-2 text-xs opacity-90">
               <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
               Online • Member Support

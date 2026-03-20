@@ -38,33 +38,6 @@
   align-items: center;
 }
 
-.vanguard-logo {
-  color: #6633cc;
-  font-weight: 800;
-}
-
-.logo-area {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 1.1rem;
-  font-weight: 600;
-}
-
-.header-logo {
-  height: 24px;
-  width: auto;
-  display: block;
-}
-
-.status-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background-color: #ccc;
-  transition: background-color 0.3s;
-}
-
 .status-dot.connected {
   background-color: #047857;
   box-shadow: 0 0 8px rgba(4, 120, 87, 0.4);
@@ -101,7 +74,7 @@
 
 .connect-btn {
   padding: 12px;
-  background-color: #6633cc;
+  background-color: #0077C8;
   color: white;
   border: none;
   border-radius: 8px;
@@ -135,7 +108,7 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background-color: #6633cc;
+  background-color: #0077C8;
   opacity: 0.2;
   transition: transform 0.2s;
 }

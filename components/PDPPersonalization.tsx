@@ -12,7 +12,7 @@ interface Audience {
     isDefault?: boolean;
 }
 
-const DEFAULT_PRODUCT_NAME = "Healthco Aha! Plan";
+const DEFAULT_PRODUCT_NAME = "Advantage Plan";
 const DEFAULT_PRICE = "$120.00 / month";
 // Remote URL for high quality image, fallback to local if needed
 const DEFAULT_IMAGE_PATH = "/images/pdp_family.png";
@@ -52,7 +52,12 @@ const DEFAULT_AUDIENCES: Audience[] = [
     }
 ];
 
-export const PDPPersonalization: React.FC = () => {
+interface PDPPersonalizationProps {
+    companyContext: { name: string, description: string, guidelines: string };
+}
+
+export const PDPPersonalization: React.FC<PDPPersonalizationProps> = ({ companyContext }) => {
+    const productName = `${companyContext.name} ${DEFAULT_PRODUCT_NAME}`;
     console.log("PDPPersonalization rendering...");
     const [audiences, setAudiences] = useState<Audience[]>(DEFAULT_AUDIENCES);
     const [selectedAudienceId, setSelectedAudienceId] = useState<string>('default_standard');
@@ -98,13 +103,13 @@ export const PDPPersonalization: React.FC = () => {
 
         try {
             // 1. Generate Text Content
-            const contentPromise = generatePersonalizedPDPContent(newAudienceName, DEFAULT_PRODUCT_NAME);
+            const contentPromise = generatePersonalizedPDPContent(newAudienceName, productName, companyContext.name);
             const content = await contentPromise;
 
             let scenePrompt = content.imagePrompt || `A clean, athletic, dynamic shot of ${DEFAULT_PRODUCT_NAME} for ${newAudienceName}`;
 
             // Add specific product constraints
-            scenePrompt += `. CRITICAL: Create a photorealistic lifestyle image representing the health insurance needs of ${newAudienceName}. The image should NOT show any physical products or footwear. Focus on health, wellness, security, and a lifestyle appropriate for the audience. Use a clean, bright, and professional aesthetic aligned with Healthco Health.`;
+            scenePrompt += `. CRITICAL: Create a photorealistic lifestyle image representing the promotional needs of ${newAudienceName} for ${companyContext.name}. The image should NOT show any physical products or footwear unless they are essential. Focus on the core benefits: ${companyContext.description}. Guidelines: ${companyContext.guidelines}. Use a clean, bright, and professional aesthetic.`;
 
             // Save debug info before image generation
             console.log("FINAL PROMPT SENT TO SERVICE:", scenePrompt);
@@ -215,8 +220,8 @@ export const PDPPersonalization: React.FC = () => {
                     {/* Left: Logo & Nav */}
                     <div className="flex items-center gap-12">
                         <div className="flex flex-col">
-                            {/* Healthco Logo */}
-                            <span className="text-3xl font-bold text-[#0077C8] max-w-[200px]">Healthco</span>
+                            {/* Company Logo/Name */}
+                            <span className="text-3xl font-bold text-[#0077C8] max-w-[200px]">{companyContext.name}</span>
                         </div>
 
                         <nav className="hidden lg:flex items-center gap-8 text-[#2D3142] font-semibold text-sm">
@@ -249,7 +254,7 @@ export const PDPPersonalization: React.FC = () => {
             <div className="max-w-7xl mx-auto p-6 md:p-12">
                 {/* Breadcrumbs */}
                 <div className="text-sm text-gray-500 mb-8 font-medium">
-                    Home / Health Insurance / Individual & Family / Aha! Plan
+                    Home / Services / {productName}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-12 bg-white rounded-3xl border border-gray-200 shadow-sm p-8">
@@ -332,7 +337,7 @@ export const PDPPersonalization: React.FC = () => {
                         <div>
                             <h2 className="text-[#0077C8] font-bold tracking-widest uppercase text-xs mb-3">Medical • Dental • Vision</h2>
                             <h1 className="text-3xl md:text-5xl font-black text-[#2D3142] leading-none tracking-tighter mb-4">
-                                {DEFAULT_PRODUCT_NAME}
+                                {productName}
                             </h1>
 
                             {/* Reviews */}

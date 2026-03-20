@@ -1,9 +1,9 @@
+  // Sample Products / Plans
 export const SIMULATION_PRODUCTS = [
-  // Health Plans
-  "Healthco Complete Care PPO: Comprehensive coverage with broad network access and low out-of-pocket costs.",
-  "Medicare Advantage Freedom: All-in-one plan including prescription drugs, dental, vision, and hearing.",
-  "Community Blue HMO: Affordable, community-focused plan with coordinated care teams.",
-  "Together Blue EPO: Network-focused plan designed for cost savings and high-quality local care.",
+  "Complete Care PPO: Comprehensive coverage with broad network access and low out-of-pocket costs.",
+  "Premium Advantage Freedom: All-in-one plan including prescription drugs, dental, vision, and hearing.",
+  "Community HMO: Affordable, community-focused plan with coordinated care teams.",
+  "Network Focused EPO: Network-focused plan designed for cost savings and high-quality local care.",
 
   // Wellness & Prevention
   "Wellness Rewards Program: Earn points for preventive screenings, flu shots, and gym visits.",

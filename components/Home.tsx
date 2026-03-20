@@ -68,7 +68,7 @@ export const Home: React.FC<HomeProps> = ({ setMode }) => {
                         className="tool-card group"
                     >
                         <div className="tool-icon-wrapper">
-                            {React.cloneElement(tool.icon as React.ReactElement, { className: "text-[#0077C8]" })}
+                            {React.cloneElement(tool.icon as React.ReactElement<any>, { className: "text-[#0077C8]" })}
                         </div>
                         <h3 className="tool-card-title">{tool.label}</h3>
                         <p className="tool-card-desc">{tool.desc}</p>

@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { generateMarketingBrief, generateMarketingCampaignAssets, MarketingAssets } from '../services/geminiService';
 import { brandConfig } from '../config';
-import { Briefcase, Send, Loader2, Globe, Target, TrendingUp, Calendar, ShieldCheck, Zap, Layout, ArrowLeft, Image, Search, Mail, Youtube, Share2, MessageCircle, ThumbsUp, Sparkles, Heart, FileText, Users, X } from 'lucide-react';
+import { Briefcase, Send, Loader2, Globe, Target, TrendingUp, Calendar, ShieldCheck, Zap, Layout, ArrowLeft, Image, Search, Mail, Youtube, Share2, MessageCircle, ThumbsUp, Sparkles, Heart, FileText, Users, X, ListChecks, Award, Clock } from 'lucide-react';
 import { MarketingBriefData } from '../types';
 
-export const MarketingBrief: React.FC = () => {
-  const [context, setContext] = useState("");
-  const [goal, setGoal] = useState("");
+interface MarketingBriefProps {
+  companyContext: { name: string, description: string, guidelines: string };
+}
+
+export const MarketingBrief: React.FC<MarketingBriefProps> = ({ companyContext }) => {
+  const [context, setContext] = useState(`${companyContext.name} - ${companyContext.description}`);
+  const [goal, setGoal] = useState("increase sales by 3% of new health product");
   const [brief, setBrief] = useState<MarketingBriefData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [language, setLanguage] = useState<'en' | 'es'>('en');
@@ -31,16 +35,22 @@ export const MarketingBrief: React.FC = () => {
       if (result) {
         // 2. Generate Assets immediately
         setGenerationStatus("Designing Campaign Assets (Social, Search, Email, YouTube)...");
-        const productName = result.productName || "Healthco Plan";
+        const productName = result.productName || `${companyContext.name} Product`;
 
         let finalAssetsMap: Record<string, MarketingAssets> | null = null;
         try {
-          finalAssetsMap = {};
-          for (const aud of result.audiences) {
+          // Parallelize asset generation across audiences
+          const assetPromises = result.audiences.map(async (aud) => {
             const combinedGoal = `Goal: ${result.campaignGoal}. Persona: ${aud.name}`;
-            const assets = await generateMarketingCampaignAssets(productName, combinedGoal);
-            finalAssetsMap[aud.name] = assets;
-          }
+            const assets = await generateMarketingCampaignAssets(productName, combinedGoal, context);
+            return { name: aud.name, assets };
+          });
+
+          const assetResults = await Promise.all(assetPromises);
+          finalAssetsMap = {};
+          assetResults.forEach(res => {
+            finalAssetsMap![res.name] = res.assets;
+          });
         } catch (assetErr) {
           console.error("Failed to auto-generate assets:", assetErr);
           // Continue with brief only if assets fail
@@ -76,13 +86,19 @@ export const MarketingBrief: React.FC = () => {
     if (!brief) return;
     setIsAssetLoading(true);
     try {
-      const productName = brief.productName || "Healthco Plan";
-      const newAssetsMap: Record<string, MarketingAssets> = {};
-      for (const aud of brief.audiences) {
+      const productName = brief.productName || `${companyContext.name} Product`;
+      // Parallelize asset regeneration across audiences
+      const assetPromises = brief.audiences.map(async (aud) => {
         const combinedGoal = `Goal: ${brief.campaignGoal}. Persona: ${aud.name}`;
-        const assets = await generateMarketingCampaignAssets(productName, combinedGoal);
-        newAssetsMap[aud.name] = assets;
-      }
+        const assets = await generateMarketingCampaignAssets(productName, combinedGoal, context);
+        return { name: aud.name, assets };
+      });
+
+      const assetResults = await Promise.all(assetPromises);
+      const newAssetsMap: Record<string, MarketingAssets> = {};
+      assetResults.forEach(res => {
+        newAssetsMap[res.name] = res.assets;
+      });
 
       setCampaignAssetsMap(newAssetsMap);
       if (brief.audiences.length > 0) setSelectedAudience(brief.audiences[0].name);
@@ -145,6 +161,13 @@ export const MarketingBrief: React.FC = () => {
     };
     fetchAudiences();
   }, []);
+
+  // Update context when global companyContext changes
+  useEffect(() => {
+    if (!brief) { // Only auto-update if we haven't generated a brief yet
+      setContext(`${companyContext.name} - ${companyContext.description}`);
+    }
+  }, [companyContext, brief]);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -366,6 +389,151 @@ export const MarketingBrief: React.FC = () => {
                 </div>
               </section>
 
+              {/* 4. KPI Requirements */}
+              {brief.kpis && brief.kpis.length > 0 && (
+                <section>
+                  <h4 className="section-header border-b-2 border-gray-200 pb-2 uppercase tracking-wide">
+                    <span className="bg-[#0077C8] text-white w-8 h-8 flex items-center justify-center rounded-md text-sm font-bold">4</span>
+                    KPI Requirements
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {brief.kpis.map((kpi, index) => (
+                      <div key={index} className="p-6 rounded-xl border border-gray-100 bg-white shadow-sm flex flex-col gap-2">
+                        <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center text-green-600 mb-2">
+                          <ListChecks size={20} />
+                        </div>
+                        <p className="font-bold text-gray-900">{kpi.title}</p>
+                        <p className="text-sm text-subtext leading-relaxed">{kpi.description}</p>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {/* 5. Value Proposition */}
+              {brief.valueProp && (
+                <section>
+                  <h4 className="section-header border-b-2 border-gray-200 pb-2 uppercase tracking-wide">
+                    <span className="bg-[#0077C8] text-white w-8 h-8 flex items-center justify-center rounded-md text-sm font-bold">5</span>
+                    Value Proposition
+                  </h4>
+                  <div className="space-y-6">
+                    <div className="p-8 rounded-2xl bg-gradient-to-br from-[#0077C8] to-[#005a9e] text-white shadow-lg">
+                      <div className="flex items-center gap-3 mb-4 opacity-80">
+                        <Award size={20} />
+                        <span className="text-xs font-bold uppercase tracking-widest">Core Narrative</span>
+                      </div>
+                      <p className="text-2xl font-bold leading-tight uppercase">
+                        {language === 'en' ? brief.valueProp.main.en : brief.valueProp.main.es}
+                      </p>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="p-6 rounded-xl border border-gray-100 bg-gray-50">
+                        <p className="font-bold text-xs uppercase text-subtext mb-3 tracking-wider">Competitive Edge</p>
+                        <p className="text-heading text-sm leading-relaxed">{brief.valueProp.againstCompetitors}</p>
+                      </div>
+                      <div className="p-6 rounded-xl border border-gray-100 bg-gray-50">
+                        <p className="font-bold text-xs uppercase text-subtext mb-3 tracking-wider">Market Context</p>
+                        <p className="text-heading text-sm leading-relaxed">{brief.valueProp.addressingTrends}</p>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+              )}
+
+              {/* 6. Recommended Messaging Hook */}
+              {brief.messaging && (
+                <section>
+                  <h4 className="section-header border-b-2 border-gray-200 pb-2 uppercase tracking-wide">
+                    <span className="bg-[#0077C8] text-white w-8 h-8 flex items-center justify-center rounded-md text-sm font-bold">6</span>
+                    Recommended Messaging
+                  </h4>
+                  <div className="p-6 rounded-xl border border-gray-200 bg-white">
+                    <div className="mb-8">
+                       <p className="font-bold text-xs uppercase text-subtext mb-2 tracking-wider">Primary Campaign Hook</p>
+                       <p className="text-xl font-bold text-[#0077C8] italic">"{language === 'en' ? brief.messaging.primaryHook.en : brief.messaging.primaryHook.es}"</p>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      <div className="space-y-2">
+                        <p className="font-bold text-sm text-gray-900 flex items-center gap-2">
+                          <MessageCircle size={16} className="text-blue-400" />
+                          {brief.messaging.supporting1.title}
+                        </p>
+                        <p className="text-sm text-subtext leading-relaxed">
+                          {language === 'en' ? brief.messaging.supporting1.content.en : brief.messaging.supporting1.content.es}
+                        </p>
+                      </div>
+                      <div className="space-y-2">
+                        <p className="font-bold text-sm text-gray-900 flex items-center gap-2">
+                          <MessageCircle size={16} className="text-blue-400" />
+                          {brief.messaging.supporting2.title}
+                        </p>
+                        <p className="text-sm text-subtext leading-relaxed">
+                          {language === 'en' ? brief.messaging.supporting2.content.en : brief.messaging.supporting2.content.es}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+              )}
+
+              {/* 7. Strategic Channels */}
+              {brief.channels && brief.channels.length > 0 && (
+                <section>
+                  <h4 className="section-header border-b-2 border-gray-200 pb-2 uppercase tracking-wide">
+                    <span className="bg-[#0077C8] text-white w-8 h-8 flex items-center justify-center rounded-md text-sm font-bold">7</span>
+                    Strategic Channels
+                  </h4>
+                  <div className="space-y-3">
+                    {brief.channels.map((channel, ci) => (
+                      <div key={ci} className="p-4 rounded-xl border border-gray-100 bg-white flex items-center gap-6 shadow-sm">
+                        <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center text-[#0077C8] shrink-0">
+                           <Globe size={24} />
+                        </div>
+                        <div>
+                          <p className="font-bold text-gray-900">{channel.name}</p>
+                          <p className="text-sm text-subtext">{channel.justification}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {/* 8. Campaign Phases */}
+              {brief.phases && brief.phases.length > 0 && (
+                <section>
+                  <h4 className="section-header border-b-2 border-gray-200 pb-2 uppercase tracking-wide">
+                    <span className="bg-[#0077C8] text-white w-8 h-8 flex items-center justify-center rounded-md text-sm font-bold">8</span>
+                    Campaign Phases
+                  </h4>
+                  <div className="space-y-4">
+                    {brief.phases.map((phase, pi) => (
+                      <div key={pi} className="relative pl-8 border-l-2 border-blue-100 pb-8 last:pb-0">
+                        <div className="absolute left-[-9px] top-0 w-4 h-4 rounded-full bg-[#0077C8] border-4 border-white"></div>
+                        <div className="flex flex-col md:flex-row md:items-center justify-between mb-2">
+                           <h5 className="font-bold text-lg text-heading">{phase.title}</h5>
+                           <span className="px-3 py-1 rounded-full bg-blue-50 text-[#0077C8] text-[10px] font-black uppercase tracking-widest border border-blue-100">
+                             <Clock size={10} className="inline mr-1 mb-0.5" />
+                             {phase.dates}
+                           </span>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <p className="text-xs font-bold text-subtext uppercase tracking-widest mb-1">Strategic Focus</p>
+                            <p className="text-sm text-gray-800 font-medium">{phase.focus}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs font-bold text-subtext uppercase tracking-widest mb-1">Primary Goal</p>
+                            <p className="text-sm text-gray-800 font-medium">{phase.goal}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
+
               {/* 9. Campaign Preview (Generated Assets) */}
               <section>
                 <div className="flex items-center justify-between mb-6 border-b-2 border-gray-200 pb-2">
@@ -572,7 +740,7 @@ export const MarketingBrief: React.FC = () => {
                           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col h-full w-full">
                             {/* Fake Nav */}
                             <div className="bg-white border-b border-gray-200 h-14 flex items-center justify-between px-4 gap-4 shrink-0">
-                              <div className="text-[#0077C8] font-bold text-xl tracking-tighter">Healthco</div>
+                              <div className="text-[#0077C8] font-bold text-xl tracking-tighter">{companyContext.name}</div>
                               <div className="h-9 bg-gray-100 rounded-full w-full max-w-xs flex items-center px-4 text-gray-500 text-xs font-medium">
                                 <Search size={14} className="mr-2" /> Search
                               </div>
@@ -602,7 +770,7 @@ export const MarketingBrief: React.FC = () => {
                                 {/* Product Details */}
                                 <div className="w-full sm:w-1/2 flex flex-col justify-center">
                                   <div className="text-green-600 text-xs font-bold mb-2">Most Popular</div>
-                                  <h1 className="text-3xl font-bold text-heading leading-none tracking-tight mb-2">{brief.productName || "Healthco Plan"}</h1>
+                                  <h1 className="text-3xl font-bold text-heading leading-none tracking-tight mb-2">{brief.productName || `${companyContext.name} Product`}</h1>
                                   <h2 className="text-lg text-subtext font-medium mb-4">Individual & Family Plans</h2>
 
                                   <div className="mb-6">

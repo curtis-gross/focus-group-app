@@ -25,7 +25,11 @@ import {
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
-export const Concierge: React.FC = () => {
+interface ConciergeProps {
+  companyContext: { name: string, description: string, guidelines: string };
+}
+
+export const Concierge: React.FC<ConciergeProps> = ({ companyContext }) => {
     const [isGenerating, setIsGenerating] = useState(false);
     const [dashboardData, setDashboardData] = useState<any>(null);
     const [rawCustomerData, setRawCustomerData] = useState<any>(null);
@@ -84,8 +88,8 @@ export const Concierge: React.FC = () => {
     };
 
     const fetchCustomerData = async () => {
-        const response = await fetch('/data/healthco_customer_data.json');
-        if (!response.ok) throw new Error("Failed to load healthco_customer_data.json");
+        const response = await fetch('/data/customer_data.json');
+        if (!response.ok) throw new Error("Failed to load customer_data.json");
         const textData = await response.text();
         try {
             setRawCustomerData(JSON.parse(textData));
@@ -171,8 +175,8 @@ export const Concierge: React.FC = () => {
                 {isGenerating ? (
                     <div className="animate-pulse flex flex-col items-center">
                         <div className="w-24 h-24 border-4 border-[#0077C8]/30 border-t-[#0077C8] rounded-full animate-spin mb-8"></div>
-                        <h2 className="text-2xl font-bold text-heading mb-2">Analyzing Telemetry & Chat Logs...</h2>
-                        <p className="text-subtext font-medium">Gemini is structuring real-time insights for the Agent...</p>
+                        <h3 className="text-xl font-bold text-gray-900">{companyContext.name} Concierge</h3>
+                        <p className="text-sm text-gray-500">Intelligent member insights and AI-powered preparation.</p>
                     </div>
                 ) : (
                     <>
@@ -469,7 +473,7 @@ export const Concierge: React.FC = () => {
             )}
             
             {/* Live Gemini Chat Bot */}
-            <ChatWidget customerContextData={dashboardData} />
+            <ChatWidget customerContextData={dashboardData} companyContext={companyContext} />
         </div>
     );
 };

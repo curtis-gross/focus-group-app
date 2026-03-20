@@ -1,31 +1,48 @@
-# Marketing Brief Audience Integration Plan
+# Implementation Plan - Refactor ChatWidget Persistence and Branding
 
-## Goal Description
-Move "Audiences" above "Marketing Brief" in the navigation. Add an introduction to the home page explaining the 3-step workflow. Integrate the personas generated from the Audience Generator into the Marketing Brief page, including ALL generated audiences in the brief generation by default.
+## Objective
+Refactor `components/chatbot/ChatWidget.tsx` to:
+1.  Remove all `localStorage` usage.
+2.  Implement server-side persistence using `/api/save-run` and `/api/load-run/chat_widget_session`.
+3.  Remove brand references ("Anthem", "E*Trade") and use brand-agnostic terms or `companyContext.name`.
 
-## User Review Required
-> [!IMPORTANT]
-> Please review this plan. Once approved, I will proceed to implementation.
+## Technical Approach
 
-## Proposed Changes
+### 1. Persistence Layer
+-   Implement `saveSessionToServer()` and `loadSessionFromServer()` functions.
+-   `saveSessionToServer()` will be called whenever relevant state changes (debounced if necessary, or just on every change since it's a small JSON).
+-   `loadSessionFromServer()` will be called on component mount.
+-   The JSON structure saved will contain:
+    -   `chat_expanded`
+    -   `chat_messages`
+    -   `chat_workflow`
+    -   `chat_workflow_step`
+    -   `chat_debug_logs`
+    -   `gemini_api_key` (if manually entered)
 
-### [MODIFY] `components/Navigation.tsx`
-- Reorder `navItems` array so that `AppMode.AUDIENCE_GEN` is second, directly after `AppMode.HOME`, and before `AppMode.MARKETING_BRIEF`. (Completed)
+### 2. State Initialization
+-   Initialize states with defaults.
+-   Use `useEffect` on mount to fetch the last session and update the state.
+-   Add a "Load Last Session" button in the setup screen to explicitly restore the last session if desired (as per Rule 5).
 
-### [MODIFY] `components/Home.tsx`
-- Reorder the `tools` array to match the navigation order. (Completed)
-- Add an introduction text section explaining the workflow. Update the language to say "Create a tailored marketing brief and assets for all your generated audiences." instead of selecting one.
+### 3. Branding Updates
+-   Rename all internal keys from `anthem_chat_...` to `chat_...`.
+-   Update `alt="E*Trade Agent"` to `alt={`${companyContext.name} Agent`}`.
+-   Ensure all "Concierge" labels use `companyContext.name`.
 
-### [MODIFY] `components/MarketingBrief.tsx`
-- **State**: Fetch personas from `/api/load-run/audience_generator` on mount to populate an `availableAudiences` state array.
-- **UI**: Display the "Audiences - from Audience Generator" section to show ALL included audiences by default. Remove the selection logic since all are included.
-- **Submission**: Pass the entire `availableAudiences` array to `generateMarketingBrief`.
-
-### [MODIFY] `services/geminiService.ts`
-- **`generateMarketingBrief`**: Update the `sourceAudience` parameter to accept an array of Personas (`sourceAudiences?: any[]`). 
-- **Prompt Update**: If `sourceAudiences` is provided, iterate through them and inject their localized details into the prompt. This forces the LLM to write the brief targeting all the included segments.
+### 4. Code Changes
+-   Modify `ChatWidget.tsx`:
+    -   Remove `localStorage` interactions.
+    -   Add `fetch` calls to `/api/save-run` and `/api/load-run`.
+    -   Update JSX for alt tags and labels.
+-   The server already has the endpoints implemented in `server.js`.
 
 ## Verification Plan
-1. Check the Home page language.
-2. Check the Marketing Brief page to see that audiences are displayed as included.
-3. Generate a brief and verify the LLM encompasses all audiences.
+1.  Verify that the component loads the last session on mount.
+2.  Verify that changes to the chat state (sending messages, toggle expand) are saved to the server.
+3.  Verify that "Anthem" and "E*Trade" are no longer present in the code or UI.
+4.  Verify that `public/data/chat_widget_session_run.json` is updated correctly.
+
+## Risks
+-   Concurrency: Multiple saves might race, but since it's a single user app, it's low risk.
+-   Server Latency: Saving on every message might feel laggy if not handled properly. I will use a simple `useEffect` for now, but will ensure it doesn't block the UI.

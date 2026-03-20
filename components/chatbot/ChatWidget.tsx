@@ -41,14 +41,16 @@ type DebugLog = {
   message: string;
 };
 
-export default function ChatWidget({ customerContextData }: { customerContextData?: any }) {
-  const [apiKey, setApiKey] = useState(() => {
-    return localStorage.getItem('gemini_api_key') || import.meta.env.VITE_GEMINI_API_KEY || '';
-  });
+export default function ChatWidget({ 
+  customerContextData, 
+  companyContext = { name: 'AI', description: '', guidelines: '' } 
+}: { 
+  customerContextData?: any, 
+  companyContext?: { name: string, description: string, guidelines: string } 
+}) {
+  const [apiKey, setApiKey] = useState('');
   const [isConnected, setIsConnected] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(() => {
-    return localStorage.getItem('anthem_chat_expanded') === 'true';
-  });
+  const [isExpanded, setIsExpanded] = useState(false);
   const [status, setStatus] = useState('Idle');
   const [connectionError, setConnectionError] = useState<string | null>(null);
 
@@ -56,55 +58,77 @@ export default function ChatWidget({ customerContextData }: { customerContextDat
   const [isVideoActive, setIsVideoActive] = useState(false);
 
   // Persisted Chat State
-  const [messages, setMessages] = useState<{ role: string, text: string }[]>(() => {
-    const saved = localStorage.getItem('anthem_chat_messages');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [messages, setMessages] = useState<{ role: string, text: string }[]>([]);
 
   // Workflow State
-  const [activeWorkflow, setActiveWorkflow] = useState<WorkflowType>(() => {
-    const saved = localStorage.getItem('anthem_chat_workflow');
-    return saved ? (saved as WorkflowType) : null;
-  });
-  const [workflowStep, setWorkflowStep] = useState(() => {
-    const saved = localStorage.getItem('anthem_chat_workflow_step');
-    return saved ? parseInt(saved, 10) : 0;
-  });
+  const [activeWorkflow, setActiveWorkflow] = useState<WorkflowType>(null);
+  const [workflowStep, setWorkflowStep] = useState(0);
 
   // Debug State
   const [showDebug, setShowDebug] = useState(false);
-  const [debugLogs, setDebugLogs] = useState<DebugLog[]>(() => {
-    const saved = localStorage.getItem('anthem_chat_debug_logs');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [debugLogs, setDebugLogs] = useState<DebugLog[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
 
   const clientRef = useRef<GeminiLiveClient | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Persistence Effects
-  useEffect(() => {
-    localStorage.setItem('gemini_api_key', apiKey);
-  }, [apiKey]);
+  // Persistence logic (Server-side)
+  const saveSessionToServer = async () => {
+    if (messages.length === 0 && !activeWorkflow) return;
+    setIsSaving(true);
+    try {
+      await fetch('/api/save-run', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          featureId: 'chat_widget_session',
+          data: {
+            messages,
+            activeWorkflow,
+            workflowStep,
+            debugLogs,
+            isExpanded
+          }
+        })
+      });
+    } catch (err) {
+      console.error("Failed to save chat session:", err);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
-  useEffect(() => {
-    localStorage.setItem('anthem_chat_expanded', String(isExpanded));
-  }, [isExpanded]);
+  const loadSessionFromServer = async () => {
+    setStatus('Loading Session...');
+    try {
+      const res = await fetch('/api/load-run/chat_widget_session');
+      if (!res.ok) throw new Error("No saved session");
+      const saved = await res.json();
+      
+      if (saved.messages) setMessages(saved.messages);
+      if (saved.activeWorkflow) setActiveWorkflow(saved.activeWorkflow);
+      if (saved.workflowStep) setWorkflowStep(saved.workflowStep);
+      if (saved.debugLogs) setDebugLogs(saved.debugLogs);
+      if (saved.isExpanded !== undefined) setIsExpanded(saved.isExpanded);
+      
+      addDebugLog('System', 'Session restored from server');
+    } catch (err) {
+      console.warn("Failed to load chat session:", err);
+      alert("No previous session found.");
+    } finally {
+      setStatus('Idle');
+    }
+  };
 
+  // Sync state to server on changes
   useEffect(() => {
-    localStorage.setItem('anthem_chat_messages', JSON.stringify(messages));
-  }, [messages]);
-
-  useEffect(() => {
-    localStorage.setItem('anthem_chat_workflow', activeWorkflow || '');
-  }, [activeWorkflow]);
-
-  useEffect(() => {
-    localStorage.setItem('anthem_chat_workflow_step', String(workflowStep));
-  }, [workflowStep]);
-
-  useEffect(() => {
-    localStorage.setItem('anthem_chat_debug_logs', JSON.stringify(debugLogs));
-  }, [debugLogs]);
+    const timer = setTimeout(() => {
+      if (isConnected || messages.length > 0) {
+        saveSessionToServer();
+      }
+    }, 2000); // 2 second debounce
+    return () => clearTimeout(timer);
+  }, [messages, activeWorkflow, workflowStep, debugLogs, isExpanded]);
 
   useEffect(() => {
     fetch('/api/key')
@@ -146,17 +170,7 @@ export default function ChatWidget({ customerContextData }: { customerContextDat
 
     const client = new GeminiLiveClient({
       apiKey,
-      systemInstruction: `You are a Healthco Concierge Director, designed to help agents expertly handle client requests for health insurance, plan details, and wellness programs.${dynamicContext}
-
-      YOUR CORE RESPONSIBILITIES:
-      1. Provide accurate, clear, and professional guidance on Healthco plans, benefits, and coverage.
-      2. Answer agent questions related to the client's profile, recent claims, and health goals to prep them for the call.
-      3. Proactively suggest health and wellness recommendations based on the client's profile.
-
-      GENERAL RULES:
-      - Maintain a supportive, expert, and professional tone at all times.
-      - Do not mention any internal technical tools or constraints.
-      - Perform actions naturally, as a human health concierge director would.`,
+      systemInstruction: `You are the ${companyContext.name} Concierge Director, designed to help agents expertly handle client requests for our services and programs.${companyContext.description ? `\n\nCompany Description: ${companyContext.description}` : ''}${companyContext.guidelines ? `\n\nBrand Guidelines: ${companyContext.guidelines}` : ''}${dynamicContext}`,
       tools: TOOLS
     }, (msg) => {
       if (msg.type === 'connected') {
@@ -243,11 +257,7 @@ export default function ChatWidget({ customerContextData }: { customerContextDat
     setWorkflowStep(0);
     setMessages([]);
     setDebugLogs([]);
-    localStorage.removeItem('anthem_chat_messages');
-    localStorage.removeItem('anthem_chat_workflow');
-    localStorage.removeItem('anthem_chat_workflow_step');
-    localStorage.removeItem('anthem_chat_debug_logs');
-    addDebugLog('System', 'Session cleared');
+    addDebugLog('System', 'Session cleared locally');
   };
 
   const enableScreenShare = async () => {
@@ -269,10 +279,10 @@ export default function ChatWidget({ customerContextData }: { customerContextDat
   return (
     <div className={`chat-widget-container ${isExpanded ? 'expanded' : 'collapsed'}`} style={{ position: 'fixed', bottom: '20px', right: '20px', zIndex: 9999 }}>
       {!isExpanded ? (
-        <button className="chat-bubble-btn" onClick={toggleExpand}>
+        <button className="chat-bubble-btn shadow-xl ring-2 ring-white/20" onClick={toggleExpand}>
           <img
             src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Google_Gemini_icon_2025.svg/500px-Google_Gemini_icon_2025.svg.png"
-            alt="E*Trade Agent"
+            alt={`${companyContext.name} Agent`}
             className="bubble-icon"
             style={{ width: '40px', height: '40px', objectFit: 'contain' }}
           />
@@ -281,7 +291,7 @@ export default function ChatWidget({ customerContextData }: { customerContextDat
         <>
           <header className="chat-widget-header" style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
             <div className="logo-area">
-              <span className="font-bold text-gray-900 text-lg tracking-widest uppercase">Healthco Concierge</span>
+              <span className="font-bold text-gray-900 text-lg tracking-widest uppercase">{companyContext.name} Concierge</span>
             </div>
             <div className="header-controls">
               <button
@@ -347,7 +357,7 @@ export default function ChatWidget({ customerContextData }: { customerContextDat
             {!isConnected && messages.length === 0 ? (
               <div className="setup-screen">
                 <p className="description" style={{ color: '#666', fontSize: '14px', marginBottom: '20px' }}>
-                  Elevated AI health preparation and insights for Healthco Concierge.
+                  Elevated AI insights and preparation for {companyContext.name} Concierge.
                 </p>
                 {(!apiKey || apiKey.trim() === '') && (
                   <input
@@ -360,9 +370,24 @@ export default function ChatWidget({ customerContextData }: { customerContextDat
                   />
                 )}
 
-                <button className="connect-btn" onClick={handleConnect} style={{ width: '100%', backgroundColor: '#0a42a0', color: 'white', padding: '12px', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', marginTop: '10px' }}>
+                <button 
+                  className="connect-btn" 
+                  onClick={handleConnect} 
+                  style={{ width: '100%', backgroundColor: '#0a42a0', color: 'white', padding: '12px', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', marginTop: '10px' }}
+                >
                   Connect Agent
                 </button>
+
+                <div className="mt-4 flex flex-col gap-2">
+                  <button 
+                    className="btn-ghost w-full py-2 hover:bg-gray-100 rounded-md text-xs font-bold text-gray-500 uppercase tracking-widest flex items-center justify-center gap-2"
+                    onClick={loadSessionFromServer}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg>
+                    Load Last Session
+                  </button>
+                </div>
+
                 {status === 'Error' && (
                   <div className="error-message" style={{ color: 'red', marginTop: '10px', fontSize: '12px', textAlign: 'center' }}>
                     {connectionError || 'Connection failed. Check console.'}

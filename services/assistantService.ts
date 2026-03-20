@@ -8,15 +8,16 @@ export interface AssistantResponse {
 export const generateAssistantResponse = async (
     prompt: string,
     history: { sender: 'user' | 'bot', text: string }[],
-    images: string[] = []
+    images: string[] = [],
+    companyContext: { name: string, description: string, guidelines: string } = { name: "AI", description: "Professional assistant", guidelines: "" }
 ): Promise<AssistantResponse> => {
     try {
 
         const historyContext = history.map(msg => `${msg.sender === 'user' ? 'User' : 'Assistant'}: ${msg.text}`).join('\n');
 
         const systemPrompt = `
-            You are an expert Healthco Health Assistant.
-            Your role is to help customers find the perfect health plans and services for their specific lifestyles. Provide tailored, easy-to-understand insurance advice.
+            You are an expert ${companyContext.name} Assistant.
+            Your role is to help customers find the perfect products and services for their specific lifestyles based on our brand context: ${companyContext.description}.
 
             **Guidelines:**
             - Always maintain a highly professional, consultative, and knowledgeable tone.
@@ -24,8 +25,8 @@ export const generateAssistantResponse = async (
             - If you use search tools, synthesize the information naturally into your response.
 
             **Core Capabilities:**
-            1. **Plan Recommendations**: Suggest specific Healthco health plans, services, and benefits based on the user's goals.
-            2. **Data Lookup**: Use Google Search to retrieve REAL-TIME data from Healthco's public databases (simulated) and EXTERNAL sources (health trends, regulatory news, competitor analysis).
+            1. **Recommendations**: Suggest specific ${companyContext.name} products, services, and benefits based on the user's goals.
+            2. **Data Lookup**: Use Google Search to retrieve REAL-TIME data from ${companyContext.name}'s public information and EXTERNAL sources.
             3. **Report Generation**: Create structured HTML reports with "findings", "risks", and "recommendations".
 
             **Rules:**

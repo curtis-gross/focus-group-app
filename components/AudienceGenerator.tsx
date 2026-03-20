@@ -44,15 +44,25 @@ interface AudienceGeneratorProps {
   setPersonas: React.Dispatch<React.SetStateAction<CombinedPersona[]>>;
   context: string;
   setContext: React.Dispatch<React.SetStateAction<string>>;
+  companyContext: { name: string, description: string };
 }
 
-export const AudienceGenerator: React.FC<AudienceGeneratorProps> = ({ personas, setPersonas, context, setContext }) => {
+export const AudienceGenerator: React.FC<AudienceGeneratorProps> = ({ personas, setPersonas, context, setContext, companyContext }) => {
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingStep, setLoadingStep] = useState("");
   const [useUploadData, setUseUploadData] = useState(false);
   const [customData, setCustomData] = useState<any[]>([]);
   const [fileName, setFileName] = useState("");
+  const [showSamplePreview, setShowSamplePreview] = useState(false);
+
+  // Auto-populate context from brand settings if empty
+  React.useEffect(() => {
+    if (!context || context.trim() === '') {
+      const defaultContext = `Company: ${companyContext.name}. Description: ${companyContext.description}`;
+      setContext(defaultContext);
+    }
+  }, [companyContext, setContext]);
 
   React.useEffect(() => {
     if (personas.length > 0) {
@@ -303,6 +313,38 @@ export const AudienceGenerator: React.FC<AudienceGeneratorProps> = ({ personas, 
                   </div>
                   <h3 className="text-lg font-bold text-gray-900 mb-2">Use Sample Data</h3>
                   <p className="text-gray-500 text-sm flex-grow mb-4">Use a pre-loaded synthetic dataset of users to instantly generate 3 distinct demographic segments.</p>
+                  
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); setShowSamplePreview(!showSamplePreview); }}
+                    className="text-[#0077C8] text-xs font-bold mb-4 hover:underline flex items-center gap-1"
+                  >
+                    {showSamplePreview ? "Hide Sample Data" : "Preview Sample Data"}
+                  </button>
+
+                  {showSamplePreview && (
+                    <div className="mb-4 overflow-hidden border border-gray-100 rounded-lg shadow-inner">
+                      <div className="max-h-40 overflow-y-auto">
+                        <table className="w-full text-[10px] text-left">
+                          <thead className="bg-gray-50 sticky top-0">
+                            <tr>
+                              <th className="p-2 border-b">Name</th>
+                              <th className="p-2 border-b">Condition</th>
+                              <th className="p-2 border-b">Location</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {SAMPLE_CUSTOMER_DATA.map((row, i) => (
+                              <tr key={i} className="hover:bg-blue-50/30">
+                                <td className="p-2 border-b text-gray-700">{row.name}</td>
+                                <td className="p-2 border-b text-gray-700">{row.condition}</td>
+                                <td className="p-2 border-b text-gray-700">{row.location}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
                   
                   {/* Inline Context Input for Sample Data */}
                   <div className="mt-auto" onClick={(e) => e.stopPropagation()}>

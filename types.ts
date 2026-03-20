@@ -36,7 +36,8 @@ export enum AppMode {
   CONTENT_VERSIONING = 'CONTENT_VERSIONING',
   FEASIBILITY_ANALYSIS = 'FEASIBILITY_ANALYSIS',
   ASSISTANT = 'ASSISTANT',
-  SYNTHETIC_USERS = 'SYNTHETIC_USERS'
+  SYNTHETIC_USERS = 'SYNTHETIC_USERS',
+  COMPANY_CONTEXT = 'COMPANY_CONTEXT'
 }
 
 export interface FeasibilityReport {
@@ -362,6 +363,7 @@ export interface DetailedPersona {
 }
 
 export interface CombinedPersona extends AudienceSegment {
+  id?: string;
   details?: DetailedPersona;
   score?: {
     propensity: number;
