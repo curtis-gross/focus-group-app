@@ -1,342 +1,385 @@
-import React, { useState, useEffect } from 'react';
-import { Users, FileText, Layout, ArrowRight, CheckCircle, Smartphone, Globe, Mail, RotateCcw } from 'lucide-react';
-import { generatePersonalizedProducts, translateProducts, generatePersonalizedHeadlines, generateImage } from '../services/geminiService';
+import React, { useState } from 'react';
+import { generateJson, generatePersonalizedProducts, translateProducts, generatePersonalizedHeadlines, generateImage } from '../services/geminiService';
 import { brandConfig } from '../config';
+import { Schema } from "@google/genai";
+import { Users, RotateCcw, ArrowLeft } from 'lucide-react';
 
-interface CustomerProfile {
-    name: string;
-    email: string;
-    condition: string;
-    location: string;
-    topChannel: string;
-    browse_history: string[];
-}
-
-
-
-import { useCompanyContext } from '../context/CompanyContext';
+const SAMPLE_DATA = [
+    { user_id: 1, email: 'sarah.m@example.com', name: 'Sarah Miller', location: 'Pittsburgh, PA', topChannel: 'Web', condition: 'Home Chef', Browse_history: 'Cookware Sets, Air Fryers, Gourmet Food', preferred_language: 'English', weather: 'sunny' },
+    { user_id: 2, email: 'r.chen88@example.com', name: 'Robert Chen', location: 'Erie, PA', topChannel: 'Email', condition: 'Tech Enthusiast', Browse_history: 'Laptops, Smart Home Devices, TVs', preferred_language: 'English', weather: 'cloudy' },
+    { user_id: 3, email: 'emily.d@example.com', name: 'Emily Davis', location: 'Harrisburg, PA', topChannel: 'Mobile', condition: 'Fashion Lover', Browse_history: 'Designer Handbags, Fall Coats, Jewelry', preferred_language: 'English', weather: 'sunny' },
+    { user_id: 4, email: 'mike.b@example.com', name: 'Michael Brown', location: 'Allentown, PA', topChannel: 'TV (QVC)', condition: 'Home Improver', Browse_history: 'Outdoor Furniture, Cleaning Supplies', preferred_language: 'English', weather: 'snow' },
+    { user_id: 5, email: 'jess.w@example.com', name: 'Jessica Wilson', location: 'Scranton, PA', topChannel: 'Social', condition: 'Beauty Guru', Browse_history: 'Skincare Routines, Anti-Aging Cosmetics', preferred_language: 'English', weather: 'sunny' },
+    { user_id: 6, email: 'david.j@example.com', name: 'David Jones', location: 'Philadelphia, PA', topChannel: 'Web', condition: 'Fitness Buff', Browse_history: 'Home Gym Equipment, Protein Powder, Activewear', preferred_language: 'English', weather: 'rain' },
+    { user_id: 7, email: 'amanda.r@example.com', name: 'Amanda Rose', location: 'Lancaster, PA', topChannel: 'Mobile', condition: 'Bargain Hunter', Browse_history: "Clearance Apparel, Today's Special Value, Handbags", preferred_language: 'English', weather: 'sunny' },
+    { user_id: 8, email: 'james.t@example.com', name: 'James Taylor', location: 'State College, PA', topChannel: 'Web', condition: 'Gift Shopper', Browse_history: 'Toys, Electronics, Gourmet Chocolates', preferred_language: 'English', weather: 'cloudy' }
+];
 
 export const GenSiteStub: React.FC = () => {
-    const { name, description } = useCompanyContext();
-    const [selectedCustomer, setSelectedCustomer] = useState<CustomerProfile | null>(null);
     const [step, setStep] = useState(1);
-    const [isGenerating, setIsGenerating] = useState(false);
-    const [generatedContent, setGeneratedContent] = useState<any>(null);
-    const [generatedHtml, setGeneratedHtml] = useState<string>("");
-    const [lastRun, setLastRun] = useState<any>(null);
+    const [loading, setLoading] = useState(false);
+    const [status, setStatus] = useState("");
 
-    useEffect(() => {
-        fetch('/api/load-run/gensite')
-            .then(res => {
-                if (res.ok) return res.json();
-                return null;
-            })
-            .then(data => {
-                if (data && data.selectedCustomer) {
-                    setLastRun(data);
+    // Step 1 & 2 Data
+    const [audiences, setAudiences] = useState<any[]>([]);
+    const [storedAudiences, setStoredAudiences] = useState<any[]>([]); // Audiences from Audience Generator
+    const [selectedUserId, setSelectedUserId] = useState<number | string>(SAMPLE_DATA[0].user_id);
+
+    // Step 4 Data
+    const [generatedHtml, setGeneratedHtml] = useState<string | null>(null);
+
+    // Load Stored Audiences on Mount
+    React.useEffect(() => {
+        const loadStoredAudiences = async () => {
+            try {
+                const res = await fetch('/api/load-run/audience_generator');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.personas && Array.isArray(data.personas)) {
+                        console.log("Loaded stored audiences:", data.personas.length);
+                        setStoredAudiences(data.personas);
+                    }
                 }
-            })
-            .catch(() => { });
+            } catch (error) {
+                console.warn("Failed to load stored audiences:", error);
+            }
+        };
+        loadStoredAudiences();
     }, []);
 
-    useEffect(() => {
-        if (step === 3 && generatedHtml && selectedCustomer) {
-            const runData = { selectedCustomer, generatedContent, generatedHtml, step: 3 };
+    // Auto-Save Effect
+    React.useEffect(() => {
+        if (step > 1 && audiences.length > 0) {
+            const runData = {
+                audiences,
+                selectedUserId,
+                generatedHtml,
+                step
+            };
+
+            // Save to Server
+            console.log("Saving GenSite Run:", { audiences: audiences.length, step, hasHtml: !!generatedHtml });
             fetch('/api/save-run', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ featureId: 'gensite', data: runData })
-            }).catch(err => console.error("Failed to save run to server:", err));
-            setLastRun(runData);
+            })
+                .then(() => console.log("GenSite Saved Successfully"))
+                .catch(err => console.error("Failed to save GenSite run to server:", err));
+        } else {
+            console.log("Not Saving GenSite:", { step, audiences: audiences.length });
         }
-    }, [selectedCustomer, generatedContent, generatedHtml, step]);
+    }, [audiences, selectedUserId, generatedHtml, step]);
 
-    const handleLoadLast = (data: any) => {
-        setIsGenerating(true);
-        setTimeout(() => {
-            setSelectedCustomer(data.selectedCustomer);
-            setGeneratedContent(data.generatedContent);
-            setGeneratedHtml(data.generatedHtml);
-            setStep(data.step || 3);
-            setIsGenerating(false);
-        }, 500);
-    };
-
-    const SAMPLE_DATA: CustomerProfile[] = [
-        { name: 'Sarah Miller', email: 'sarah.m@example.com', condition: 'Growing Family', location: 'Pittsburgh, PA', topChannel: 'Web', browse_history: ['Pediatricians', 'Family Plans'] },
-        { name: 'Robert Chen', email: 'r.chen88@example.com', condition: 'Retirement Planning', location: 'Erie, PA', topChannel: 'Email', browse_history: ['Medicare Advantage', 'SilverSneakers'] },
-        { name: 'Emily Davis', email: 'emily.d@example.com', condition: 'Freelancer', location: 'Harrisburg, PA', topChannel: 'Mobile', browse_history: ['Individual PPO', 'Dental Coverage'] },
-        { name: 'Michael Brown', email: 'mike.b@example.com', condition: 'Chronic Care', location: 'Allentown, PA', topChannel: 'Agent', browse_history: ['Diabetes Management', 'Prescription Tiers'] },
-        { name: 'Jessica Wilson', email: 'jess.w@example.com', condition: 'Wellness Focused', location: 'Scranton, PA', topChannel: 'Social', browse_history: ['Gym Discounts', 'Nutrition Coaching'] },
-    ];
-
-    const handleAnalyzeAudiences = async () => {
-        setIsGenerating(true);
-        // Simulation of analysis
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        setIsGenerating(false);
-    };
-
-    const handleGeneratePage = async (customer: CustomerProfile) => {
-        setSelectedCustomer(customer);
-        setStep(2);
-        setIsGenerating(true);
+    const handleLoadLast = async () => {
+        setLoading(true);
+        setStatus("Restoring previous session...");
 
         try {
-            // 1. Generate Content (Parallel)
-            const [productsData, headlineData] = await Promise.all([
-                generatePersonalizedProducts(customer, { 
-                    name: customer.condition, 
-                    bio: `Customer interested in ${customer.browse_history.join(', ')}. Context: ${description}`, 
-                    details: { goals: [customer.condition], preferred_products: [] } 
-                }, name),
-                generatePersonalizedHeadlines(customer, { 
-                    name: customer.condition, 
-                    details: { bio: `Customer interested in ${customer.browse_history.join(', ')}. Context: ${description}`, goals: [customer.condition] } 
-                }, name)
-            ]);
+            const res = await fetch('/api/load-run/gensite');
+            if (!res.ok) throw new Error("No saved run");
+            const data = await res.json();
 
-            // 2. Translate if needed (Simulation)
-            // const translatedProducts = await translateProducts(productsData.products);
+            // 1. Simulate Loader
+            setTimeout(() => {
+                console.log("Restoring GenSite Data:", data);
+                if (data.audiences) setAudiences(data.audiences);
 
-            // 3. Construct HTML
-            const html = constructHtml(customer, productsData.products, headlineData);
-            setGeneratedHtml(html);
-            setGeneratedContent({ products: productsData.products, headlines: headlineData });
-            setStep(3);
+                // Restore step based on data
+                const savedStep = data.step || 2;
 
-        } catch (error) {
-            console.error("Generation failed", error);
-        } finally {
-            setIsGenerating(false);
+                // 2. If we had a page, restore it
+                if (savedStep >= 3) {
+                    setSelectedUserId(data.selectedUserId);
+
+                    // If we have HTML, go to step 4
+                    if (data.generatedHtml) {
+                        setGeneratedHtml(data.generatedHtml);
+                        setStep(4);
+                        setStatus("");
+                        setLoading(false);
+                        return;
+                    }
+                }
+
+                // Default fallback
+                setStep(2);
+                setLoading(false);
+            }, 1000);
+
+        } catch (e) {
+            console.warn("Could not load GenSite run:", e);
+            setLoading(false);
+            alert("No previous run found or failed to load.");
         }
     };
 
-    const constructHtml = (customer: CustomerProfile, products: any[], headlines: any) => {
-        const heroImage = "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80&w=2000"; // Generic health image
+    const handleAnalyzeAudiences = async () => {
+        setLoading(true);
+        setStatus("Analyzing customer data to identify segments...");
+        try {
+            let prompt = "";
+
+            if (storedAudiences.length > 0) {
+                const audienceDescriptions = storedAudiences.map(a => `- **${a.name || a.personaName}**: ${a.bio || a.description}`).join('\n');
+
+                prompt = `
+                Company: ${brandConfig.companyName}
+                Task: Analyze the provided user data and map each user to one of the following EXISTING Audience Segments:
+                
+                ${audienceDescriptions}
+                
+                STRICTLY map users to ONLY these segments. Do not create new segments.
+                For each audience, returned the exact name from the list above, and the list of user_ids that belong to it.
+                Data: ${JSON.stringify(SAMPLE_DATA)}`
+                ;
+            } else {
+                prompt = `
+                Company: ${brandConfig.companyName}
+                Task: Analyze the provided user data and group them into 3 distinct, meaningful Audience Segments based on their style preferences, shopping goals, and browsing behavior.
+                Do not force them into pre-defined archetypes unless they naturally fit.
+
+                For each audience, provide a creative name, a brief description of the commonalities, and a list of user_ids that belong to it.
+                All users must be in a single audience.
+                Data: ${JSON.stringify(SAMPLE_DATA)}`
+                ;
+            }
+            const schema: Schema = {
+                type: "OBJECT",
+                properties: {
+                    audiences: {
+                        type: "ARRAY",
+                        items: {
+                            type: "OBJECT",
+                            properties: {
+                                audience_name: { type: "STRING" },
+                                description: { type: "STRING" },
+                                user_ids: { type: "ARRAY", items: { type: "NUMBER" } }
+                            },
+                            required: ["audience_name", "description", "user_ids"]
+                        }
+                    }
+                },
+                required: ["audiences"]
+            };
+
+            const result = await generateJson(prompt, schema);
+            if (result && result.audiences) {
+                setAudiences(result.audiences);
+                setStep(2);
+            }
+        } catch (error) {
+            console.error(error);
+            alert("Failed to analyze audiences.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleGeneratePage = async () => {
+        const user = SAMPLE_DATA.find(u => u.user_id === Number(selectedUserId));
+        if (!user) return;
+
+        setStep(3);
+        setLoading(true);
+
+        try {
+            // Find matching audience context
+            // We match user.condition (e.g. "Data-Driven Athlete") to storedAudiences.name or segment name
+            const audienceContext = storedAudiences.find(a =>
+                (a.name && user.condition && a.name.toLowerCase().includes(user.condition.toLowerCase())) ||
+                (a.personaName && user.condition && a.personaName.toLowerCase().includes(user.condition.toLowerCase()))
+            );
+
+            if (audienceContext) {
+                console.log("Found matching audience context:", audienceContext.name);
+            } else {
+                console.log("No matching audience context found for condition:", user.condition);
+            }
+
+            // 1. Recommendations
+            setStatus("1/5: Asking Gemini for tailored product recommendations...");
+            const prodData = await generatePersonalizedProducts(user, audienceContext);
+            const products = prodData.products || [];
+
+            // 2. Translation
+            setStatus("2/5: Translating recommendations to Spanish...");
+            const transData = await translateProducts(products);
+            const productsEs = transData.products || [];
+
+            // 3. Headlines
+            setStatus("3/5: Writing personalized headlines...");
+            const headlines = await generatePersonalizedHeadlines(user, audienceContext);
+
+            // 4. Images
+            setStatus("4/5: Generating product images with Gemini...");
+            const images: (string | null)[] = [];
+            const batchSize = 3;
+            
+            for (let i = 0; i < products.length; i += batchSize) {
+                const batch = products.slice(i, i + batchSize);
+                const batchResults = await Promise.all(batch.map((p: any) =>
+                    generateImage(p.image_prompt + ", high quality, photorealistic, isolated on white background")
+                ));
+                images.push(...batchResults);
+            }
+
+            // 5. Assembly
+            setStatus("5/5: Assembling the final page...");
+            const html = constructHtml(user, products, productsEs, headlines, images);
+            setGeneratedHtml(html);
+            setStep(4);
+
+        } catch (error) {
+            console.error(error);
+            alert("Failed to generate page.");
+            setStep(2); // Go back
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const constructHtml = (user: any, productsEn: any[], productsEs: any[], headlines: any, images: (string | null)[]) => {
+        let cardsHtml = "";
+
+        productsEn.forEach((prod, i) => {
+            const prodEs = productsEs[i] || prod;
+            const imgBase64 = images[i] ? `data:image/jpeg;base64,${images[i]}` : 'https://via.placeholder.com/400?text=Image+Failed';
+
+            cardsHtml += `
+                <div class="product-card">
+                    <img src="${imgBase64}" alt="${prod.name}">
+                    <div class="product-info">
+                        <h3>
+                            <span class="lang-en">${prod.name}</span>
+                            <span class="lang-es">${prodEs.name}</span>
+                        </h3>
+                        <p class="description">
+                            <span class="lang-en">${prod.short_description}</span>
+                            <span class="lang-es">${prodEs.short_description}</span>
+                        </p>
+                        <p class="price">${prod.cost}</p>
+                    </div>
+                    <div class="reason-overlay">
+                        <p>
+                            <span class="lang-en">${prod.reason}</span>
+                            <span class="lang-es">${prodEs.reason}</span>
+                        </p>
+                    </div>
+                </div>
+            `;
+        });
 
         return `
-      <!DOCTYPE html>
-      <html lang="en">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>${name} - Personalized Quote</title>
-        <script src="https://cdn.tailwindcss.com"></script>
-        <style>
-            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
-            body { font-family: 'Inter', sans-serif; }
-            .brand-gradient { background: linear-gradient(135deg, #0077C8 0%, #00508a 100%); }
-        </style>
-      </head>
-      <body class="bg-gray-50 text-gray-900">
-        <!-- Navigation -->
-        <nav class="bg-white border-b border-gray-100 py-4">
-            <div class="max-w-6xl mx-auto px-4 flex justify-between items-center">
-                <div class="font-bold text-2xl text-[#0077C8]">${name}</div>
-                <div class="hidden md:flex gap-8 text-sm font-medium text-gray-500">
-                    <a href="#" class="hover:text-[#0077C8]">Plans</a>
-                    <a href="#" class="hover:text-[#0077C8]">Find a Doctor</a>
-                    <a href="#" class="hover:text-[#0077C8]">Wellness</a>
-                    <a href="#" class="hover:text-[#0077C8]">Member Login</a>
-                </div>
+            <!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Special Selection for ${user.name}</title>
+            <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+            <style>
+                :root { --bg-primary: #F0F2F6; --bg-content: #FFFFFF; --text-primary: #262730; --text-secondary: #5E6C84; --accent-primary: #E22026; --accent-light: #F3F4F6; --border-color: #DFE1E6; }
+                body { font-family: 'Inter', sans-serif; margin: 0; background-color: var(--bg-primary); color: var(--text-primary); line-height: 1.6; }
+                .lang-es { display: none; }
+                .header { background-color: var(--bg-content); padding: 40px; text-align: center; border-bottom: 2px solid var(--border-color); }
+                .header h1 { margin: 0; font-size: 2.5rem; color: var(--text-primary); }
+                .header p { margin: 20px auto 0; font-size: 1.15rem; color: var(--text-secondary); max-width: 800px; }
+                .lang-toggle { padding: 15px; text-align: center; background: var(--bg-content); border-bottom: 1px solid var(--border-color); }
+                .lang-toggle button { background: var(--bg-primary); border: 1px solid var(--border-color); padding: 8px 20px; margin: 0 5px; border-radius: 6px; cursor: pointer; }
+                .lang-toggle button.active { background: var(--accent-primary); color: #fff; border-color: var(--accent-primary); }
+                .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+                .products-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+                .product-card { background: var(--bg-content); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); overflow: hidden; position: relative; transition: transform 0.3s; }
+                .product-card:hover { transform: translateY(-5px); }
+                .product-card img { width: 100%; height: 300px; object-fit: contain; padding: 20px; background: white; }
+                .product-info { padding: 20px; }
+                .product-info h3 { margin: 0 0 10px; font-size: 1.2rem; }
+                .product-info .price { color: var(--accent-primary); font-weight: bold; font-size: 1.2rem; margin-top: 10px; }
+                .reason-overlay { position: absolute; inset: 0; background: rgba(226, 32, 38, 0.95); color: white; display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; transition: opacity 0.3s; text-align: center; }
+                .product-card:hover .reason-overlay { opacity: 1; }
+            </style>
+            </head><body>
+            <div class="header">
+                <h1><span class="lang-en">${headlines.en.headline}</span><span class="lang-es">${headlines.es.headline}</span></h1>
+                <p><span class="lang-en">${headlines.en.subheadline}</span><span class="lang-es">${headlines.es.subheadline}</span></p>
             </div>
-        </nav>
-
-        <!-- Hero Section -->
-        <header class="relative bg-white overflow-hidden">
-            <div class="absolute inset-0">
-                <img src="${heroImage}" class="w-full h-full object-cover opacity-10" alt="Background">
-                <div class="absolute inset-0 bg-gradient-to-r from-white via-white/80 to-transparent"></div>
+            <div class="lang-toggle">
+                <button id="btn-en" class="active" onclick="toggleLanguage('en')">English</button>
+                <button id="btn-es" onclick="toggleLanguage('es')">Español</button>
             </div>
-            <div class="relative max-w-6xl mx-auto px-4 py-20 md:py-32 grid md:grid-cols-2 gap-12 items-center">
-                <div>
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-[#0077C8] text-sm font-semibold mb-6">
-                        <span class="w-2 h-2 rounded-full bg-[#0077C8]"></span> Personalized for ${customer.name}
-                    </div>
-                    <h1 class="text-4xl md:text-6xl font-black tracking-tight text-gray-900 mb-6 leading-tight">
-                        ${headlines.en.headline}
-                    </h1>
-                    <p class="text-xl text-gray-600 mb-8 leading-relaxed">
-                        ${headlines.en.subheadline}
-                    </p>
-                    <div class="flex gap-4">
-                        <button class="bg-[#0077C8] text-white px-8 py-4 rounded-xl font-bold shadow-lg shadow-blue-500/20 hover:bg-[#0061a3] transition-all transform hover:-translate-y-1">
-                            View Your Quote
-                        </button>
-                        <button class="bg-white text-gray-700 px-8 py-4 rounded-xl font-bold border border-gray-200 hover:bg-gray-50 transition-all">
-                            Speak to an Agent
-                        </button>
-                    </div>
-                </div>
-                <!-- Dynamic Card -->
-                <div class="relative hidden md:block">
-                    <div class="bg-white p-8 rounded-3xl shadow-2xl border border-gray-100 transform rotate-2 hover:rotate-0 transition-all duration-500">
-                        <div class="flex items-center gap-4 mb-6">
-                            <div class="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center text-[#0077C8]">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                            </div>
-                            <div>
-                                <h3 class="font-bold text-gray-900">Recommended Coverage</h3>
-                                <p class="text-sm text-gray-500">Based on your needs in ${customer.location}</p>
-                            </div>
-                        </div>
-                        <div class="space-y-4">
-                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-                                <span class="font-medium text-gray-700">Primary Care Visits</span>
-                                <span class="font-bold text-[#0077C8]">$0 Copay</span>
-                            </div>
-                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-                                <span class="font-medium text-gray-700">Specialist Visits</span>
-                                <span class="font-bold text-[#0077C8]">$25 Copay</span>
-                            </div>
-                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-                                <span class="font-medium text-gray-700">Deductible</span>
-                                <span class="font-bold text-[#0077C8]">$500</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </header>
-
-        <!-- Recommended Plans Section -->
-        <section class="py-20 bg-gray-50">
-            <div class="max-w-6xl mx-auto px-4">
-                <div class="text-center mb-16">
-                    <h2 class="text-3xl font-bold text-gray-900 mb-4">Plans Selected For You</h2>
-                    <p class="text-gray-500 max-w-2xl mx-auto">We've analyzed your profile and found these options that match your lifestyle and budget.</p>
-                </div>
-                
-                <div class="grid md:grid-cols-3 gap-8">
-                    ${products.slice(0, 3).map((product: any) => `
-                        <div class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 group">
-                            <div class="h-48 overflow-hidden bg-gray-100 relative">
-                                <!-- Placeholder for generated image if available, else gradient -->
-                                 <div class="absolute inset-0 bg-gradient-to-br from-blue-50 to-white flex items-center justify-center text-blue-200">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                                 </div>
-                                 <div class="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-[#0077C8]">
-                                    Best Match
-                                 </div>
-                            </div>
-                            <div class="p-8">
-                                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-[#0077C8] transition-colors">${product.name}</h3>
-                                <p class="text-gray-500 text-sm mb-6 line-clamp-2">${product.short_description}</p>
-                                
-                                <div class="mb-6 p-4 bg-blue-50 rounded-xl border border-blue-100">
-                                    <p class="text-xs font-bold text-[#0077C8] uppercase tracking-wider mb-1">Why it fits</p>
-                                    <p class="text-sm text-blue-800 italic">"${product.reason}"</p>
-                                </div>
-                                
-                                <div class="flex items-end justify-between border-t border-gray-50 pt-6">
-                                    <div>
-                                        <p class="text-xs text-gray-400 font-medium uppercase">Est. Premium</p>
-                                        <p class="text-2xl font-black text-gray-900">${product.cost || "$0"}<span class="text-sm font-medium text-gray-400">/mo</span></p>
-                                    </div>
-                                    <button class="w-12 h-12 rounded-full bg-[#0077C8] text-white flex items-center justify-center hover:bg-[#0061a3] transition-colors">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            </div>
-        </section>
-
-        <!-- CTA -->
-        <section class="py-20 bg-white border-t border-gray-100">
-            <div class="max-w-4xl mx-auto px-4 text-center">
-                <h2 class="text-3xl font-bold text-gray-900 mb-6">Ready to enroll?</h2>
-                <div class="flex justify-center gap-4">
-                    <button class="bg-gray-900 text-white px-8 py-3 rounded-full font-semibold hover:bg-black transition-colors">
-                        Start Application
-                    </button>
-                </div>
-            </div>
-        </section>
-      </body>
-      </html>
-    `;
+            <div class="container"><div class="products-grid">${cardsHtml}</div></div>
+            <script>
+                function toggleLanguage(lang) {
+                    const en = document.querySelectorAll('.lang-en');
+                    const es = document.querySelectorAll('.lang-es');
+                    document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+                    document.getElementById('btn-es').classList.toggle('active', lang === 'es');
+                    en.forEach(e => e.style.display = lang === 'en' ? 'inline' : 'none');
+                    es.forEach(e => e.style.display = lang === 'es' ? 'inline' : 'none');
+                }
+            </script>
+            </body></html>
+        `;
     };
 
     return (
-        <div className="max-w-[1600px] mx-auto p-4 md:p-8 min-h-screen">
-
-            {/* Header */}
-            <div className="flex justify-between items-center mb-10">
-                <div>
-                    <h2 className="section-header">Personalized Site Generator</h2>
-                    <p className="text-subtext mt-1">Generate dynamic landing pages based on member profiles.</p>
-                </div>
+        <div className="max-w-[1600px] mx-auto p-6">
+            <div className="flex justify-between items-center mb-6">
+                <h2 className="section-header">Generative Site Building</h2>
             </div>
 
-            {step === 1 && (
-                <div className="content-card">
-                    <div className="flex justify-between items-center mb-6 border-b border-gray-100 pb-6">
-                        <h3 className="text-xl font-bold text-heading flex items-center gap-2">
-                            <Users size={20} className="text-[#0077C8]" /> Customer Data Source
-                        </h3>
+            {step > 1 && !loading && (
+                <button
+                    onClick={() => { setStep(1); setGeneratedHtml(null); setAudiences([]); }}
+                    className="flex items-center gap-2 text-gray-500 hover:text-gray-900 font-semibold mb-6 transition-colors"
+                >
+                    <ArrowLeft size={20} /> Back to Data
+                </button>
+            )}
+
+            {step === 1 && !loading && (
+                <div className="content-card p-8">
+                    <div className="flex justify-between items-center mb-6">
+                        <div>
+                            <h3 className="text-xl font-semibold text-gray-900 font-bold mb-1 flex items-center gap-2">
+                                <Users size={20} className="text-[#0077C8]" /> Customer Data Source
+                            </h3>
+                        </div>
                         <div className="flex gap-4 items-center">
                             <button
-                                onClick={handleAnalyzeAudiences}
-                                disabled={isGenerating}
-                                className="btn-primary flex items-center gap-2"
+                                onClick={handleLoadLast}
+                                className="text-gray-500 hover:text-gray-900 font-medium flex items-center gap-2"
+                                title="Replay last run"
                             >
-                                {isGenerating ? <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" /> : <CheckCircle size={18} />}
-                                Analyze Segments
+                                <RotateCcw size={16} /> Load Last Run
+                            </button>
+                            <button
+                                onClick={handleAnalyzeAudiences}
+                                className={`btn-primary px-6 py-3 rounded-lg font-bold shadow-md hover:shadow-lg transition-all`}
+                            >
+                                Analyze Audiences
                             </button>
                         </div>
                     </div>
 
                     <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
+                        <table className="data-table">
                             <thead>
-                                <tr className="border-b border-gray-100 text-xs font-bold text-subtext uppercase tracking-wider">
-                                    <th className="p-4">Customer Name</th>
-                                    <th className="p-4">Life Stage / Goal</th>
-                                    <th className="p-4">Location</th>
-                                    <th className="p-4">Interests</th>
-                                    <th className="p-4">Top Channel</th>
-                                    <th className="p-4">Action</th>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Channel</th>
+                                    <th>Goal/Focus</th>
+                                    <th>Browse History</th>
+                                    <th>Location</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-50">
-                                {SAMPLE_DATA.map((customer, idx) => (
-                                    <tr key={idx} className="hover:bg-gray-50 transition-colors group">
-                                        <td className="p-4 font-medium text-heading">{customer.name}<br /><span className="text-xs text-subtext font-normal">{customer.email}</span></td>
-                                        <td className="p-4">
-                                            <span className="px-2.5 py-1 bg-blue-50 text-[#0077C8] rounded-full text-xs font-bold">{customer.condition}</span>
-                                        </td>
-                                        <td className="p-4 text-sm text-subtext">{customer.location}</td>
-                                        <td className="p-4 text-xs text-subtext max-w-xs truncate">{customer.browse_history.join(', ')}</td>
-                                        <td className="p-4">
-                                            <div className="flex items-center gap-2 text-sm font-medium text-gray-600">
-                                                {customer.topChannel === 'Web' && <Globe size={14} />}
-                                                {customer.topChannel === 'Email' && <Mail size={14} />}
-                                                {customer.topChannel === 'Mobile' && <Smartphone size={14} />}
-                                                {customer.topChannel}
-                                            </div>
-                                        </td>
-                                        <td className="p-4">
-                                            <div className="flex gap-2">
-                                                <button
-                                                    onClick={() => handleGeneratePage(customer)}
-                                                    className="transition-opacity btn-secondary text-xs py-1.5 px-3"
-                                                >
-                                                    Generate Page
-                                                </button>
-                                                {lastRun && lastRun.selectedCustomer?.name === customer.name && (
-                                                    <button
-                                                        onClick={() => handleLoadLast(lastRun)}
-                                                        className="transition-opacity btn-secondary flex items-center gap-1 bg-gray-100 text-gray-700 hover:bg-gray-200 border-gray-200 text-xs py-1.5 px-3"
-                                                    >
-                                                        <RotateCcw size={12} /> Load Last
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </td>
+                            <tbody>
+                                {SAMPLE_DATA.map(user => (
+                                    <tr key={user.user_id}>
+                                        <td className="font-medium text-gray-900">{user.name}</td>
+                                        <td className="text-sm text-gray-500">{user.email}</td>
+                                        <td><span className="badge badge-gray">{user.topChannel}</span></td>
+                                        <td className="text-sm text-gray-900 font-medium max-w-xs truncate">{user.condition}</td>
+                                        <td className="text-sm text-gray-500 max-w-xs truncate">{user.Browse_history}</td>
+                                        <td className="text-sm text-gray-500">{user.location}</td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -345,70 +388,102 @@ export const GenSiteStub: React.FC = () => {
                 </div>
             )}
 
-            {(step === 2 || step === 3) && isGenerating && (
-                <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center">
-                    <div className="w-24 h-24 border-4 border-[#0077C8] border-t-transparent rounded-full animate-spin mb-6"></div>
-                    <h3 className="text-2xl font-bold text-heading animate-pulse">Generating Personalized Experience...</h3>
-                    <p className="text-subtext mt-2"> analyzing {selectedCustomer?.name}'s profile...</p>
+            {/* Loading State */}
+            {loading && (
+                <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 flex items-center justify-center">
+                    <div className="flex flex-col items-center">
+                        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#0077C8] mb-4"></div>
+                        <p className="text-xl font-semibold text-gray-900 mb-2">Building Site...</p>
+                        <p className="text-gray-500 animate-pulse">{status}</p>
+                    </div>
                 </div>
             )}
 
-            {step === 3 && generatedHtml && !isGenerating && (
-                <div className="animate-fadeIn">
-                    <button onClick={() => setStep(1)} className="mb-6 flex items-center gap-2 text-subtext hover:text-heading transition-colors font-medium">
-                        <ArrowRight className="rotate-180" size={18} /> Back to Data
-                    </button>
-                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-                        {/* Preview Window */}
-                        <div className="lg:col-span-3">
-                            <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden h-[800px] flex flex-col">
-                                <div className="bg-gray-100 border-b border-gray-200 p-3 flex gap-2 items-center">
-                                    <div className="flex gap-1.5">
-                                        <div className="w-3 h-3 rounded-full bg-red-400"></div>
-                                        <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
-                                        <div className="w-3 h-3 rounded-full bg-green-400"></div>
-                                    </div>
-                                    <div className="bg-white rounded-md px-4 py-1.5 text-xs text-gray-400 flex-1 text-center font-mono mx-8">
-                                        {name.toLowerCase().replace(/\s+/g, '')}.com/quote/{selectedCustomer?.name.toLowerCase().replace(' ', '-')}
-                                    </div>
-                                </div>
-                                <iframe
-                                    srcDoc={generatedHtml}
-                                    className="w-full h-full border-0"
-                                    title="Generated Preview"
-                                />
-                            </div>
-                        </div>
-
-                        {/* Sidebar Controls */}
-                        <div className="space-y-6">
-                            <div className="content-card p-6">
-                                <h3 className="text-sm font-bold text-heading uppercase tracking-widest mb-4"> personalization data</h3>
-                                <div className="space-y-4">
-                                    <div>
-                                        <label className="text-xs text-subtext font-bold uppercase">Target Segment</label>
-                                        <p className="text-heading font-medium">{selectedCustomer?.condition}</p>
-                                    </div>
-                                    <div>
-                                        <label className="text-xs text-subtext font-bold uppercase">Primary Interest</label>
-                                        <p className="text-heading font-medium">{selectedCustomer?.browse_history[0]}</p>
-                                    </div>
-                                    <div>
-                                        <label className="text-xs text-subtext font-bold uppercase">Generated Plans</label>
-                                        <p className="text-heading font-medium">{generatedContent?.products?.length || 0} Options</p>
-                                    </div>
-                                </div>
-
-                                <div className="mt-8 pt-6 border-t border-gray-100">
-                                    <button className="w-full btn-primary mb-3">Publish to Staging</button>
-                                    <button className="w-full btn-ghost">Download HTML</button>
+            {/* Step 2: Select Audience/User */}
+            {step === 2 && !loading && (
+                <div className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {audiences.map((aud, idx) => (
+                            <div key={idx} className="content-card border-t-4 border-[#0077C8]">
+                                <h3 className="text-lg font-bold text-gray-900 mb-2">{aud.audience_name}</h3>
+                                <p className="text-sm text-gray-600 mb-4">{aud.description}</p>
+                                <div className="text-xs text-gray-500">
+                                    <strong>Users: </strong>
+                                    {aud.user_ids.map((uid: number) => SAMPLE_DATA.find(u => u.user_id === uid)?.name).join(', ')}
                                 </div>
                             </div>
+                        ))}
+                    </div>
+
+                    <div className="content-card text-center p-8">
+                        <h3 className="section-header justify-center mb-4">Select a User to Target</h3>
+                        <div className="flex justify-center gap-4">
+                            <select
+                                value={selectedUserId}
+                                onChange={(e) => setSelectedUserId(e.target.value)}
+                                className="p-3 rounded-lg border border-gray-200 bg-white text-gray-900 min-w-[200px]"
+                            >
+                                {SAMPLE_DATA.map(user => (
+                                    <option key={user.user_id} value={user.user_id}>{user.name} ({user.location})</option>
+                                ))}
+                            </select>
+                            <button onClick={handleGeneratePage} className={`btn-primary px-8 py-3 rounded-lg font-bold transition-colors shadow-lg`}>
+                                Generate Personalized Site
+                            </button>
                         </div>
                     </div>
                 </div>
             )}
 
+            {/* Step 4: Preview */}
+            {step === 4 && generatedHtml && (
+                <div className="space-y-8">
+                    {/* Context: Audiences */}
+                    <div className="bg-gray-50 p-6 rounded-xl shadow-sm border border-gray-200">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-lg font-bold text-gray-900">Target Audiences Identified</h3>
+                            <button
+                                onClick={() => setStep(2)}
+                                className="text-sm text-gray-500 hover:text-gray-900 font-medium"
+                            >
+                                Change Selection
+                            </button>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            {audiences.map((aud, idx) => (
+                                <div key={idx} className={`p-4 rounded-lg border ${aud.user_ids.includes(Number(selectedUserId)) ? 'bg-[#0077C8]/5 border-[#0077C8]/30 ring-1 ring-[#0077C8]/20' : 'bg-white border-gray-200 opacity-70'}`}>
+                                    <h4 className="font-bold text-gray-900 text-sm mb-1">{aud.audience_name}</h4>
+                                    <p className="text-xs text-gray-600 line-clamp-2">{aud.description}</p>
+                                    {aud.user_ids.includes(Number(selectedUserId)) && (
+                                        <div className="mt-2 text-xs font-bold text-[#0077C8] bg-[#0077C8]/10 inline-block px-2 py-1 rounded">
+                                            Current Target
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Generated Site */}
+                    <div className="content-card p-0 overflow-hidden">
+                        <div className="bg-gray-100 p-2 border-b border-gray-200 flex gap-2 items-center">
+                            <div className="flex gap-1.5 ml-2">
+                                <div className="w-3 h-3 rounded-full bg-red-400/60"></div>
+                                <div className="w-3 h-3 rounded-full bg-yellow-400/60"></div>
+                                <div className="w-3 h-3 rounded-full bg-green-400/60"></div>
+                            </div>
+                            <div className="flex-1 bg-white mx-4 py-1 px-3 rounded text-xs text-center text-gray-500 font-mono border border-gray-200 shadow-inner">
+                                {brandConfig.companyName.replace(/\s+/g, '').toLowerCase()}.com/personalized/{SAMPLE_DATA.find(u => u.user_id === Number(selectedUserId))?.name.toLowerCase()}
+                            </div>
+                        </div>
+                        <iframe
+                            srcDoc={generatedHtml}
+                            className="w-full h-[800px] border-none"
+                            title="Generated Site"
+                        />
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

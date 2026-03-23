@@ -1,25 +1,20 @@
 import React, { useState } from 'react';
 import { generateImageWithReference } from '../services/geminiService';
 import { brandConfig } from '../config';
-import { Upload, X } from 'lucide-react';
+import { Upload, X, RotateCcw } from 'lucide-react';
 
 const BRAND_BLACK = "#111827"; // Brand Black
 const BRAND_ACCENT = "#0077C8";
 
 export const ContentVersioning: React.FC = () => {
   const [loading, setLoading] = useState(false);
-  const [tagline, setTagline] = useState("Science that empowers you");
-  const [fontSettings, setFontSettings] = useState("font-family:Arial,sans-serif;font-weight:bold;");
-  const [logoPlacement, setLogoPlacement] = useState('Top Right');
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [generatedDeals, setGeneratedDeals] = useState<string[]>([]);
-  const [bgMode, setBgMode] = useState<'brand' | 'custom'>('brand');
-  const [customBgPrompt, setCustomBgPrompt] = useState("A sunny outdoor park");
 
   React.useEffect(() => {
     const loadDefaultImage = async () => {
       try {
-        const response = await fetch('/images/content_version_healthcare.png');
+        const response = await fetch('/images/qvc-ad.png');
         const blob = await response.blob();
         const reader = new FileReader();
         reader.onloadend = () => {
@@ -34,6 +29,43 @@ export const ContentVersioning: React.FC = () => {
     };
     loadDefaultImage();
   }, []);
+
+  React.useEffect(() => {
+    if (generatedDeals.length > 0) {
+      fetch('/api/save-run', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          featureId: 'content_versioning',
+          data: {
+            uploadedImage,
+            generatedDeals
+          }
+        })
+      }).catch(err => console.error("Failed to save run to server:", err));
+    }
+  }, [generatedDeals, uploadedImage]);
+
+  const loadLastRun = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/load-run/content_versioning');
+      if (!response.ok) throw new Error("No saved run");
+      
+      const data = await response.json();
+      
+      if (data.uploadedImage) setUploadedImage(data.uploadedImage);
+      if (data.generatedDeals) setGeneratedDeals(data.generatedDeals);
+      
+    } catch (error) {
+      console.warn("Could not load last run:", error);
+      alert("No previous run found.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -55,35 +87,24 @@ export const ContentVersioning: React.FC = () => {
     setGeneratedDeals([]);
 
     try {
-      const backgroundInstruction = bgMode === 'brand'
-        ? `The background MUST be a professional ${brandConfig.companyName} style (Clean/Athletic/High Contrast). The text MUST be clear.`
-        : `The background should be: ${customBgPrompt}.`;
-
-      const logoInstruction = logoPlacement !== 'None'
-        ? `Add a small, subtle ${brandConfig.companyName} logo in the ${logoPlacement}. CRITICAL: Do NOT use heavy text.`
-        : "";
-
       const prompt = `
-      Create a high-energy, commercial-grade advertisement featuring this product.
+      Create a high-quality variation of the provided input advertisement.
       
       CONTEXT:
-      The product MUST be worn or used by a person in a dynamic, authentic setting (e.g. sprinting on a track, lifting in a gritty gym, jumping in an urban environment, hiking). 
-      The person should look focused and athletic. 
-      The lighting should be dramatic and cinematic (high contrast).
-      ${backgroundInstruction}
+      The image should be a faithful recreation of the input advertisement, adapted to the target aspect ratio.
+      Maintain the overarching theme, visual style, and aesthetic of the input image.
+      The lighting, color palette, and overall vibe MUST remain consistent with the original.
       
-      TEXT OVERLAY:
-      The text "${tagline}" MUST be clearly integrated into the image, perhaps behind the subject or boldly in the negative space.
-      Font Style: "${fontSettings}".
-      The text must NOT cover the product.
+      TEXT REPLICATION:
+      CRITICAL: You MUST maintain 100% accuracy of all text found in the original advertisement.
+      The text placement, font weights, and typographic hierarchy should feel native to the new aspect ratio.
+      Do not add new text or calls to action.
       
       BRANDING:
-      ${logoInstruction}
+      Maintain any logos or brand elements exactly as they appear in the input image, adjusted proportionately for the new aspect ratio.`;
 
-      Overall Vibe: Empowering, fast, premium, and intense.`;
-
-      const aspectRatios = ["1:1", "16:9", "9:16", "4:3"];
-      const promises = aspectRatios.map(ratio => generateImageWithReference(prompt, uploadedImage, "image/jpeg", "gemini-3-pro-image-preview", ratio));
+      const aspectRatios = ["1:1", "4:3", "16:9", "9:16", "3:2", "2:3", "4:5", "5:4", "21:9", "4:1"];
+      const promises = aspectRatios.map(ratio => generateImageWithReference(prompt, uploadedImage, "image/jpeg", "gemini-3.1-flash-image-preview", ratio));
       const results = await Promise.all(promises);
 
       const validResults = results
@@ -100,13 +121,21 @@ export const ContentVersioning: React.FC = () => {
 
   return (
     <div className="max-w-6xl mx-auto p-6">
-      <h2 className="section-header">Content Versioning</h2>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="section-header !mb-0">Content Versioning</h2>
+        <button
+          onClick={loadLastRun}
+          className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors bg-white px-4 py-2 rounded-lg border border-gray-200 shadow-sm font-medium"
+        >
+          <RotateCcw size={16} /> Load Last
+        </button>
+      </div>
 
       {loading && (
         <div className="fixed inset-0 bg-white/90 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
           <div className="flex flex-col items-center">
             <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600 mb-4"></div>
-            <p className="text-xl font-semibold text-gray-900">Generating 4 Variations...</p>
+            <p className="text-xl font-semibold text-gray-900">Generating 10 Variations...</p>
           </div>
         </div>
       )}
@@ -136,67 +165,12 @@ export const ContentVersioning: React.FC = () => {
             </div>
           )}
 
-          <h3 className="text-lg font-semibold mb-2 text-gray-900">2. Background Style</h3>
-          <div className="flex gap-2 mb-4 bg-gray-100 p-1 rounded-lg border border-gray-200">
-            <button
-              onClick={() => setBgMode('brand')}
-              className={`flex-1 py-2 px-3 rounded-md text-sm font-bold transition-all ${bgMode === 'brand' ? 'bg-white shadow-sm text-gray-900 border border-gray-200' : 'text-gray-500 hover:text-gray-700'}`}
-            >
-              Brand Style
-            </button>
-            <button
-              onClick={() => setBgMode('custom')}
-              className={`flex-1 py-2 px-3 rounded-md text-sm font-bold transition-all ${bgMode === 'custom' ? 'bg-white shadow-sm text-gray-900 border border-gray-200' : 'text-gray-500 hover:text-gray-700'}`}
-            >
-              Custom
-            </button>
-          </div>
-
-          {bgMode === 'custom' && (
-            <textarea
-              value={customBgPrompt}
-              onChange={(e) => setCustomBgPrompt(e.target.value)}
-              className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none mb-6 h-20 resize-none placeholder-gray-400"
-              placeholder="e.g. Urban running track at sunset"
-            />
-          )}
-
-          <h3 className="text-lg font-semibold mb-2 text-gray-900">3. Enter Tagline</h3>
-          <textarea
-            value={tagline}
-            onChange={(e) => setTagline(e.target.value)}
-            className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none mb-6 h-24 resize-none placeholder-gray-400 text-lg"
-            placeholder="e.g. Science that empowers you"
-          />
-
-          <h3 className="text-lg font-semibold mb-2 text-gray-900">4. Font Settings</h3>
-          <input
-            type="text"
-            value={fontSettings}
-            onChange={(e) => setFontSettings(e.target.value)}
-            className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none mb-6 font-mono placeholder-gray-400"
-            placeholder="e.g. font-family:Arial; font-weight:bold;"
-          />
-
-          <h3 className="text-lg font-semibold mb-2 text-gray-900">5. Logo Placement</h3>
-          <select
-            value={logoPlacement}
-            onChange={(e) => setLogoPlacement(e.target.value)}
-            className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none mb-6"
-          >
-            <option value="Top Left">Top Left</option>
-            <option value="Top Right">Top Right</option>
-            <option value="Bottom Left">Bottom Left</option>
-            <option value="Bottom Right">Bottom Right</option>
-            <option value="None">None</option>
-          </select>
-
           <button
             onClick={handleGenerateDeal}
             disabled={!uploadedImage || loading}
-            className={`w-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg btn-primary px-6 py-4 rounded-lg font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all`}
+            className={`w-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg btn-primary px-6 py-4 rounded-lg font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all mt-6`}
           >
-            Generate 4 Options
+            Generate 10 Options
           </button>
         </div>
 
@@ -205,7 +179,11 @@ export const ContentVersioning: React.FC = () => {
           {generatedDeals.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {generatedDeals.map((dealUrl, index) => {
-                const ratios = ["1:1 (Square)", "16:9 (Landscape)", "9:16 (Story)", "4:3 (Classic)"];
+                const ratios = [
+                  "1:1 (Square)", "4:3 (Classic)", "16:9 (Landscape)", "9:16 (Vertical)", 
+                  "3:2 (Standard)", "2:3 (Portrait)", "4:5 (Social)", "5:4 (Social)", 
+                  "21:9 (Cinematic)", "4:1 (Banner)"
+                ];
                 return (
                   <div key={index} className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
                     <h3 className="text-sm font-bold text-gray-500 uppercase mb-3 tracking-wider">{ratios[index]}</h3>

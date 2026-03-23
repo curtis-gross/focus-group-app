@@ -3,7 +3,8 @@ import { Upload, X, Loader2, Play, Video } from 'lucide-react';
 import { generateProductSpinVideo, fileToGenerativePart } from '../services/geminiService';
 
 export const ProductSpin: React.FC = () => {
-    const [images, setImages] = useState<string[]>([]);
+    const [images, setImages] = useState<string[]>(['/images/default-pot.png', '/images/qvc-dish2.png']);
+    const [prompt, setPrompt] = useState<string>("A photorealistic 360-degree spin of the product on a clean pedestal. Maintain exact consistency with the provided reference images.");
     const [loading, setLoading] = useState(false);
     const [generatedVideo, setGeneratedVideo] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
@@ -33,7 +34,7 @@ export const ProductSpin: React.FC = () => {
         try {
             // Take up to 4 images as per typical Veo capabilities/best practices for this task
             // The prompt implies multiple images can be used for reference
-            const videoUrl = await generateProductSpinVideo(images);
+            const videoUrl = await generateProductSpinVideo(images, prompt);
 
             if (videoUrl) {
                 setGeneratedVideo(videoUrl);
@@ -48,6 +49,7 @@ export const ProductSpin: React.FC = () => {
                             data: {
                                 timestamp: new Date().toISOString(),
                                 inputImagesCount: images.length,
+                                prompt: prompt,
                                 videoUrl: videoUrl
                             }
                         })
@@ -105,7 +107,7 @@ export const ProductSpin: React.FC = () => {
 
                 {/* Image Preview Grid */}
                 {images.length > 0 && (
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                         {images.map((img, idx) => (
                             <div key={idx} className="relative group aspect-square rounded-lg overflow-hidden border border-gray-200 bg-white shadow-sm">
                                 <img src={img} alt={`Reference ${idx + 1}`} className="w-full h-full object-contain p-2" />
@@ -120,7 +122,24 @@ export const ProductSpin: React.FC = () => {
                     </div>
                 )}
 
-                <div className="flex justify-between items-center pt-4 border-t border-gray-100">
+                {/* Prompt Editor */}
+                <div className="mb-8">
+                    <label className="block text-sm font-bold text-heading mb-3 flex items-center gap-2">
+                        <Video size={16} className="text-[#0077C8]" />
+                        Generation Prompt
+                    </label>
+                    <textarea
+                        value={prompt}
+                        onChange={(e) => setPrompt(e.target.value)}
+                        placeholder="Describe the product spin context..."
+                        className="w-full h-32 p-4 rounded-xl border border-gray-200 bg-white text-heading focus:ring-2 focus:ring-[#0077C8] focus:border-transparent transition-all resize-none shadow-inner"
+                    />
+                    <p className="text-subtext text-xs mt-2 italic">
+                        The AI will use the uploaded images as its primary visual reference while following this prompt.
+                    </p>
+                </div>
+
+                <div className="flex justify-between items-center pt-6 border-t border-gray-100">
                     <div></div>
 
                     <div className="flex gap-4">

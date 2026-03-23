@@ -13,95 +13,95 @@
       "relation": "Family of 4"
     },
     {
-      "name": "Child 1",
-      "relation": "Dependent"
+      "name": "David",
+      "relation": "Primary Shopper"
     },
     {
-      "name": "Child 2",
-      "relation": "Dependent"
+      "name": "Sara",
+      "relation": "Co-Shopper"
     },
     {
-      "name": "Newborn",
-      "relation": "Prospective Addition"
+      "name": "Kids",
+      "relation": "Gift Recipients"
     }
   ],
   "recent_purchases": [
     {
-      "name": "Monthly Health Premium",
-      "brand": "Healthco Family Plus",
-      "price": 750,
-      "type": "Premium Payment"
+      "name": "Le Creuset 3.75-qt Signature Oval Casserole",
+      "brand": "Le Creuset",
+      "price": 259.98,
+      "type": "Kitchen & Food"
     },
     {
-      "name": "Specialist Visit Copay",
-      "brand": "Pediatric Care Network",
-      "price": 45,
-      "type": "Copay"
+      "name": "Dyson V15 Detect Cordless Vacuum",
+      "brand": "Dyson",
+      "price": 749.99,
+      "type": "Home Improvements"
     },
     {
-      "name": "Prescription Refill",
-      "brand": "Healthco Rx",
-      "price": 25,
-      "type": "Pharmacy"
+      "name": "KitchenAid Artisan Series 5-qt Stand Mixer",
+      "brand": "KitchenAid",
+      "price": 449.99,
+      "type": "Kitchen & Food"
     }
   ],
   "upcoming_events": [
     {
-      "event_name": "Annual Preventive Care Checkup",
+      "event_name": "Today's Special Value: Ninja Creami",
       "target_date": "2026-04-15",
-      "notes": "Due for comprehensive blood work and biometric screening."
+      "notes": "Interested in the new ice cream maker models for summer entertaining."
     },
     {
-      "event_name": "Open Enrollment Preparation",
-      "target_date": "2026-10-01",
-      "notes": "Interested in adding dental coverage for the kids next year."
+      "event_name": "QVC Birthday Sale",
+      "target_date": "2026-06-01",
+      "notes": "Planning to upgrade the patio furniture during the big clearance event."
     }
   ],
-  "aiSummary": "David Miller is a Platinum Member and 'Proactive Family Protector' managing a family plan with high engagement in pediatric and preventive care. He is currently seeking a physical therapist for a sports injury and has shown recent frustration regarding a lab bill he expected to be covered under preventive services. Given his recent queries about adding a newborn and his frequent use of the claims tracker, the concierge should focus on resolving the billing discrepancy and assisting with provider searches for his injury.",
+  "aiSummary": "David Miller is a QVC Platinum Member and 'Gourmet Tech Enthusiast' who frequently shops for high-end kitchenware and home technology. He recently purchased a Le Creuset casserole dish and has been browsing for Dyson cleaning solutions. He is highly engaged with 'Today's Special Value' events and values premium brands. Currently, he is looking for summer entertaining essentials and has shown interest in upcoming Ninja kitchen appliance launches. The concierge should focus on providing tailored recommendations for patio living and kitchen upgrades.",
   "nextActions": [
     {
-      "title": "Resolve Lab Claim Discrepancy",
-      "description": "Investigate the lab bill mentioned in chat logs to ensure it was processed correctly as preventive care and explain the status of his deductible."
+      "title": "Track Le Creuset Delivery",
+      "description": "Provide real-time shipping updates for the recent Le Creuset purchase and ensure the customer is aware of the 30-day Easy Return policy."
     },
     {
-      "title": "Specialist Referral Support",
-      "description": "Provide a curated list of in-network physical therapists and chiropractors in the 78701 area for his sports injury."
+      "title": "Ninja Creami Launch Notification",
+      "description": "Set a reminder to notify David 30 minutes before the Ninja Creami TSV goes live to ensure he gets his preferred color."
     },
     {
-      "title": "Policy Update Guidance",
-      "description": "Proactively share the documentation requirements and timeline for adding a newborn to the Family Plus policy."
+      "title": "Patio Decor Recommendations",
+      "description": "Curate a list of in-stock outdoor rugs and lighting that complement his modern home aesthetic for the upcoming summer season."
     }
   ],
   "marketingActivity": [
     {
       "type": "Web",
-      "event": "Provider Search",
+      "event": "Product Search",
       "time": "2026-03-10",
-      "details": "Searched find-a-doctor tool for local providers."
+      "details": "Searched for 'Air Fryers' and 'Cast Iron Dutch Ovens'."
     },
     {
       "type": "App",
-      "event": "ID Card View",
+      "event": "TSV Alert View",
       "time": "2026-03-10",
-      "details": "Accessed digital ID card via mobile app."
+      "details": "Viewed details for the upcoming Ninja TSV event."
     },
     {
       "type": "App",
-      "event": "Claims Tracking",
+      "event": "Order Tracking",
       "time": "2026-03-09",
-      "details": "Checked status of recent lab claim."
+      "details": "Checked shipping status of the Le Creuset order."
     },
     {
       "type": "Web",
-      "event": "Deductible Education",
+      "event": "Recipe Blog View",
       "time": "2026-03-09",
-      "details": "Viewed 'Understanding Your Deductible' article."
+      "details": "Read '5 Spring Stew Recipes' on the QVC community blog."
     },
     {
       "type": "Email",
       "event": "Newsletter Click",
       "time": "2026-03-08",
-      "details": "Clicked link in Monthly Wellness Newsletter."
+      "details": "Clicked link in the 'Weekly Gourmet Living' newsletter."
     }
   ],
   "engagementChart": {
@@ -109,18 +109,18 @@
     "data": [
       {
         "name": "Web",
-        "visits": 3,
-        "clicks": 1
+        "visits": 12,
+        "clicks": 5
       },
       {
         "name": "App",
-        "visits": 3,
-        "clicks": 2
+        "visits": 8,
+        "clicks": 4
       },
       {
         "name": "Email",
-        "visits": 2,
-        "clicks": 1
+        "visits": 4,
+        "clicks": 2
       }
     ]
   },

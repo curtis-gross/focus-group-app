@@ -7,7 +7,7 @@ export const GenerateNewProduct: React.FC = () => {
     const [loading, setLoading] = useState(false);
 
     // Step 1: Upload Reference
-    const DEFAULT_SKETCH = "https://images.unsplash.com/photo-1584515933487-779824d29309?auto=format&fit=crop&q=80&w=2000"; // Medical/Health abstract background
+    const DEFAULT_SKETCH = "https://images.unsplash.com/photo-1556910103-1c02745aae4d?auto=format&fit=crop&q=80&w=2000"; // Gourmet Kitchen background
     const [sketchImage, setSketchImage] = useState<string | null>(null);
 
     // Step 2: Concepts
@@ -94,18 +94,18 @@ export const GenerateNewProduct: React.FC = () => {
         }
 
         const themes = [
-            "Modern Minimalist Health Interface",
-            "Warm & Compassionate Family Care",
-            "High-Tech Medical Analytics Dashboard",
-            "Vibrant Senior Active Lifestyle",
-            "Clean Clinical Professional",
-            "Holistic Wellness & Nature"
+            "Elegant Culinary & Dining Experience",
+            "Modern Minimalist Home Decor",
+            "Premium Electronics Showcase",
+            "Luxury Beauty & Wellness Collection",
+            "Cozy Outdoor Living Space",
+            "Curated Fashion & Accessories"
         ];
 
         try {
             const promises = themes.map(theme =>
                 generateImageWithReference(
-                    `Create a high-quality marketing visual based on this reference. Theme: ${theme}. Style: Professional health insurance marketing, trustworthy, clear, positive emotional resonance. High resolution.`,
+                    `Create a high-quality marketing visual based on this reference. Theme: ${theme}. Style: Professional retail marketing, premium quality, elegant, aspirational. High resolution.`,
                     imageBase64.split(',')[1]
                 )
             );
@@ -144,21 +144,21 @@ export const GenerateNewProduct: React.FC = () => {
         setLifestyleImages([]);
 
         const formats = [
-            "as a hero image on a modern health website",
-            "as a printed brochure on a clean desk",
-            "on a mobile phone screen held by a user",
-            "on a large digital billboard in a city",
-            "as a social media card with 'Coverage You Trust' text overlay",
-            "as a wellness app interface"
+            "as a hero image on a premium retail website",
+            "as a lifestyle magazine spread",
+            "on a mobile shopping app screen",
+            "on a digital billboard in a high-end shopping district",
+            "as a social media card with 'Today's Special Value' text overlay",
+            "as a gourmet cooking app interface"
         ];
 
         const people = [
-            "a caring doctor consulting with a patient",
-            "a young family playing in a park",
-            "an active senior couple hiking",
-            "a diverse group of professionals in a meeting",
-            "a mother holding a baby",
-            "a man jogging with a smile"
+            "a home chef preparing a meal",
+            "a family enjoying a movie night",
+            "an active individual using high-end tech",
+            "a group of friends at a dinner party",
+            "someone pampering themselves with luxury beauty products",
+            "a stylish person using premium accessories"
         ];
 
         try {
@@ -173,7 +173,7 @@ export const GenerateNewProduct: React.FC = () => {
             // Lifestyle Imagery
             const lifestylePromises = people.map(person =>
                 generateImageWithReference(
-                    `Lifestyle photography of ${person}, incorporating the color palette and mood of this design reference. Authentic, emotional, warm lighting, high quality health marketing usage.`,
+                    `Lifestyle photography of ${person}, incorporating the color palette and mood of this design reference. Authentic, aspirational, balanced lighting, high quality retail marketing usage.`,
                     selectedVariation.split(',')[1]
                 )
             );
@@ -221,7 +221,7 @@ export const GenerateNewProduct: React.FC = () => {
             <div className="mb-8 flex justify-between items-end">
                 <div>
                     <h1 className="page-title mb-2">Campaign Asset Generator</h1>
-                    <p className="page-subtitle">Upload a concept or reference, and generate professional health marketing assets.</p>
+                    <p className="page-subtitle">Upload a concept or reference, and generate professional retail marketing assets.</p>
                 </div>
 
                 <button

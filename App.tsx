@@ -24,6 +24,7 @@ import { Assistant } from './components/Assistant';
 import { Concierge } from './components/Concierge';
 import { SyntheticUsers } from './components/SyntheticUsers';
 import { CompanyProvider } from './context/CompanyContext';
+import { ProductSpin } from './components/ProductSpin';
 
 function App() {
   return (
@@ -80,6 +81,8 @@ function AppContent() {
         return <ContentVersioning />;
       case AppMode.GEN_SITE:
         return <GenSiteStub />;
+      case AppMode.PRODUCT_SPIN:
+        return <ProductSpin />;
       case AppMode.AUDIENCE_GEN:
         return (
           <AudienceGenerator 

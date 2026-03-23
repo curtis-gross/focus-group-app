@@ -3,6 +3,15 @@ import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { GoogleGenAI, Modality, MediaResolution } from '@google/genai';
+import { execSync } from 'child_process';
+
+console.log("Running frontend build before starting the server...");
+try {
+    execSync('npm run build', { stdio: 'inherit' });
+    console.log("Frontend build complete.");
+} catch (e) {
+    console.error("Failed to build frontend:", e);
+}
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -89,6 +98,22 @@ app.post('/api/genai/generateVideos', checkAi, async (req, res) => {
     } catch (e) {
         console.error("generateVideos error:", e);
         res.status(500).json({ error: e.message || "Failed to generate videos" });
+    }
+});
+
+app.post('/api/genai/getOperation', checkAi, async (req, res) => {
+    try {
+        const { operation } = req.body;
+        // Mock _fromAPIResponse as it is required by the SDK for Operation status updates
+        const mockOperation = {
+            ...operation,
+            _fromAPIResponse: (arg) => arg.apiResponse
+        };
+        const response = await ai.operations.get({ operation: mockOperation });
+        res.json(response);
+    } catch (e) {
+        console.error("getOperation error:", e);
+        res.status(500).json({ error: e.message || "Failed to get operation" });
     }
 });
 
@@ -253,6 +278,47 @@ app.post('/api/save-email-campaigns', (req, res) => {
     } catch (e) {
         console.error("Error saving email campaigns:", e);
         res.status(500).json({ error: "Failed to save email campaigns" });
+    }
+});
+
+// Audience Strategy Persistence
+const AUDIENCE_STRATEGY_FILE = path.join(__dirname, 'public', 'data', 'audience_strategy.json');
+
+app.get('/api/audience-strategy', (req, res) => {
+    if (fs.existsSync(AUDIENCE_STRATEGY_FILE)) {
+        try {
+            const data = fs.readFileSync(AUDIENCE_STRATEGY_FILE, 'utf8');
+            res.json(JSON.parse(data));
+        } catch (e) {
+            console.error("Error reading audience strategy:", e);
+            res.status(500).json({ error: "Failed to read audience strategy" });
+        }
+    } else {
+        res.status(404).json({ error: "No strategy found" });
+    }
+});
+
+app.post('/api/audience-strategy', (req, res) => {
+    try {
+        const { strategy } = req.body;
+        const dir = path.dirname(AUDIENCE_STRATEGY_FILE);
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+        }
+        fs.writeFileSync(AUDIENCE_STRATEGY_FILE, JSON.stringify({ strategy }, null, 2));
+
+        // Update dist
+        const distFile = path.join(__dirname, 'dist', 'data', 'audience_strategy.json');
+        const distDir = path.dirname(distFile);
+        if (fs.existsSync(path.join(__dirname, 'dist'))) {
+            if (!fs.existsSync(distDir)) fs.mkdirSync(distDir, { recursive: true });
+            fs.writeFileSync(distFile, JSON.stringify({ strategy }, null, 2));
+        }
+
+        res.json({ success: true });
+    } catch (e) {
+        console.error("Error saving audience strategy:", e);
+        res.status(500).json({ error: "Failed to save audience strategy" });
     }
 });
 

@@ -8,7 +8,7 @@ import { useCompanyContext } from '../context/CompanyContext';
 export const MarketingBrief: React.FC = () => {
   const { name, description } = useCompanyContext();
   const [context, setContext] = useState(description);
-  const [goal, setGoal] = useState("");
+  const [goal, setGoal] = useState("Drive increase in activity and conversions from gen-z audiences across QVC brands.");
   const [brief, setBrief] = useState<MarketingBriefData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [language, setLanguage] = useState<'en' | 'es'>('en');
@@ -35,20 +35,19 @@ export const MarketingBrief: React.FC = () => {
         setGenerationStatus("Designing Campaign Assets (Social, Search, Email, YouTube)...");
         const productName = result.productName || `${name} Product`;
 
-        let finalAssetsMap: Record<string, MarketingAssets> | null = null;
+        const finalAssetsMap: Record<string, MarketingAssets> = {};
         try {
-          // Parallelize asset generation across audiences
-          const assetPromises = result.audiences.map(async (aud) => {
+          // Process audiences SEQUENTIALLY to limit image generation concurrency
+          setGenerationStatus(`Designing Campaign Assets (0/${result.audiences.length})...`);
+          
+          for (let i = 0; i < result.audiences.length; i++) {
+            const aud = result.audiences[i];
+            setGenerationStatus(`Designing Campaign Assets for ${aud.name} (${i + 1}/${result.audiences.length})...`);
+            
             const combinedGoal = `Goal: ${result.campaignGoal}. Persona: ${aud.name}`;
             const assets = await generateMarketingCampaignAssets(productName, combinedGoal, context);
-            return { name: aud.name, assets };
-          });
-
-          const assetResults = await Promise.all(assetPromises);
-          finalAssetsMap = {};
-          assetResults.forEach(res => {
-            finalAssetsMap![res.name] = res.assets;
-          });
+            finalAssetsMap[aud.name] = assets;
+          }
         } catch (assetErr) {
           console.error("Failed to auto-generate assets:", assetErr);
           // Continue with brief only if assets fail
@@ -85,18 +84,17 @@ export const MarketingBrief: React.FC = () => {
     setIsAssetLoading(true);
     try {
       const productName = brief.productName || `${name} Product`;
-      // Parallelize asset regeneration across audiences
-      const assetPromises = brief.audiences.map(async (aud) => {
+      const newAssetsMap: Record<string, MarketingAssets> = {};
+      
+      // Process audiences SEQUENTIALLY to limit image generation concurrency
+      for (let i = 0; i < brief.audiences.length; i++) {
+        const aud = brief.audiences[i];
+        setGenerationStatus(`Regenerating Assets for ${aud.name} (${i + 1}/${brief.audiences.length})...`);
+        
         const combinedGoal = `Goal: ${brief.campaignGoal}. Persona: ${aud.name}`;
         const assets = await generateMarketingCampaignAssets(productName, combinedGoal, context);
-        return { name: aud.name, assets };
-      });
-
-      const assetResults = await Promise.all(assetPromises);
-      const newAssetsMap: Record<string, MarketingAssets> = {};
-      assetResults.forEach(res => {
-        newAssetsMap[res.name] = res.assets;
-      });
+        newAssetsMap[aud.name] = assets;
+      }
 
       setCampaignAssetsMap(newAssetsMap);
       if (brief.audiences.length > 0) setSelectedAudience(brief.audiences[0].name);

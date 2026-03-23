@@ -16,16 +16,11 @@ export const MarketingCampaign: React.FC = () => {
     const handleGenerate = async () => {
         setIsLoading(true);
         try {
-            const results = await Promise.all(
-                AUDIENCES.map(async (aud) => {
-                    const result = await generateMarketingCampaignAssets(product, aud);
-                    return { aud, result };
-                })
-            );
             const newMap: Record<string, MarketingAssets> = {};
-            results.forEach(({ aud, result }) => {
+            for (const aud of AUDIENCES) {
+                const result = await generateMarketingCampaignAssets(product, aud);
                 newMap[aud] = result;
-            });
+            }
             setAssetsMap(newMap);
         } catch (error) {
             console.error(error);

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { generateAudienceSegments, generateImageFromPrompt, generateSyntheticPersona } from '../services/geminiService';
 import { brandConfig } from '../config';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Users, TrendingUp, BarChart2, DollarSign, Briefcase, Heart, RotateCcw, ArrowLeft, Shield, Upload, FileText, Download } from 'lucide-react';
+import { Users, TrendingUp, BarChart2, DollarSign, Briefcase, Heart, RotateCcw, ArrowLeft, Shield, Upload, FileText, Download, Settings, X } from 'lucide-react';
 import { CombinedPersona, DetailedPersona } from '../types';
 import { useCompanyContext } from '../context/CompanyContext';
 
@@ -50,19 +50,53 @@ export const AudienceGenerator: React.FC<AudienceGeneratorProps> = ({ personas, 
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingStep, setLoadingStep] = useState("");
+  const [audienceTargets, setAudienceTargets] = useState("");
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   React.useEffect(() => {
-    if (personas.length > 0) {
+    if (personas.length > 0 || audienceTargets.trim() !== "") {
       fetch('/api/save-run', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           featureId: 'audience_generator',
-          data: { personas, context: description }
+          data: { personas, context: description, audienceTargets }
         })
       }).catch(err => console.error("Failed to save audience run:", err));
     }
-  }, [personas, description]);
+  }, [personas, description, audienceTargets]);
+
+  React.useEffect(() => {
+    handleLoadStrategy();
+  }, []);
+
+  const handleSaveStrategy = async () => {
+    try {
+      await fetch('/api/audience-strategy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ audienceTargets })
+      });
+      setIsSettingsOpen(false);
+    } catch (error) {
+      console.error("Failed to save strategy:", error);
+      alert("Failed to save strategy.");
+    }
+  };
+
+  const handleLoadStrategy = async () => {
+    try {
+      const res = await fetch('/api/audience-strategy');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.audienceTargets) {
+          setAudienceTargets(data.audienceTargets);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to load strategy:", error);
+    }
+  };
 
   const handleLoadLast = async () => {
     setIsLoading(true);
@@ -72,7 +106,11 @@ export const AudienceGenerator: React.FC<AudienceGeneratorProps> = ({ personas, 
       if (!res.ok) throw new Error("No saved run found");
       const data = await res.json();
 
-      if (data.personas) {
+      if (data.audienceTargets) {
+        setAudienceTargets(data.audienceTargets);
+      }
+      
+      if (data.personas && data.personas.length > 0) {
         setPersonas(data.personas);
         setStep(2);
       }
@@ -92,7 +130,12 @@ export const AudienceGenerator: React.FC<AudienceGeneratorProps> = ({ personas, 
 
     try {
       const targetData = SAMPLE_CUSTOMER_DATA;
-      const explicitContext = `${description}. Segment these customers into exactly three audiences based on the data. Data: ${JSON.stringify(targetData)}`;
+      let explicitContext = `${description}. Segment these customers into exactly three audiences based on the data. Data: ${JSON.stringify(targetData)}`;
+      
+      if (audienceTargets.trim()) {
+        explicitContext += `\n\nCRITICAL AUDIENCE TARGET DEFINITIONS TO USE: ${audienceTargets}`;
+      }
+      
       const segments = await generateAudienceSegments(explicitContext);
 
       // Basic validation
@@ -156,9 +199,18 @@ export const AudienceGenerator: React.FC<AudienceGeneratorProps> = ({ personas, 
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <div className="page-header">
         <div className="max-w-7xl mx-auto px-6 w-full">
-          <div className="flex items-center gap-3 mb-4">
-            <Users className="text-[#0077C8]" />
-            <h1 className="page-title">Audience Generator</h1>
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center gap-3">
+              <Users className="text-[#0077C8]" />
+              <h1 className="page-title">Audience Generator</h1>
+            </div>
+            <button 
+              onClick={() => setIsSettingsOpen(true)}
+              className="p-2 text-gray-400 hover:text-[#0077C8] transition-colors bg-white rounded-lg border border-gray-200 shadow-sm"
+              title="Audience Settings"
+            >
+              <Settings size={20} />
+            </button>
           </div>
           <p className="text-subtext mt-1">Preview member data and generate detailed QVC user personas.</p>
         </div>
@@ -360,6 +412,65 @@ export const AudienceGenerator: React.FC<AudienceGeneratorProps> = ({ personas, 
       )}
         </div>
       </div>
+
+      {/* Settings Modal */}
+      {isSettingsOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden border border-gray-200">
+            <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-[#0077C8]/10 rounded-lg text-[#0077C8]">
+                  <Settings size={20} />
+                </div>
+                <h2 className="text-xl font-bold text-gray-900">Audience Strategy</h2>
+              </div>
+              <button 
+                onClick={() => setIsSettingsOpen(false)}
+                className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Audience Target Definitions</label>
+                <textarea 
+                  value={audienceTargets}
+                  onChange={(e) => setAudienceTargets(e.target.value)}
+                  rows={8}
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0077C8] focus:border-transparent transition-all outline-none font-medium text-gray-900 resize-none"
+                  placeholder="Paste specific audience definitions here that you want the AI to prioritize (e.g., 'Focus on high-net-worth retirees who shop late at night...')"
+                />
+                <p className="mt-2 text-[11px] text-gray-400 italic">
+                  These definitions will be injected directly into the AI prompt when analyzing customer data to ensure alignment with your specific targeting goals.
+                </p>
+              </div>
+            </div>
+            
+            <div className="p-6 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
+              <button 
+                onClick={handleLoadStrategy}
+                className="mr-auto text-xs font-bold text-gray-500 hover:text-[#0077C8] flex items-center gap-1"
+              >
+                <RotateCcw size={14} /> Load Last
+              </button>
+              <button 
+                onClick={() => setIsSettingsOpen(false)}
+                className="px-6 py-2.5 text-sm font-bold text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleSaveStrategy}
+                className="px-6 py-2.5 bg-[#0077C8] text-white rounded-xl font-bold text-sm shadow-md hover:shadow-lg transition-all"
+              >
+                Save Strategy
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

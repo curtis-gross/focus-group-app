@@ -11,7 +11,7 @@ async function main() {
 
   const client = new GoogleGenAI({ apiKey });
 
-  const imagePath = path.join(process.cwd(), 'public/images/nike.png');
+  const imagePath = path.join(process.cwd(), 'public/images/qvc-logo.png');
   if (!fs.existsSync(imagePath)) {
     console.error("Image not found at:", imagePath);
     process.exit(1);

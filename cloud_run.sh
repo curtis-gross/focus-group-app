@@ -22,6 +22,7 @@ gcloud run deploy $SERVICE_NAME \
   --platform managed \
   --region $REGION \
   --allow-unauthenticated \
+  --memory 1Gi \
   --set-secrets=GEMINI_API_KEY=GEMINI_API_KEY:latest
 
 echo "Deployment complete."

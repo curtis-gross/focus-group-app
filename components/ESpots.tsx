@@ -5,18 +5,18 @@ import { Schema, Type } from "@google/genai";
 import { RotateCcw, Play, ArrowLeft, Shield, Heart, Activity } from 'lucide-react';
 
 const consumerData = [
-  { id: 1, name: "Jessica M.", condition: "Young Family", interest: "High", adherence: "Good", recent: "Added dependent, Pediatric visit", segment_hint: "Young Family" },
-  { id: 2, name: "David K.", condition: "Chronic Management", interest: "Medium", adherence: "Fair", recent: "Diabetes checkup, Rx refill", segment_hint: "Chronic Management" },
-  { id: 3, name: "Robert L.", condition: "Active Senior", interest: "High", adherence: "Excellent", recent: "SilverSneakers usage, Flu shot", segment_hint: "Active Senior" },
-  { id: 4, name: "Sarah P.", condition: "Wellness Seeker", interest: "High", adherence: "Good", recent: "Preventive screening, Gym reimbursement", segment_hint: "Wellness Seeker" },
-  { id: 5, name: "Michael T.", condition: "Transitioning", interest: "Medium", adherence: "N/A", recent: "Job change, COBRA inquiry", segment_hint: "Transitioning" },
-  { id: 6, name: "Elena R.", condition: "Young Family", interest: "Medium", adherence: "Good", recent: "Maternity program enrollment", segment_hint: "Young Family" },
-  { id: 7, name: "Thomas B.", condition: "Chronic Management", interest: "Low", adherence: "Poor", recent: "Missed appointment, ED visit", segment_hint: "Chronic Management" },
-  { id: 8, name: "Linda C.", condition: "Active Senior", interest: "Medium", adherence: "Good", recent: "Hip replacement inquiry, PT", segment_hint: "Active Senior" },
-  { id: 9, name: "James H.", condition: "Wellness Seeker", interest: "High", adherence: "Excellent", recent: "Telehealth nutrition consult", segment_hint: "Wellness Seeker" },
-  { id: 10, name: "Patricia W.", condition: "Active Senior", interest: "High", adherence: "Good", recent: "Medicare Advantage renewal", segment_hint: "Active Senior" },
-  { id: 11, name: "Kevin G.", condition: "Young Family", interest: "Medium", adherence: "Good", recent: "Urgent care visit (child)", segment_hint: "Young Family" },
-  { id: 12, name: "Nancy D.", condition: "Chronic Management", interest: "Low", adherence: "Fair", recent: "High A1C result alert", segment_hint: "Chronic Management" },
+  { id: 1, name: "Jessica M.", condition: "Home Chef", interest: "High", adherence: "Frequent", recent: "Purchased Le Creuset, Browsed recipes", segment_hint: "Home Chef" },
+  { id: 2, name: "David K.", condition: "Tech Enthusiast", interest: "Medium", adherence: "Occasional", recent: "Browsed Laptops, Added to cart", segment_hint: "Tech Enthusiast" },
+  { id: 3, name: "Robert L.", condition: "Fashion Lover", interest: "High", adherence: "Very Frequent", recent: "Purchased LOGO Dress, Reviewed items", segment_hint: "Fashion Lover" },
+  { id: 4, name: "Sarah P.", condition: "Home Improver", interest: "High", adherence: "Frequent", recent: "Browsed Outdoor Furniture", segment_hint: "Home Improver" },
+  { id: 5, name: "Michael T.", condition: "Beauty Guru", interest: "Medium", adherence: "Rare", recent: "Purchased Skincare, Viewed tutorials", segment_hint: "Beauty Guru" },
+  { id: 6, name: "Elena R.", condition: "Home Chef", interest: "Medium", adherence: "Frequent", recent: "Joined Cooking club", segment_hint: "Home Chef" },
+  { id: 7, name: "Thomas B.", condition: "Tech Enthusiast", interest: "Low", adherence: "Rare", recent: "Missed sale, Cart abandoned", segment_hint: "Tech Enthusiast" },
+  { id: 8, name: "Linda C.", condition: "Fashion Lover", interest: "Medium", adherence: "Frequent", recent: "Viewed Fall collection", segment_hint: "Fashion Lover" },
+  { id: 9, name: "James H.", condition: "Home Improver", interest: "High", adherence: "Very Frequent", recent: "Purchased Tools", segment_hint: "Home Improver" },
+  { id: 10, name: "Patricia W.", condition: "Beauty Guru", interest: "High", adherence: "Frequent", recent: "Auto-delivery renewal", segment_hint: "Beauty Guru" },
+  { id: 11, name: "Kevin G.", condition: "Home Chef", interest: "Medium", adherence: "Frequent", recent: "Browsed Air Fryers", segment_hint: "Home Chef" },
+  { id: 12, name: "Nancy D.", condition: "Tech Enthusiast", interest: "Low", adherence: "Occasional", recent: "Price drop alert clicked", segment_hint: "Tech Enthusiast" },
 ];
 
 interface Audience {
@@ -121,23 +121,23 @@ export const ESpots: React.FC = () => {
 
         const copyResult = await generateJson(copyPrompt, copySchema);
 
-        const imagePrompt = `Design a high-quality, professional health insurance marketing banner for ${brandConfig.companyName} targeting "${aud.name}". 
+        const imagePrompt = `Design a high-quality, professional retail marketing banner for ${brandConfig.companyName} targeting "${aud.name}". 
             
             **TEXT REQUIREMENT:**
             You MUST legally and clearly write the HEADLINE text: "${copyResult.headline}" directly onto the image.
             The text should be stylized, readable, and integrated into the design (e.g., elegant typography, ${name} brand colors).
             
             **VISUALS:**
-            - Subject: ${aud.description} (Family care, doctor patient interaction, active seniors, wellness)
-            - Style: Professional insurance advertising, clean, trustworthy, warm, bright.
-            - Background: Modern medical center, cozy home, or sunny park.
+            - Subject: ${aud.description} (Shopping, lifestyle, product usage, happy customers)
+            - Style: Professional retail advertising, clean, trustworthy, warm, bright, visually engaging.
+            - Background: Modern home, cozy living room, stylish kitchen, or neutral studio backdrop.
             
             **NEGATIVE CONSTRAINTS:**
             - DO NOT include browser frames, search bars, or fake website interfaces.
             
             Return ONLY the artistic banner image.`;
 
-        const imgBase64 = await generateImage(imagePrompt, 'gemini-3-pro-image-preview', '16:9');
+        const imgBase64 = await generateImage(imagePrompt, 'gemini-3.1-flash-image-preview', '16:9');
         return { idx, copy: copyResult, image: imgBase64 };
       });
 
@@ -206,7 +206,7 @@ export const ESpots: React.FC = () => {
                   <th>Name</th>
                   <th>Segment / Status</th>
                   <th>Engagement</th>
-                  <th>Care Adherence</th>
+                  <th>Purchase Frequency</th>
                   <th>Recent Activity</th>
                 </tr>
               </thead>

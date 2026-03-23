@@ -24,17 +24,17 @@ export const Assistant: React.FC = () => {
                     <div class="grid grid-cols-2 gap-2 mt-2">
                         <button 
                             data-action="suggested-prompt" 
-                            data-prompt="Help me find a doctor or specialist in my network."
+                            data-prompt="Help me track my recent order."
                             class="text-left text-xs bg-white hover:bg-gray-100 text-gray-700 p-2 rounded transition-colors flex items-center gap-2 border border-gray-200"
                         >
-                            <span class="text-lg">👨‍⚕️</span> Find a Provider
+                            <span class="text-lg">📦</span> Track Order
                         </button>
                         <button 
                             data-action="suggested-prompt"
-                            data-prompt="What benefits are included in my current plan?"
+                            data-prompt="How do I return an item?"
                             class="text-left text-xs bg-white hover:bg-gray-100 text-gray-700 p-2 rounded transition-colors flex items-center gap-2 border border-gray-200"
                         >
-                            <span class="text-lg">📋</span> Plan Benefits
+                            <span class="text-lg">🔄</span> Return Policy
                         </button>
                     </div>
                 </div>
@@ -265,7 +265,7 @@ export const Assistant: React.FC = () => {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
             className="flex-1 bg-transparent border-none outline-none text-gray-900 placeholder-gray-400 text-sm"
-            placeholder="Ask about benefits, claims, or finding care..."
+            placeholder="Ask about products, orders, or returns..."
           />
 
           <button

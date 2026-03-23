@@ -12,34 +12,18 @@ interface Audience {
     isDefault?: boolean;
 }
 
-const DEFAULT_PRODUCT_NAME = "LOGO by Lori Goldstein Regular Cotton Patchwork Print Midi Dress";
-const DEFAULT_PRICE = "$40.99";
+const DEFAULT_PRODUCT_NAME = "Le Creuset 3.75-qt Signature Cast-Iron Oval Casserole w/Lid";
+const DEFAULT_PRICE = "$259.98"; // Adjusted price for Le Creuset
 // Remote URL for high quality image, fallback to local if needed
-const DEFAULT_IMAGE_PATH = "/images/qvc-pdp.png";
+const DEFAULT_IMAGE_PATH = "/images/default-pot.png";
 
 const DEFAULT_AUDIENCES: Audience[] = [
     {
         id: 'default_standard',
         name: 'Standard View',
-        whyPerfect: 'Let your love for lively prints take center stage at everything from afternoon brunches to garden soirees in this soft cotton patchwork dress. Elbow-length sleeves and a classic boat neckline lend timeless appeal, while handy pockets keep essentials close as you mingle and catch up with friends. From LOGO by Lori Goldstein®.',
-        description: 'Quality and comfort designed for your peace of mind and overall wellbeing.',
+        whyPerfect: "Mouthwatering recipes call for a multipurpose multitasker. Invest in the superior quality and French craftsmanship of Le Creuset and their Signature Series 3.75-qt oval casserole. A wide cooking surface with sloping sides, it'll handle your braised pork, hearty stew, Thanksgiving stuffing, or ratatouille with chef-like results thanks to cast-iron construction and an easy-clean enamel interior. From Le Creuset.",
+        description: "Includes 3.75-qt shallow oval casserole dish and lid. Cast-iron construction.",
         image: DEFAULT_IMAGE_PATH,
-        isDefault: true
-    },
-    {
-        id: 'default_skeptic',
-        name: 'The Practical Shopper',
-        whyPerfect: 'Tailored perfectly for those who want comfort and convenience without sacrificing style.',
-        description: 'Focuses on the 100% cotton fabrication, machine-washable care, and handy pockets for an easy-going lifestyle.',
-        image: '/images/pdp1.png',
-        isDefault: true
-    },
-    {
-        id: 'default_enthusiast',
-        name: 'The Fashion Enthusiast',
-        whyPerfect: 'A vibrant patchwork aesthetic that turns heads at any garden soiree.',
-        description: 'Your go-to statement piece for afternoon text brunches or lively outdoor get-togethers.',
-        image: '/images/pdp2.png',
         isDefault: true
     }
 ];
@@ -102,7 +86,7 @@ export const PDPPersonalization: React.FC = () => {
             let scenePrompt = content.imagePrompt || `A clean, athletic, dynamic shot of ${DEFAULT_PRODUCT_NAME} for ${newAudienceName}`;
 
             // Add specific product constraints
-            scenePrompt += `. CRITICAL: Create a photorealistic lifestyle image representing the promotional needs of ${newAudienceName} for ${name}. The image should NOT show any physical products or footwear unless they are essential. Focus on the core benefits: ${description}. Guidelines: ${companyContext.guidelines}. Use a clean, bright, and professional aesthetic.`;
+            scenePrompt += `. CRITICAL: Create a photorealistic lifestyle image representing the promotional needs of ${newAudienceName} for ${name}. Maintain the exact same color and finish of the dish as shown in the source images. The image should NOT show any physical products or footwear unless they are essential. Focus on the core benefits: ${description}. Guidelines: ${guidelines}. Use a clean, bright, and professional aesthetic.`;
 
             // Save debug info before image generation
             console.log("FINAL PROMPT SENT TO SERVICE:", scenePrompt);
@@ -111,7 +95,8 @@ export const PDPPersonalization: React.FC = () => {
             // Now generate image using the specific lifestyle scene function
             // Ensure absolute URL for image fetching
             const imagePath = DEFAULT_IMAGE_PATH.startsWith('/') ? `${window.location.origin}${DEFAULT_IMAGE_PATH}` : DEFAULT_IMAGE_PATH;
-            const image = await generateLifestyleScene(imagePath, scenePrompt);
+            const dishPath = `${window.location.origin}/images/qvc-dish2.png`;
+            const image = await generateLifestyleScene([imagePath, dishPath], scenePrompt);
 
             const newAudience: Audience = {
                 id: Date.now().toString(),
@@ -151,30 +136,9 @@ export const PDPPersonalization: React.FC = () => {
             let finalAudiences: Audience[] = [DEFAULT_AUDIENCES[0]]; // Always start with Standard View
 
             try {
-                // 1. Fetch Dynamic Audiences from Marketing Hub
-                const hubRes = await fetch('/api/load-run/audience_generator');
-                if (hubRes.ok) {
-                    const hubData = await hubRes.json();
-                    if (hubData && hubData.personas && Array.isArray(hubData.personas) && hubData.personas.length > 0) {
-                        const marketingHubAudiences: Audience[] = hubData.personas.map((p: any, index: number) => ({
-                            id: `hub_audience_${index}`,
-                            name: p.name || p.personaName || 'Unknown Audience',
-                            whyPerfect: `Tailored completely for ${p.name || 'this audience'} based on their unique demographic and lifestyle profile.`,
-                            description: p.details?.bio || p.bio || 'An exclusive view into how this product matches exactly what you need.',
-                            image: p.imageUrl || DEFAULT_IMAGE_PATH,
-                            isDefault: true
-                        }));
-                        finalAudiences = [...finalAudiences, ...marketingHubAudiences];
-                    } else {
-                        // Fallback to static defaults if no hub data
-                        finalAudiences = [...DEFAULT_AUDIENCES];
-                    }
-                } else {
-                    finalAudiences = [...DEFAULT_AUDIENCES];
-                }
+                // Removed fetching from audience_generator as requested by the user.
             } catch (e) {
                 console.warn("Failed to fetch Marketing Hub audiences, falling back to defaults", e);
-                finalAudiences = [...DEFAULT_AUDIENCES];
             }
 
             // 2. Fetch User-Generated Custom Audiences from PDP server/localStorage
@@ -235,7 +199,7 @@ export const PDPPersonalization: React.FC = () => {
 
                     {/* Right: Actions */}
                     <div className="flex items-center gap-6 text-[#2D3142] font-medium text-sm">
-                        <a href="#" className="hidden md:block hover:text-[#0077C8] transition-colors">Find a Doctor</a>
+                        <a href="#" className="hidden md:block hover:text-[#0077C8] transition-colors">Sign In</a>
                         <a href="#" className="hidden md:block hover:text-[#0077C8] transition-colors">Help</a>
                         <span className="hidden md:block border-l border-gray-300 h-4 mx-2"></span>
                         <SearchIcon size={20} className="cursor-pointer hover:text-[#0077C8] transition-colors" />
@@ -247,7 +211,7 @@ export const PDPPersonalization: React.FC = () => {
             <div className="max-w-7xl mx-auto p-6 md:p-12">
                 {/* Breadcrumbs */}
                 <div className="text-sm text-gray-500 mb-8 font-medium">
-                    Home / Fashion / Dresses / Midi Dresses
+                    Home / Kitchen & Food / Cookware / Casseroles & Dutch Ovens
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-12 bg-white rounded-3xl border border-gray-200 shadow-sm p-8">
@@ -261,7 +225,7 @@ export const PDPPersonalization: React.FC = () => {
                                 className="w-full h-full object-contain rounded-xl hover:scale-105 transition-transform duration-500 shadow-md"
                                 onError={(e) => {
                                     // Fallback if image fails
-                                    e.currentTarget.src = "/images/pdp1.png";
+                                    e.currentTarget.src = "/images/default-pot.png";
                                 }}
                             />
 
@@ -332,7 +296,7 @@ export const PDPPersonalization: React.FC = () => {
                             <h1 className="text-3xl md:text-5xl font-black text-[#2D3142] leading-none tracking-tighter mb-2">
                                 {DEFAULT_PRODUCT_NAME}
                             </h1>
-                            <h3 className="text-xl font-medium text-gray-600 mb-4">LOGO by Lori Goldstein</h3>
+                            <h3 className="text-xl font-medium text-gray-600 mb-4">Le Creuset</h3>
 
                             {/* Reviews */}
                             <div className="flex items-center gap-4 mt-4">
@@ -344,20 +308,20 @@ export const PDPPersonalization: React.FC = () => {
 
                             <div className="mt-8 space-y-3 text-sm text-[#2D3142] bg-gray-50 p-4 rounded-xl border border-gray-200">
                                 <div className="flex justify-between border-b border-gray-200 pb-2">
-                                    <span className="text-gray-500 w-1/3">Fabrication</span>
-                                    <span className="font-bold text-right w-2/3">knit</span>
+                                    <span className="text-gray-500 w-1/3">Construction</span>
+                                    <span className="font-bold text-right w-2/3">cast-iron</span>
+                                </div>
+                                <div className="flex justify-between border-b border-gray-200 pb-2">
+                                    <span className="text-gray-500 w-1/3">Interior</span>
+                                    <span className="font-bold text-right w-2/3">enamel</span>
                                 </div>
                                 <div className="flex justify-between border-b border-gray-200 pb-2">
                                     <span className="text-gray-500 w-1/3">Features</span>
-                                    <span className="font-bold text-right w-2/3">patchwork print, elbow-length sleeves, boat neckline, set-in pockets</span>
-                                </div>
-                                <div className="flex justify-between border-b border-gray-200 pb-2">
-                                    <span className="text-gray-500 w-1/3">Content</span>
-                                    <span className="font-bold text-right w-2/3">100% cotton</span>
+                                    <span className="font-bold text-right w-2/3">side handles, lid included</span>
                                 </div>
                                 <div className="flex justify-between">
-                                    <span className="text-gray-500 w-1/3">Care</span>
-                                    <span className="font-bold text-right w-2/3">machine wash, tumble dry</span>
+                                    <span className="text-gray-500 w-1/3">Measurements</span>
+                                    <span className="font-bold text-right w-2/3">15.7"L x 9.7"W x 5.4"H, weighs 9.9 lbs, Made in France</span>
                                 </div>
                             </div>
                         </div>
@@ -366,7 +330,7 @@ export const PDPPersonalization: React.FC = () => {
                         <div>
                             <div className="text-4xl font-black tracking-tight text-[#E22026]">{DEFAULT_PRICE}</div>
                             <div className="text-md text-gray-500 font-medium mt-1">
-                                QVC PRICE: <span className="line-through">$63.00</span> <span className="text-[#188038] font-bold">Save 34%</span>
+                                QVC PRICE: <span className="line-through">$310.00</span> <span className="text-[#188038] font-bold">Save 16%</span>
                             </div>
                             <div className="text-sm text-gray-500 font-medium mt-1">S&H: $3.50</div>
                         </div>

@@ -22,6 +22,6 @@ export const brandConfig = {
     },
   },
   examples: {
-    privateBrands: ["Allegheny Health", "Blue Cross", "United Concordia", "HM Insurance", "Helion", "Enneagram"],
+    privateBrands: ["Le Creuset", "Dyson", "KitchenAid", "Ninja", "Shark", "Bose", "Samsung", "Philosophy", "IT Cosmetics", "Dooney & Bourke"],
   }
 };

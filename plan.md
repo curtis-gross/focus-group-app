@@ -1,23 +1,24 @@
-# Plan: Logo Configuration and Rebranding [COMPLETED]
+# QVC Acquisition Focus Group Plan
+
+Targeting Gen-Z and Millennials for QVC Group Acquisition.
 
 ## Technical Approach
-1.  **Analyze**: [DONE] Checked the codebase. `brandConfig.logo.sidebar` is set to `"/images/qvc-logo.png"` in `qvc-app/src/config.ts`.
-2.  **Verify Assets**: [DONE] Confirmed `qvc-app/public/images/qvc-logo.png` exists.
-3.  **Clean up Branding**: [DONE]
-    - Updated `qvc-app/public/index.html` title to "QVC AI Lab".
-    - Updated `qvc-app/src/components/MarketingCampaign.tsx` to replace "NIKE" with "QVC".
-    - Updated `qvc-app/src/components/MultiImage.tsx` to replace "nike_variant_" with "qvc_variant_".
-4.  **Verification**: [DONE]
-    - Verified filenames and text content.
-    - Grep search for "Nike" in code files (excluding node_modules/dist) returned zero text matches in the relevant components after updates.
+- Update the `SyntheticTesting` component to use QVC-specific acquisition offers (drops, AR, BNPL).
+- Pass brand context (name, description) to GenAI simulation services.
+- Refine the AI persona simulation prompt to better capture Gen-Z/Millennial "vibes".
+- Add Gen-Z standard personas to the simulation data pool.
 
 ## File Changes
--   `qvc-app/public/index.html`: Title updated.
--   `qvc-app/src/config.ts`: Verified.
--   `qvc-app/components/MarketingCampaign.tsx`: Updated brand text.
--   `qvc-app/components/MultiImage.tsx`: Updated download prefix.
--   `qvc-app/plan.md`: Updated to completed status.
+- `qvc-app/components/SyntheticTesting.tsx`: Update default `acquisitionOffers` state and simulation call arguments.
+- `qvc-app/services/geminiService.ts`: Update `simulateAcquisitionFocusGroup` to use brand context and refined prompts.
+- `qvc-app/data/simulationData.ts`: Add "The Savvy Social Shopper" (Gen-Z) persona.
 
 ## Potential Risks
--   None identified after manual verification of text and asset existence.
+- **Hallucination**: AI might invent product features not available at QVC.
+- **Demographic Accuracy**: Persona simulation must be carefully prompted to avoid stereotypes.
+- **Data Persistence**: Ensure new personas are saved correctly to the filesystem/json as per rules.
 
+## Phase 2 Implementation (TDD)
+- Spawn tests for `simulateAcquisitionFocusGroup` before implementation.
+- Implement passing logic.
+- Verify with 100% pass rate.

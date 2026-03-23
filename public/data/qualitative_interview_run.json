@@ -1,206 +1,206 @@
 {
   "type": "INTERVIEW_SESSION",
-  "id": "interview_1773416886190",
-  "name": "Interview: what products are you most lik...",
-  "timestamp": "2026-03-13T15:48:06.190Z",
-  "question": "what products are you most likely to buy?",
+  "id": "interview_1774281677628",
+  "name": "Interview: What makes you stay on a QVC V...",
+  "timestamp": "2026-03-23T16:01:17.628Z",
+  "question": "What makes you stay on a QVC Video (on tv, or TikTok livestream for more than 30 seconds)?",
   "results": [
     {
-      "personaId": "p_1773416847761",
-      "personaName": "The Milestone Navigator",
+      "personaId": "p_1774281628359",
+      "personaName": "The Core Loyalist",
       "transcript": [
         {
           "role": "interviewer",
-          "content": "what products are you most likely to buy?"
+          "content": "What makes you stay on a QVC Video (on tv, or TikTok livestream for more than 30 seconds)?"
         },
         {
           "role": "interviewee",
-          "content": "Right now, I'm focusing on products that offer long-term stability and help me establish a routine in my new career, so I’m looking at high-quality basics like ergonomic office gear and reliable fitness equipment like Nike walking shoes that I know will last."
+          "content": "For me, it’s all about the storytelling and the relationship. I’ve watched these hosts for thirty years; they aren't just selling a product, they’re telling a story about why a piece of jewelry or a throw pillow belongs in a home that’s lived-in and loved. Even on those new little phone apps, if I see a host I recognize or someone who clearly understands the quality of a gemstone, I'll stop because I trust their eye as much as I trust my own from my design days."
         },
         {
           "role": "interviewer",
-          "content": "Given your current transition into the workforce, how do you decide which health-related purchases are worth the investment?"
+          "content": "You mentioned trust and your eye for design. How do you feel about QVC using these digital platforms to reach a much younger audience, like those under 30?"
         },
         {
           "role": "interviewee",
-          "content": "I prioritize items that come with a structured plan or a clear benefit; if a brand like Healthco partners with Nike to provide a roadmap for my cardiovascular health, it removes the guesswork and makes the financial commitment feel much safer."
+          "content": "I think it's wonderful, but I do worry that the younger generation moves so fast they might miss the 'Quality' part of QVC. My daughter is always buying things that fall apart in a month. I would love to use the streaming service to show her that a real investment piece—like a solid piece of gold or a well-crafted armchair—is worth the wait. If the app makes it easy for me to send her a clip of a host explaining the craftsmanship, then I'm all for it."
         },
         {
           "role": "interviewer",
-          "content": "How much does the incentive or reward aspect of the Wellness Walkers initiative influence your decision to participate?"
+          "content": "If you could share a 'digital boutique' of your favorite finds with your daughter through the app, would that change how often you use the service?"
         },
         {
           "role": "interviewee",
-          "content": "It’s a huge factor for me because it turns a preventative health goal into something manageable and rewarding, which is exactly the kind of administrative support I need while I'm still figuring out my new adult life."
+          "content": "Oh, absolutely. It would turn my 'me-time' into a way to connect with her. I'd love to curate a little collection of things I think she needs for her first apartment and just text it over. It keeps me relevant in her life, and it lets me pass down that appreciation for a beautiful home without being too pushy—I'm just the curator of her digital boutique."
         }
       ],
-      "summary": "Elena values structured health incentives and brand partnerships that provide a sense of stability and clear guidance during her transition into the workforce.",
-      "quote": "I prioritize items that come with a structured plan or a clear benefit; it removes the guesswork and makes the financial commitment feel much safer.",
+      "summary": "Jane values long-term host relationships and product quality, viewing new digital features primarily as a bridge to share her design expertise and 'investment' philosophy with her younger family members.",
+      "quote": "I’ve watched these hosts for thirty years; they aren't just selling a product, they’re telling a story about why a piece of jewelry or a throw pillow belongs in a home that’s lived-in and loved.",
       "sentiment": "Positive"
     },
     {
-      "personaId": "p_1773416854806",
-      "personaName": "The Digital Health Optimizer",
+      "personaId": "p_1774281640373",
+      "personaName": "The TikTok Generation",
       "transcript": [
         {
           "role": "interviewer",
-          "content": "what products are you most likely to buy?"
+          "content": "What makes you stay on a QVC Video (on tv, or TikTok livestream for more than 30 seconds)?"
         },
         {
           "role": "interviewee",
-          "content": "As an SRE, I'm all about optimization. I'm most likely to buy smart wearables, glucose monitors that sync via Bluetooth, and now, specifically those Nike walking shoes if they actually integrate with the Healthco app. I need products that contribute to my recovery data stream without adding manual overhead to my day."
+          "content": "Honestly, for me to stay longer than a scroll, it has to feel like a 'get ready with me' or a life hack I can't look away from. If the host is just reading specs, I'm out. But if they're showing a beauty tool that gives instant glass skin or a kitchen gadget that's going viral, and they're doing it with that high-energy creator vibe where it feels like a FaceTime call, I'll watch. It’s about that 'I need this right now' feeling and seeing the results in real-time."
         },
         {
           "role": "interviewer",
-          "content": "How does the integration of shoes like Nike into your existing health ecosystem affect your purchasing decision?"
+          "content": "You mentioned your purchasing is often trend-driven. How much does seeing a product being used by a 'core' QVC shopper—like a mom or grandmother figure—influence your interest?"
         },
         {
           "role": "interviewee",
-          "content": "It’s a dealbreaker for me. If the shoes are just 'dumb' gear, I’m not interested. But if they feed gait analysis or step counts directly into my Healthco dashboard where I track my chronic condition recovery, they become a functional tool. I prioritize hardware that talks to my software."
+          "content": "It's funny because my mom is obsessed with QVC, so there's a trust factor there. If she tells me a brand is actually legit, I'll listen, but I still need to see it styled for my life. Like, she might buy a Dyson for cleaning, but I want to see a creator show me how it makes my tiny apartment look aesthetic. If QVC can bridge that gap—taking the 'mom-approved' quality and putting it in a viral, 15-second format—I'm way more likely to bite."
         },
         {
           "role": "interviewer",
-          "content": "What specific features or incentives would make you choose these Nike shoes over a standard pair of walking shoes?"
+          "content": "What would the QVC+ streaming app need to offer to make you choose it over just scrolling through TikTok or Instagram for shopping?"
         },
         {
           "role": "interviewee",
-          "content": "Auto-syncing data is number one, but from a financial side, I'd want to see my walking streaks translate into lower monthly premiums or Healthco credits. If I can prove my activity levels through the Nike integration to get a discount on my insurance, I'm buying them immediately."
+          "content": "It needs to be 'entertainment with a checkout button' that feels exclusive. Give me limited-edition drops that I can't get anywhere else, or content with creators I already follow. If the app has a 'one-tap buy' while I’m watching a livestream and the UI doesn't look like a 90s website, I’d actually use it. It has to feel like I’m part of a club, not just watching a long-form infomercial."
         }
       ],
-      "summary": "Marcus is highly motivated by data integration and financial incentives that reward a tech-enabled healthy lifestyle.",
-      "quote": "If I can prove my activity levels through the Nike integration to get a discount on my insurance, I'm buying them immediately.",
+      "summary": "Jennifer requires high-energy, 'hack-based' content and modern UI to engage, leveraging her mother's trust in QVC quality but demanding a viral, aesthetic-focused delivery.",
+      "quote": "If QVC can bridge that gap—taking the 'mom-approved' quality and putting it in a viral, 15-second format—I'm sold.",
+      "sentiment": "Neutral"
+    },
+    {
+      "personaId": "p_1774281648673",
+      "personaName": "The Millennial Bridge",
+      "transcript": [
+        {
+          "role": "interviewer",
+          "content": "What makes you stay on a QVC Video (on tv, or TikTok livestream for more than 30 seconds)?"
+        },
+        {
+          "role": "interviewee",
+          "content": "For me, it’s all about the expert demonstration and the trust factor. As a Project Operations Manager and a mom, I don’t have time to guess if a product works. If I see a host spend time showing exactly how a kitchen gadget handles a mess or how a fabric moves on a real body, I stay because it’s solving a problem for me in real-time. It’s the efficiency of seeing the 'truth' of a product before I click buy."
+        },
+        {
+          "role": "interviewer",
+          "content": "You mentioned buying for three generations; how do you currently involve the younger members of your family in these shopping experiences?"
+        },
+        {
+          "role": "interviewee",
+          "content": "It usually starts with me finding something high-quality and then 'selling' it to them. For example, if I see a great tech deal or a skincare line on QVC, I’ll send the clip to my niece or younger cousins. They are skeptical of traditional ads, but they trust my 'Chief Purchasing Officer' stamp of approval. I find myself acting as the filter—I find the quality on QVC and then show them how it fits their aesthetic."
+        },
+        {
+          "role": "interviewer",
+          "content": "In what way could AI or the QVC+ app make it easier for you to bridge that gap and get them to engage with the platform directly?"
+        },
+        {
+          "role": "interviewee",
+          "content": "I would love an AI feature that lets me create a 'curated bundle' for them. Imagine if I could select a video demo I like and the AI suggests a 'Gen Z edit' of that product or similar items that ship directly to them with a video note from me. If the app could use AI to help me match my standards for quality with their specific style preferences, it would make the QVC+ app a one-stop shop for our whole family's needs."
+        }
+      ],
+      "summary": "Mary leverages her trust in QVC's expert demonstrations to act as a quality filter for younger generations, suggesting that AI-curated social sharing could bridge the age gap.",
+      "quote": "If the app could use AI to help me match my standards for quality with their specific style preferences, it would make the QVC+ app a one-stop shop for our whole family's needs.",
       "sentiment": "Positive"
     },
     {
-      "personaId": "p_1773416862909",
-      "personaName": "The Proactive Well-being Seeker",
+      "personaId": "std_chef",
+      "personaName": "Home Chef",
       "transcript": [
         {
           "role": "interviewer",
-          "content": "what products are you most likely to buy?"
+          "content": "What makes you stay on a QVC Video (on tv, or TikTok livestream for more than 30 seconds)?"
         },
         {
           "role": "interviewee",
-          "content": "I'm most likely to invest in high-quality walking shoes, wearable fitness trackers, and monthly subscriptions for meditation or mental health apps. As a Digital Wellness Consultant, I prioritize products that integrate seamlessly into my proactive routine and support a holistic approach to my long-term health."
+          "content": "As a marketing manager and a home chef, I'm drawn to the narrative and the utility. I stay because I see a high-end product, like a Le Creuset or a Vitamix, being used in a practical, expert-led demonstration. It's the thrill of the 'Today's Special Value' combined with the inspiration for my next dinner party. If the host is sharing a specific technique or a recipe I haven't tried, I'm locked in for way longer than 30 seconds."
         },
         {
           "role": "interviewer",
-          "content": "How does the idea of Healthco offering incentives for Nike walking shoes fit into your current buying habits?"
+          "content": "How do you think we could translate that same 'host-driven' appeal to a younger audience, like your younger colleagues, through a platform like QVC+?"
         },
         {
           "role": "interviewee",
-          "content": "It aligns perfectly because I already view gear as a form of preventative medicine. If Healthco makes it easier for me to access premium equipment like Nike shoes through the Wellness Walkers initiative, it removes the financial barrier to staying active and makes me feel like my insurer is actually a partner in my well-being."
+          "content": "The younger crowd lives for 'curated aesthetics.' My younger colleagues are always asking where I got my kitchen gadgets. We could bridge that gap by creating 'Host with Me' segments on QVC+ where someone from my demographic partners with a younger influencer. It’s about leveraging my purchasing power and taste to validate products for them. They need it to look like a social feed—fast-paced and visually stunning—rather than a traditional broadcast."
         },
         {
           "role": "interviewer",
-          "content": "Does having access to a program like Wellness Walkers influence your overall loyalty to Healthco as a brand?"
+          "content": "How would you feel about an AI feature that suggests gifts or kitchen essentials for younger relatives based on your own purchase history and preferences?"
         },
         {
           "role": "interviewee",
-          "content": "Definitely. At 22, I'm looking for a brand that understands my generation's focus on preventative care rather than just reactive treatment; a company that rewards me for being healthy feels much more modern and worth sticking with long-term."
+          "content": "I would love that. As someone who appreciates 'Quality, Value, and Convenience,' having an AI curate a 'Starter Kitchen' list for my niece based on the high-end tools I already own would be incredibly helpful. It turns my expertise into a giftable experience. If the AI can help me pass down my 'Today's Special Value' obsession to the next generation in a way that fits their lifestyle, that's a win for everyone."
         }
       ],
-      "summary": "Sarah views incentivized wellness gear as a vital component of preventative care and a key differentiator that builds brand loyalty with younger, health-conscious members.",
-      "quote": "If Healthco makes it easier for me to access premium equipment like Nike shoes, it removes the financial barrier to staying active and makes me feel like my insurer is actually a partner in my well-being.",
+      "summary": "The user suggests that bridging the age gap requires merging high-end product expertise with social-style curation and AI-driven personalized gifting recommendations.",
+      "quote": "They trust my taste, but they need the interface to feel less like a TV channel and more like a social feed.",
       "sentiment": "Positive"
     },
     {
-      "personaId": "std_skeptic",
-      "personaName": "Skeptic",
+      "personaId": "std_tech_guru",
+      "personaName": "Tech Enthusiast",
       "transcript": [
         {
           "role": "interviewer",
-          "content": "what products are you most likely to buy?"
+          "content": "What makes you stay on a QVC Video (on tv, or TikTok livestream for more than 30 seconds)?"
         },
         {
           "role": "interviewee",
-          "content": "As an accountant, I don't purchase products based on brand lifestyle; I buy based on utility and ROI. In the healthcare space, I'm only likely to buy products that are HSA-eligible or have a proven track record of reducing my long-term out-of-pocket expenses. If a product like these Nike shoes is being marketed through my insurance, my first instinct is to calculate whether the 'incentive' is just a way to justify higher premiums elsewhere."
+          "content": "For me to stick around, the production quality has to be top-tier and the utility needs to be obvious. I'm drawn in by high-fidelity visuals—like 4K streams where I can actually see the build quality of a product—and a UI that doesn't look like it was designed in the 90s. If it feels like a slick, tech-forward presentation rather than a frantic sales pitch, I'll stop scrolling."
         },
         {
           "role": "interviewer",
-          "content": "Healthco is offering specific incentives for Nike walking shoes as part of the Wellness Walkers program. How do you evaluate the value of a high-end shoe brand being subsidized by your insurance provider?"
+          "content": "You mentioned the UI and tech-forward presentation. How important is real-time interactivity, like AR features or live data overlays, to your engagement?"
         },
         {
           "role": "interviewee",
-          "content": "I evaluate it by looking at the net cost. If a $130 pair of Nikes is discounted to $90 through the program, but I can get a functionally equivalent shoe for $60 elsewhere, the 'benefit' is actually a $30 loss. I also look at the fine print: what data am I giving up to Healthco in exchange for this discount, and how does that data affect my future insurability or rate tier?"
+          "content": "As a developer, I'm always looking for that 'wow' factor in the stack. If QVC+ integrated an AR 'view in room' feature directly into the stream or used AI to show real-time price comparisons and technical specs in an overlay, I’d be much more likely to buy. It needs to feel like an ecosystem, not just a video feed with a phone number at the bottom."
         },
         {
           "role": "interviewer",
-          "content": "If we could provide data showing a direct correlation between this specific footwear and reduced cardiovascular incidents among members your age, would that change your cost-benefit analysis?"
+          "content": "How do you think QVC could use their established 'core' audience's influence to make the platform more appealing to someone in your demographic?"
         },
         {
           "role": "interviewee",
-          "content": "Only if that correlation translates into a guaranteed, contractual reduction in my monthly premium or a lower deductible. General health data is fine for a brochure, but I'm interested in the bottom line of my healthcare ledger; if my risk profile improves because of this initiative, I expect to see that reflected in my financial obligations to the insurer."
+          "content": "They should bridge the gap by showing 'social proof' from the core demographic but through a modern lens—think crowdsourced 'Pro-Tips' or 'Real-World Use' clips from long-time users integrated into the stream. If I see that a product has 20 years of brand loyalty but the interface I'm using to buy it is cutting-edge, that's the sweet spot for me."
         }
       ],
-      "summary": "The user views health incentives through a strictly financial lens, dismissing brand-name appeal in favor of verifiable premium reductions and net-cost calculations.",
-      "quote": "I'm not interested in 'wellness' as an abstract concept; I'm interested in the bottom line of my healthcare ledger.",
-      "sentiment": "Negative"
+      "summary": "This tech-savvy user seeks high-definition production, modern UI/UX, and advanced interactive features like AR to engage with legacy retail content.",
+      "quote": "I want the platform to feel like a high-end app, not a broadcast from 1995.",
+      "sentiment": "Neutral"
     },
     {
-      "personaId": "std_optimist",
-      "personaName": "Optimist",
+      "personaId": "std_beauty_pro",
+      "personaName": "Beauty Guru",
       "transcript": [
         {
           "role": "interviewer",
-          "content": "what products are you most likely to buy?"
+          "content": "What makes you stay on a QVC Video (on tv, or TikTok livestream for more than 30 seconds)?"
         },
         {
           "role": "interviewee",
-          "content": "As a yoga instructor and someone who is really proactive about movement, I'm always looking for high-quality athletic wear, sustainable yoga mats, and the latest wearable tech to track my heart rate and daily steps. I prioritize products that support a long-term healthy lifestyle and offer durability for my daily practice."
+          "content": "As an esthetician, I'm hyper-focused on efficacy and the 'why' behind a product. I'll stay if I see a live demonstration of a high-end skincare tool or a deep dive into active ingredients like stabilized Vitamin C or peptides. It has to feel like a masterclass rather than a hard sell; if they are showing real-time skin texture improvements or explaining the molecular delivery system of a serum, I’m hooked."
         },
         {
           "role": "interviewer",
-          "content": "How would you feel about your health insurance, like Healthco, offering specific incentives for brands like Nike to help with those purchases?"
+          "content": "Since you value that educational 'masterclass' feel, how do you think that content would translate to a younger audience, under 30, who might view QVC as a legacy brand?"
         },
         {
           "role": "interviewee",
-          "content": "I would absolutely love that! It feels like the insurance company actually cares about my prevention rather than just treating me when I'm sick. Getting a discount or reward points for Nike shoes through the Healthco ecosystem would make me feel like my healthy habits are being recognized and supported financially."
+          "content": "The younger generation are 'skintellectuals'—they are obsessed with transparency and science. If QVC+ leans into that 'Get Ready With Me' style but maintains the professional authority of an expert demonstration, it bridges the gap. They don't want a commercial; they want to see a 38-year-old expert like me showing them how to build a preventative routine using the premium brands QVC carries, which gives the platform immediate 'cool girl' credibility through expertise."
         },
         {
           "role": "interviewer",
-          "content": "Regarding the Wellness Walkers Initiative, what specific feature would make you most likely to participate daily?"
+          "content": "Would you feel comfortable recommending a QVC+ video or a specific digital boutique link to your younger clients, and what would it take for you to do so?"
         },
         {
           "role": "interviewee",
-          "content": "The integration between my step tracker and a tangible reward, like earning credit toward new walking shoes, is the biggest draw. I'm already tracking my steps, so having that data automatically unlock benefits for high-performance gear would turn my daily walks into a fun, rewarding challenge that directly impacts my cardiovascular health."
+          "content": "I definitely would, especially if the content is clipped into bite-sized tutorials focused on 'glass skin' or 'pro-aging.' If I can send a client a link that not only lets them buy a professional-grade Elemis or Perricone MD kit but also includes a video of an expert explaining the application, it adds value to my recommendation. The key is making the checkout seamless and the video content feel like a curated expert tip rather than a 24-hour shopping loop."
         }
       ],
-      "summary": "The user is an enthusiastic wellness advocate who values brand partnerships that reward proactive physical activity and provide high-quality athletic gear.",
-      "quote": "I'm always looking for ways to bridge the gap between my daily movement and my healthcare, so a reward system for Nike shoes is a dream come true.",
-      "sentiment": "Positive"
-    },
-    {
-      "personaId": "std_average_jane",
-      "personaName": "Average Jane",
-      "transcript": [
-        {
-          "role": "interviewer",
-          "content": "what products are you most likely to buy?"
-        },
-        {
-          "role": "interviewee",
-          "content": "As a teacher with a family, my budget is mostly dedicated to the basics like groceries and school supplies, but I'm always on the lookout for healthcare-related items that prevent bigger bills later. I usually buy generic brand sneakers or whatever is on clearance because I can't justify spending a hundred dollars on shoes when I have high deductibles and co-pays to worry about."
-        },
-        {
-          "role": "interviewer",
-          "content": "If Healthco offered a significant discount or a reward system for Nike walking shoes through the Wellness Walkers program, would that change your interest in premium footwear?"
-        },
-        {
-          "role": "interviewee",
-          "content": "It definitely would. I know quality shoes like Nikes are better for my back and joints, especially since I'm on my feet all day at school, but the price is usually the barrier. If Healthco made them affordable or if the program helped lower my family's out-of-pocket healthcare costs, I'd choose those over the cheap ones in a heartbeat."
-        },
-        {
-          "role": "interviewer",
-          "content": "What specific financial incentive would make you feel most supported by Healthco in this walking initiative?"
-        },
-        {
-          "role": "interviewee",
-          "content": "The biggest win for me would be if my steps could earn credits toward my deductible or reduce my monthly premium. If I could 'walk off' some of those medical costs while wearing a pair of reliable Nikes that didn't break the bank, it would feel like the insurance company is actually partnerning with me to keep my family healthy and my budget intact."
-        }
-      ],
-      "summary": "Jane is highly price-sensitive but would prioritize premium footwear if the program directly offsets her high out-of-pocket healthcare costs.",
-      "quote": "If I could 'walk off' some of those out-of-pocket costs while getting a reliable pair of shoes, it would feel like Healthco is actually looking out for my wallet and my heart at the same time.",
+      "summary": "The user believes QVC can attract younger audiences by positioning its video content as expert-led, 'skintellectual' education that mirrors TikTok trends while utilizing professional authority.",
+      "quote": "The younger generation are 'skintellectuals'—they want to see an expert showing them how to build a preventative routine using premium brands.",
       "sentiment": "Positive"
     }
   ]

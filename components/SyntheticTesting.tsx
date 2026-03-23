@@ -80,7 +80,13 @@ export const SyntheticTesting: React.FC = () => {
 
     // Acquisition Simulation
     const [acquisitionResults, setAcquisitionResults] = useState<AcquisitionResult[]>([]);
-    const [acquisitionOffers, setAcquisitionOffers] = useState<string[]>(["$0 Monthly Premium", "Free Gym Membership (SilverSneakers)", "24/7 Telehealth Included", "First Month Free"]);
+    const [acquisitionOffers, setAcquisitionOffers] = useState<string[]>([
+        "Early Access to Limited Edition Collaborations",
+        "Virtual AR Try-On for Beauty & Fashion",
+        "Interest-Free BNPL (Shop Now, Pay Later)",
+        "Exclusive 'Host Hangout' Virtual Events",
+        "Sustainability-First Curated Collections"
+    ]);
     const [newOffer, setNewOffer] = useState("");
     const [isAcquisitionLoading, setIsAcquisitionLoading] = useState(false);
 
@@ -277,7 +283,7 @@ export const SyntheticTesting: React.FC = () => {
         setStatus("Simulating Net-New Acquisition...");
         try {
             let pool = [...syntheticUsers];
-            const results = await simulateAcquisitionFocusGroup(pool, acquisitionOffers);
+            const results = await simulateAcquisitionFocusGroup(pool, acquisitionOffers, name, description);
             setAcquisitionResults(results);
 
             // Auto Save
@@ -453,11 +459,10 @@ export const SyntheticTesting: React.FC = () => {
         try {
             const { generateRegionalVariants, simulateABTestFocusGroup } = await import('../services/geminiService');
 
-            // Generate Variants based on the current main image prompt
-            // The assets have an image, let's pass a generic base prompt representing the current goal and product
-            const basePrompt = `${brief.productName} campaign focusing on ${brief.campaignGoal}`;
+            // Generate Variants based on the current brief and campaign goals
+            const basePrompt = `Product: ${brief.productName}. Goal: ${brief.campaignGoal}. Value Prop: ${brief.valueProp?.main?.en || 'Premium Quality'}. Asset Context: ${activeCreativeAssets?.social?.caption || ''}`;
 
-            const variants = await generateRegionalVariants(basePrompt);
+            const variants = await generateRegionalVariants(basePrompt, name, description);
             setRegionalVariants(variants);
 
             setStatus("Simulating A/B Test focus group...");
@@ -468,7 +473,7 @@ export const SyntheticTesting: React.FC = () => {
             }));
 
             // Simulate A/B Test
-            const results = await simulateABTestFocusGroup(pool, variants.map(v => ({ region: v.region, image: v.image })));
+            const results = await simulateABTestFocusGroup(pool, variants.map(v => ({ region: v.region, image: v.image })), name, description);
             setAbTestResults(results);
 
             // Auto Save
@@ -765,24 +770,46 @@ export const SyntheticTesting: React.FC = () => {
                                     )}
 
                                     {acquisitionResults.length > 0 && (
-                                        <div className="content-card p-0 overflow-hidden">
-                                            <div className="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
-                                                <h3 className="font-bold text-heading">Prospect Feedback Loop</h3>
-                                                <div className="text-xs text-subtext">{acquisitionResults.length} simulated interactions</div>
+                                        <div className="content-card p-0 overflow-hidden shadow-xl border-blue-100">
+                                            <div className="p-6 border-b border-gray-100 bg-white flex justify-between items-center">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="p-2 bg-blue-50 rounded-lg">
+                                                        <MessageSquare className="text-[#0077C8]" size={20} />
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="font-black text-heading uppercase tracking-widest text-sm">Prospect Feedback Loop</h3>
+                                                        <p className="text-[10px] text-subtext font-bold">In-depth sentiment analysis from {acquisitionResults.length} simulated interactions</p>
+                                                    </div>
+                                                </div>
+                                                <div className="badge badge-blue">{acquisitionResults.length} participants</div>
                                             </div>
-                                            <div className="max-h-[500px] overflow-y-auto p-4 space-y-3 custom-scrollbar">
+                                            <div className="max-h-[600px] overflow-y-auto p-6 space-y-4 custom-scrollbar bg-gray-50/30">
                                                 {acquisitionResults.map((r, i) => (
-                                                    <div key={i} className="flex gap-4 p-4 bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-                                                        <div className={`w-2 h-full rounded-full flex-shrink-0 ${r.likelihoodToJoin > 70 ? 'bg-green-500' : r.likelihoodToJoin > 40 ? 'bg-yellow-500' : 'bg-red-500'}`} />
+                                                    <div key={i} className="flex gap-4 p-5 bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5 group">
+                                                        <div className={`w-1.5 h-16 rounded-full flex-shrink-0 transition-colors ${r.likelihoodToJoin > 75 ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.3)]' : r.likelihoodToJoin > 45 ? 'bg-yellow-500' : 'bg-red-400'}`} />
                                                         <div className="flex-1">
-                                                            <div className="flex justify-between mb-1">
-                                                                <div className="font-bold text-heading">{r.personaName}</div>
-                                                                <span className="text-xs font-mono text-subtext">Likelihood: {r.likelihoodToJoin}%</span>
+                                                            <div className="flex justify-between items-start mb-2">
+                                                                <div>
+                                                                    <div className="font-black text-heading text-sm uppercase tracking-wider">{r.personaName}</div>
+                                                                    <div className="text-[10px] font-bold text-subtext opacity-60">Gen-Z / Millennial Prospect</div>
+                                                                </div>
+                                                                <div className="text-right">
+                                                                    <div className="text-lg font-black text-heading leading-none">{r.likelihoodToJoin}%</div>
+                                                                    <div className="text-[8px] font-black text-subtext uppercase tracking-widest">Likelihood</div>
+                                                                </div>
                                                             </div>
-                                                            <p className="text-subtext italic text-sm mb-2">"{r.feedback}"</p>
-                                                            <div className="flex gap-2 text-xs">
-                                                                {r.barriers && <span className="px-2 py-1 bg-red-50 text-red-600 rounded border border-red-100">Barrier: {r.barriers}</span>}
-                                                                {r.winningOffer && r.winningOffer !== "None" && <span className="px-2 py-1 bg-green-50 text-green-600 rounded border border-green-100">Won by: {r.winningOffer}</span>}
+                                                            <p className="text-sm text-heading italic font-medium leading-relaxed mb-4 border-l-2 border-gray-100 pl-3">"{r.feedback}"</p>
+                                                            <div className="flex flex-wrap gap-2">
+                                                                {r.barriers && r.barriers !== "None" && (
+                                                                    <span className="px-3 py-1.5 bg-red-50 text-red-600 rounded-xl text-[10px] font-black border border-red-100 flex items-center gap-1">
+                                                                        <XCircle size={12} /> {r.barriers}
+                                                                    </span>
+                                                                )}
+                                                                {r.winningOffer && r.winningOffer !== "None" && (
+                                                                    <span className="px-3 py-1.5 bg-green-50 text-green-700 rounded-xl text-[10px] font-black border border-green-100 flex items-center gap-1 shadow-sm">
+                                                                        <CheckCircle2 size={12} /> Won by: {r.winningOffer}
+                                                                    </span>
+                                                                )}
                                                             </div>
                                                         </div>
                                                     </div>
@@ -1198,7 +1225,11 @@ export const SyntheticTesting: React.FC = () => {
                                                     <div className="flex items-center gap-2">
                                                         <span className="text-heading">{r.personaName}</span>
                                                         <span className="text-[10px] text-subtext font-black uppercase tracking-widest bg-gray-50 px-2 py-0.5 rounded border border-gray-100">
-                                                            {syntheticUsers.find(u => u.id === r.personaId)?.baseAudienceName || 'Standard Audience'}
+                                                            {(() => {
+                                                                const user = syntheticUsers.find(u => r.personaId.includes(u.id)) || 
+                                                                             syntheticUsers.find(u => u.name === r.personaName);
+                                                                return user?.baseAudienceName || 'Standard Audience';
+                                                            })()}
                                                         </span>
                                                     </div>
                                                     <span className="text-[#0077C8] flex items-center gap-1">Interest: {r.briefMetrics.interestScore}/10</span>
@@ -1602,8 +1633,8 @@ export const SyntheticTesting: React.FC = () => {
                         <div className="space-y-6">
                             <div className="content-card flex justify-between items-center">
                                 <div>
-                                    <h3 className="text-lg font-black text-heading">A/B Test Simulation</h3>
-                                    <p className="text-sm text-subtext">Generate regional variants & simulate multi-variant testing on {syntheticUsers.length} synthetic users.</p>
+                                    <h3 className="text-lg font-black text-heading">Campaign Strategic A/B Testing</h3>
+                                    <p className="text-sm text-subtext">Generate strategic variants & simulate multi-variant testing on {syntheticUsers.length} synthetic users.</p>
                                 </div>
                                 <div className="flex gap-4">
                                     <button
@@ -1750,11 +1781,44 @@ export const SyntheticTesting: React.FC = () => {
                         </div>
 
                         <div className="space-y-6 mb-8">
+                            <div className="flex flex-col gap-2">
+                                <label className="block text-[10px] font-black text-subtext uppercase tracking-widest">Select From Standards</label>
+                                <div className="grid grid-cols-2 gap-2">
+                                    {STANDARD_AUDIENCES.map((std) => (
+                                        <button 
+                                            key={std.id}
+                                            onClick={() => {
+                                                setPersonas([...personas, { ...std, isWildcard: false }]);
+                                                setIsAddAudienceModalOpen(false);
+                                            }}
+                                            className="text-left p-3 rounded-2xl border border-gray-100 hover:border-blue-300 hover:bg-blue-50 transition-all flex items-center gap-3 group"
+                                        >
+                                            <div className="w-8 h-8 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0 group-hover:scale-110 transition-transform">
+                                                <img src={std.imageUrl} className="w-full h-full object-cover" alt={std.name} />
+                                            </div>
+                                            <div>
+                                                <div className="text-[10px] font-black text-heading uppercase truncate w-24">{std.name}</div>
+                                                <div className="text-[8px] font-bold text-subtext">{std.demographics.split(',')[0]}</div>
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="relative">
+                                <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                                    <div className="w-full border-t border-gray-100"></div>
+                                </div>
+                                <div className="relative flex justify-center text-xs uppercase font-black text-subtext/40">
+                                    <span className="bg-white px-2">Or Design Custom</span>
+                                </div>
+                            </div>
+
                             <div>
-                                <label className="block text-[10px] font-black text-subtext uppercase tracking-widest mb-3">Audience Criteria</label>
+                                <label className="block text-[10px] font-black text-subtext uppercase tracking-widest mb-3">Custom Audience Criteria</label>
                                 <textarea
-                                    className="input-field h-40 text-base"
-                                    placeholder="Describe the audience you want to test (e.g., 'Urban marathon runners who need high-mileage durability' or 'Casual joggers looking for stylish sneakers')..."
+                                    className="input-field h-32 text-sm"
+                                    placeholder="Describe the audience you want to test..."
                                     value={audienceCriteria}
                                     onChange={e => setAudienceCriteria(e.target.value)}
                                 />

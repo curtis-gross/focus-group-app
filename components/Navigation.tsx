@@ -18,6 +18,7 @@ import {
   Settings,
   Save,
   RotateCcw,
+  RotateCw,
   Loader2
 } from 'lucide-react';
 import { useCompanyContext } from '../context/CompanyContext';
@@ -72,12 +73,11 @@ export const Navigation: React.FC<NavigationProps> = ({ currentMode, setMode, is
 
   const navItems = [
     { id: AppMode.HOME, label: 'Home', icon: Home },
-    { id: AppMode.INSIGHTS, label: 'Insights', icon: Eye },
     { id: AppMode.AUDIENCE_GEN, label: 'Audiences', icon: Users },
     { id: AppMode.SYNTHETIC_USERS, label: 'Synthetic Users', icon: UserPlus },
     { id: AppMode.MARKETING_BRIEF, label: 'Marketing Brief', icon: FileText },
-    { id: AppMode.PDP_HUB, label: 'Content', icon: Layers },
     { id: AppMode.SYNTHETIC_FOCUS_GROUP, label: 'Focus Group', icon: MessageSquare },
+    { id: AppMode.PDP_HUB, label: 'Content', icon: Layers },
   ];
 
   return (

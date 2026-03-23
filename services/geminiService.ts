@@ -123,7 +123,9 @@ export const generateImage = async (prompt: string, model: string = "gemini-3.1-
                 // @ts-ignore
                 imageConfig: {
                     aspectRatio: aspectRatio,
-                    imageSize: "1K"
+                    imageSize: "1K",
+                    // @ts-ignore
+                    outputMimeType: "image/jpeg"
                 }
             }
         });
@@ -142,11 +144,11 @@ export const generateImage = async (prompt: string, model: string = "gemini-3.1-
 /**
  * Generates an image using Gemini with a reference image.
  */
-export const generateImageWithReference = async (prompt: string, referenceImageBase64: string, mimeType: string = "image/png", model: string = "gemini-3.1-flash-image-preview", aspectRatio: string = "1:1"): Promise<string | null> => {
+export const generateImageWithReference = async (prompt: string, referenceImageBase64s: string[], mimeType: string = "image/png", model: string = "gemini-3.1-flash-image-preview", aspectRatio: string = "1:1"): Promise<string | null> => {
     try {
         
         console.log(`Generating image with reference, model ${model}. Prompt: ${prompt}, Aspect: ${aspectRatio}`);
-        console.log(`Reference Image Base64 Length: ${referenceImageBase64 ? referenceImageBase64.length : '0'}`);
+        console.log(`Reference Images count: ${referenceImageBase64s.length}`);
 
         const response = await callGenAiProxy("generateContent", {
             model: model,
@@ -154,7 +156,9 @@ export const generateImageWithReference = async (prompt: string, referenceImageB
                 role: "user",
                 parts: [
                     { text: prompt },
-                    { inlineData: { mimeType: mimeType, data: referenceImageBase64 } }
+                    ...referenceImageBase64s.map(img => ({ 
+                        inlineData: { mimeType: mimeType, data: img.replace(/^data:image\/\w+;base64,/, '') } 
+                    }))
                 ]
             }],
             config: {
@@ -162,7 +166,9 @@ export const generateImageWithReference = async (prompt: string, referenceImageB
                 // @ts-ignore
                 imageConfig: {
                     aspectRatio: aspectRatio,
-                    imageSize: "1K"
+                    imageSize: "1K",
+                    // @ts-ignore
+                    outputMimeType: "image/jpeg"
                 }
             }
         });
@@ -613,32 +619,46 @@ export const generateMarketingCampaignAssets = async (productName: string, targe
         
         console.log("Parsed Marketing Brief Data:", JSON.stringify(data, null, 2));
 
-        // 2 & 3. Generate Images Concurrently
-        const imagePromises: Promise<any>[] = [];
+        // 2 & 3. Generate Images in batches of 3
+        const allImagePrompts: { type: string, prompt: string, rec?: any }[] = [];
         
-        console.log("Queueing Main Campaign Image for prompt:", data.imagePrompt);
-        const mainImagePromise = data.imagePrompt
-            ? generateImageFromPrompt(data.imagePrompt + ", professional photography, high resolution, commercial lighting")
-            : Promise.resolve(null);
-        imagePromises.push(mainImagePromise);
-
-        console.log("Queueing Recommendation Images. Count:", (data.recommendations || []).length);
-        for (const rec of (data.recommendations || [])) {
-            console.log("Queueing Rec Image for:", rec.name, rec.imagePrompt);
-            const recPromise = generateImageFromPrompt(rec.imagePrompt + ", clean commerce marketing style, warm lighting").then(img => ({
-                name: rec.name,
-                price: rec.price,
-                image: img
-            }));
-            imagePromises.push(recPromise);
+        if (data.imagePrompt) {
+            allImagePrompts.push({ type: 'MAIN', prompt: data.imagePrompt + ", professional photography, high resolution, commercial lighting" });
         }
         
-        console.log(`Waiting for ${imagePromises.length} image generation calls...`);
-        const results = await Promise.all(imagePromises);
-        console.log("Finished all image generation calls.");
+        for (const rec of (data.recommendations || [])) {
+            allImagePrompts.push({ type: 'REC', prompt: rec.imagePrompt + ", clean commerce marketing style, warm lighting", rec });
+        }
+
+        const results: any[] = [];
+        const imageBatchSize = 4;
         
-        const mainImage = results[0];
-        const recommendations = results.slice(1);
+        console.log(`Processing ${allImagePrompts.length} images in batches of ${imageBatchSize}...`);
+        
+        for (let i = 0; i < allImagePrompts.length; i += imageBatchSize) {
+            const batch = allImagePrompts.slice(i, i + imageBatchSize);
+            const batchResults = await Promise.all(batch.map(async (item) => {
+                const img = await generateImageFromPrompt(item.prompt);
+                if (item.type === 'MAIN') return { type: 'MAIN', img };
+                return { 
+                    type: 'REC', 
+                    img, 
+                    name: item.rec.name, 
+                    price: item.rec.price 
+                };
+            }));
+            results.push(...batchResults);
+        }
+        
+        console.log("Finished all image generation batches.");
+        
+        const mainImageObj = results.find(r => r.type === 'MAIN');
+        const mainImage = mainImageObj ? mainImageObj.img : null;
+        const recommendations = results.filter(r => r.type === 'REC').map(r => ({
+            name: r.name,
+            price: r.price,
+            image: r.img
+        }));
 
         return {
             image: mainImage,
@@ -846,32 +866,52 @@ const saveVideoServe = async (base64Data: string | null, videoUrl?: string): Pro
     }
 };
 
-export const generateProductSpinVideo = async (imageB64s: string[]): Promise<string | null> => {
+export const generateProductSpinVideo = async (imageB64s: string[], customPrompt?: string): Promise<string | null> => {
     
     try {
         console.log(`Generating product spin video with ${imageB64s.length} images...`);
 
-        // Prepare reference images
-        // Prepare image for Image-to-Video
-        // We only use the first image for now as Veo likely supports single image input for generation
-        const firstImageB64 = imageB64s[0];
-        const cleanB64 = firstImageB64.replace(/^data:image\/\w+;base64,/, "");
-        // Extract mime type if present or default
-        const matches = firstImageB64.match(/^data:(image\/\w+);base64,/);
-        const mimeType = matches ? matches[1] : "image/png";
+        // Process all images into referenceImages format
+        const referenceImages = await Promise.all(imageB64s.map(async (img) => {
+            let data = img;
+            let type = "image/png";
+
+            if (img.startsWith('/') || img.startsWith('http')) {
+                const result = await urlToRawBase64(img);
+                data = result.data;
+                type = result.mimeType;
+            } else if (img.startsWith('data:')) {
+                const matches = img.match(/^data:([^;]+);base64,(.+)$/);
+                if (matches && matches.length === 3) {
+                    type = matches[1];
+                    data = matches[2];
+                } else {
+                    data = img.split(',')[1];
+                }
+            } else {
+                data = img.replace(/^data:image\/\w+;base64,/, "");
+            }
+
+            return {
+                image: {
+                    imageBytes: data,
+                    mimeType: type
+                },
+                referenceType: "asset"
+            };
+        }));
 
         const response = await callGenAiProxy("generateVideos", {
             model: 'veo-3.1-generate-preview',
-            prompt: "the product is on a pedestal spinning around",
-            image: {
-                imageBytes: cleanB64,
-                mimeType: mimeType
-            },
+            prompt: customPrompt || "A photorealistic 360-degree spin of the product on a clean pedestal. Maintain exact consistency with the provided reference images.",
             config: {
                 aspectRatio: "16:9",
                 numberOfVideos: 1,
                 durationSeconds: 8,
                 resolution: "720p",
+                generateAudio: false,
+                // @ts-ignore
+                referenceImages: referenceImages
             }
         });
 
@@ -890,14 +930,10 @@ export const generateProductSpinVideo = async (imageB64s: string[]): Promise<str
             console.log(`Waiting for video generation... attempt ${i + 1}/${MAX_POLLS}`);
             await new Promise(resolve => setTimeout(resolve, POLL_INTERVAL));
 
-            // Refresh operation status
-            // The SDK likely has a method to get operation status, assuming client.operations.get exists
-            // or we might need to use the operation object itself if it has a refresh method?
-            // Based on user snippet: operation = client.operations.get(operation)
-            // Let's assume client.operations exists in this SDK version.
+            // Refresh operation status via proxy
             try {
                 // @ts-ignore
-                const op = await client.operations.get({ operation: operation });
+                const op = await callGenAiProxy("getOperation", { operation: operation });
                 if (op) {
                     operation = op;
                 }
@@ -914,25 +950,28 @@ export const generateProductSpinVideo = async (imageB64s: string[]): Promise<str
         // result is likely nested in response or result property depending on SDK
         // User snippet says: response = operation.result
         // @ts-ignore
-        const result = operation.result;
-        // Check for URI in generatedVideos (Veo 3.1)
-        // @ts-ignore
-        const generatedVideo = operation.response?.generatedVideos?.[0] || result?.generatedVideos?.[0];
-
-        if (generatedVideo?.video?.uri) {
-            const videoUrl = await saveVideoServe(null, generatedVideo.video.uri);
-            return videoUrl;
+        const result = operation.result || operation.response;
+        
+        // Handle different possible response structures for Veo 3.1
+        // 1. response.videos[0].bytesBase64Encoded (User's actual log)
+        const v0 = result?.videos?.[0] || operation.response?.videos?.[0];
+        if (v0?.bytesBase64Encoded) {
+            return await saveVideoServe(v0.bytesBase64Encoded);
+        }
+        if (v0?.uri) {
+            return await saveVideoServe(null, v0.uri);
         }
 
-        if (generatedVideo?.video?.encodedVideo) {
-            const videoUrl = await saveVideoServe(generatedVideo.video.encodedVideo);
-            return videoUrl;
+        // 2. response.generatedVideos[0].video.encodedVideo (Typical SDK structure)
+        const gv0 = result?.generatedVideos?.[0] || operation.response?.generatedVideos?.[0];
+        if (gv0?.video?.encodedVideo) {
+            return await saveVideoServe(gv0.video.encodedVideo);
+        }
+        if (gv0?.video?.uri) {
+            return await saveVideoServe(null, gv0.video.uri);
         }
 
-        console.error("No video data found in completed operation result:", operation);
-        return null;
-
-        console.error("No video generated in response");
+        console.error("No video data found in completed operation result:", JSON.stringify(operation, null, 2));
         return null;
 
     } catch (error) {
@@ -1507,39 +1546,33 @@ const urlToRawBase64 = async (url: string): Promise<{ data: string, mimeType: st
         throw error;
     }
 };
-export const generateLifestyleScene = async (productImage: string, sceneDescription: string, mimeType: string = 'image/png'): Promise<string | null> => {
+export const generateLifestyleScene = async (productImages: string | string[], sceneDescription: string, mimeType: string = 'image/png'): Promise<string | null> => {
     
     try {
-        // Always fetch image to base64 (client-side compatible)
-        let imageBytes = productImage;
-        let actualMimeType = mimeType;
-
-        if (productImage.startsWith('/') || productImage.startsWith('http')) {
-            try {
-                const result = await urlToRawBase64(productImage);
-                imageBytes = result.data;
-                actualMimeType = result.mimeType;
-            } catch (e) {
-                console.error("Failed to fetch product image for lifestyle scene:", e);
-                return null;
+        const images = Array.isArray(productImages) ? productImages : [productImages];
+        const processedImages = await Promise.all(images.map(async (img) => {
+            if (img.startsWith('/') || img.startsWith('http')) {
+                const result = await urlToRawBase64(img);
+                return { data: result.data, mimeType: result.mimeType };
+            } else if (img.startsWith('data:')) {
+                const matches = img.match(/^data:([^;]+);base64,(.+)$/);
+                if (matches && matches.length === 3) {
+                    return { mimeType: matches[1], data: matches[2] };
+                }
+                return { mimeType: 'image/png', data: img.split(',')[1] };
             }
-        } else if (productImage.startsWith('data:')) {
-            const matches = productImage.match(/^data:([^;]+);base64,(.+)$/);
-            if (matches && matches.length === 3) {
-                actualMimeType = matches[1];
-                imageBytes = matches[2];
-            } else {
-                imageBytes = productImage.split(',')[1];
-            }
-        }
+            return { data: img, mimeType };
+        }));
 
         const model = 'gemini-3.1-flash-image-preview';
 
-        // Config from user example (simplified) + safety
+        // Config with JPEG output
         const config = {
             responseModalities: ['IMAGE', 'TEXT'],
             imageConfig: {
                 imageSize: '1K',
+                // @ts-ignore
+                outputMimeType: "image/jpeg"
             },
             safetySettings: [
                 { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'OFF' },
@@ -1549,17 +1582,21 @@ export const generateLifestyleScene = async (productImage: string, sceneDescript
             ]
         };
 
+        const imageParts = processedImages.map(img => ({
+            inlineData: { mimeType: img.mimeType, data: img.data }
+        }));
+
         const contents = [
             {
                 role: 'user',
                 parts: [
-                    { inlineData: { mimeType: actualMimeType, data: imageBytes } },
+                    ...imageParts,
                     { text: sceneDescription }
                 ],
             },
         ];
 
-        console.log("Generating lifestyle scene (local base64)...");
+        console.log("Generating lifestyle scene (multi-image context)...");
         // @ts-ignore
         const response = await callGenAiProxy("generateContent", {
             model,
@@ -1895,8 +1932,8 @@ export const simulateMarketingFocusGroup = async (
             Return a JSON array with exactly ${batchPersonas.length} objects:
             [
                 {
-                    "personaId": "id from input",
-                    "personaName": "name from input",
+                    "personaId": "id from input (MANDATORY: must match input ID exactly)",
+                    "personaName": "name from input (MANDATORY: must match input name exactly)",
                     "briefMetrics": { 
                         "interestScore": 85, 
                         "clarityScore": 90, 
@@ -1973,8 +2010,8 @@ export const simulateMarketingFocusGroup = async (
 export const simulateAcquisitionFocusGroup = async (
     personas: any[],
     offers: string[],
-    companyName: string = "AI",
-    productContext: string = "health insurance"
+    companyName: string = "QVC AI",
+    productContext: string = "Retail and Live Commerce"
 ): Promise<any[]> => {
     
     const BATCH_SIZE = 10;
@@ -1982,32 +2019,33 @@ export const simulateAcquisitionFocusGroup = async (
 
     const processBatch = async (batchPersonas: any[]) => {
         try {
-            console.log(`Processing acquisition batch of ${batchPersonas.length} users...`);
+            console.log(`Processing acquisition batch of ${batchPersonas.length} users for ${companyName}...`);
             const prompt = `
-            You are a hyper-realistic consumer simulator.
+            You are a hyper-realistic consumer simulator specializing in Gen-Z and Millennial retail behaviors.
             
             **CONTEXT:**
             You are simulating ${batchPersonas.length} distinct synthetic personas.
-            **CRITICAL:** For this simulation, assume these personas are **NEW PROSPECTS** who are considering switching their ${productContext} to ${companyName}.
+            **CRITICAL:** For this simulation, assume these personas are **NEW PROSPECTS** who are considering engaging with ${companyName} for their ${productContext} needs.
             
             **THE ACQUISITION OFFERS:**
             ${JSON.stringify(offers)}
 
             **YOUR TASK:**
-            For EACH participant, evaluate the offers and decide if they would join.
+            For EACH participant, evaluate the offers based on their personal brand affinity, tech-savviness, and lifestyle needs. 
+            Decide if they would join/engage with ${companyName}.
             
-            1. **Likelihood to Join**: (0-100). Be realistic.
-            2. **Perceived Value**: (0-100).
-            3. **Barriers**: What is stopping them?
+            1. **Likelihood to Join**: (0-100). Be realistic. Gen-Z/Millennials are discerning.
+            2. **Perceived Value**: (0-100). How "worth it" is this offer?
+            3. **Barriers**: What is stopping them? (e.g. lack of authenticity, better deals elsewhere, complex UI).
             4. **Winning Offer**: Which offer (if any) tempted them the most?
-            5. **Feedback**: Their internal monologue.
+            5. **Feedback**: Their internal monologue. Use language appropriate for their demographic (e.g. "vibey", "aesthetic", "seamless", "overrated").
 
             **OUTPUT FORMAT:**
             Return a JSON array with exactly ${batchPersonas.length} objects:
             [
                 {
-                    "personaId": "...",
-                    "personaName": "...",
+                    "personaId": "id from input (MANDATORY: must match input ID exactly)",
+                    "personaName": "name from input (MANDATORY: must match input name exactly)",
                     "likelihoodToJoin": 0-100,
                     "perceivedValue": 0-100,
                     "barriers": "...",
@@ -2120,7 +2158,8 @@ export const simulateCreativeFocusGroup = async (
             Return a JSON array with exactly ${batchPersonas.length} objects:
             [
                 {
-                    "personaId": "...",
+                    "personaId": "id from input (MANDATORY: must match input ID exactly)",
+                    "personaName": "name from input (MANDATORY: must match input name exactly)",
                     "personaName": "...",
                     "visualAppeal": 0-100,
                     "brandFit": 0-100,
@@ -2404,18 +2443,19 @@ export const conductQualitativeInterview = async (persona: CombinedPersona, cont
     }
 };
 
-export const generateRegionalVariants = async (basePrompt: string, companyName: string = "AI", productContext: string = "health insurance"): Promise<{ region: string, imagePrompt: string, image: string | null }[]> => {
+export const generateRegionalVariants = async (basePrompt: string, companyName: string = "QVC AI", productContext: string = "Retail & Live Commerce"): Promise<{ region: string, imagePrompt: string, image: string | null }[]> => {
     
     try {
-        const regions = ["Generic", "Health-Focused (Condition Specific)", "Regional (Local Community)", "Value-Based (Pricing/Benefits)", "Emotional (Peace of Mind)"];
+        const categories = ["Lifestyle & Context", "Benefit & Feature-First", "Social-First & Aesthetic", "Value & Urgency-Based", "Aspirational Luxury"];
 
         const prompt = `
-        Take the following marketing concept for ${companyName}: "${basePrompt}"
+        Take the following marketing concept for ${companyName} (${productContext}): "${basePrompt}"
         
         Adapt this concept for the following variations/themes, adding specific imagery or cultural cues relevant to each:
-        ${regions.join(", ")}
+        ${categories.join(", ")}
         
-        Return a JSON object mapping each region name exactly as written to a highly detailed image generation prompt. Include health insurance and wellness context in the prompts.
+        Return a JSON object mapping each category name exactly as written to a highly detailed image generation prompt. 
+        Focus on high-quality retail photography, authentic lifestyle settings, and vibrant visual storytelling suitable for QVC audiences.
         `;
 
         const response = await callGenAiProxy("generateContent", {
@@ -2429,24 +2469,38 @@ export const generateRegionalVariants = async (basePrompt: string, companyName: 
         const data = JSON.parse(cleanText);
 
         const results = [];
-        for (const region of regions) {
-            const promptForRegion = data[region] || basePrompt;
-            // Generate the image using the existing utility (gemini-3-pro-image-preview)
-            const imageUrl = await generateImageFromPrompt(promptForRegion + ", professional marketing photography, high resolution");
-            results.push({
-                region,
-                imagePrompt: promptForRegion,
-                image: imageUrl
+        const BATCH_SIZE = 2;
+        
+        for (let i = 0; i < categories.length; i += BATCH_SIZE) {
+            const batch = categories.slice(i, i + BATCH_SIZE);
+            const batchPromises = batch.map(async (category) => {
+                const promptForRegion = data[category] || basePrompt;
+                // Generate the image using the existing utility (gemini-3-pro-image-preview)
+                const imageUrl = await generateImageFromPrompt(promptForRegion + ", professional marketing photography, high resolution");
+                return {
+                    region: category,
+                    imagePrompt: promptForRegion,
+                    image: imageUrl
+                };
             });
+            
+            const batchResults = await Promise.all(batchPromises);
+            results.push(...batchResults);
         }
+        
         return results;
     } catch (error) {
         console.error("Regional variants error:", error);
-        return [{ region: "Generic", imagePrompt: basePrompt, image: null }];
+        return [{ region: "Standard", imagePrompt: basePrompt, image: null }];
     }
 };
 
-export const simulateABTestFocusGroup = async (pool: any[], variants: { region: string, image: string | null }[]): Promise<ABTestResult[]> => {
+export const simulateABTestFocusGroup = async (
+    pool: any[], 
+    variants: { region: string, image: string | null }[],
+    companyName: string = "QVC AI",
+    productContext: string = "Retail & Live Commerce"
+): Promise<ABTestResult[]> => {
     
     if (!variants || variants.length === 0) return [];
 
@@ -2454,7 +2508,7 @@ export const simulateABTestFocusGroup = async (pool: any[], variants: { region: 
     const promises = pool.map(async (persona) => {
         try {
             const prompt = `
-            You are evaluating marketing creative variants for ${companyName} as a synthetic user.
+            You are evaluating marketing creative variants for ${companyName} (${productContext}) as a synthetic user.
             
             Persona Profile:
             Name: ${persona.name}
@@ -2518,9 +2572,9 @@ export const simulateABTestFocusGroup = async (pool: any[], variants: { region: 
 export const generateAgentSummary = async (customerText: string): Promise<any> => {
     try {
         const prompt = `
-        You are an expert health concierge assistant.
-        Analyze the following raw customer data and chat telemetry.
-        Extract the information into a highly structured JSON dashboard payload for a live health concierge to review during an incoming call.
+        You are an expert customer concierge assistant.
+        Analyze the following raw customer data and chat telemetry
+        Extract the information into a highly structured JSON dashboard payload for a live concierge to review during an incoming customer interaction.
 
         RAW DATA:
         ${customerText}
@@ -2545,7 +2599,7 @@ export const generateAgentSummary = async (customerText: string): Promise<any> =
             "upcoming_events": [
                 { "event_name": "Event Name", "target_date": "Upcoming", "notes": "High priority" }
             ],
-            "aiSummary": "A 3-4 sentence engaging executive summary for the concierge. Describe the user's current health insurance needs, plan tier, and their immediate intent based on the chat logs.",
+            "aiSummary": "A 3-4 sentence engaging executive summary for the concierge. Describe the user's current interests, brand affinity, and their immediate intent based on the interaction logs.",
             "nextActions": [
                 { "title": "Action Title", "description": "Action Details" }
             ],
@@ -2562,7 +2616,7 @@ export const generateAgentSummary = async (customerText: string): Promise<any> =
         
         Ensure "nextActions" provides at least 2 distinct recommendations based on user intent in the logs.
         Ensure "engagementChart.data" correctly tallies their recent online behavior (like Web Visits, Emails, App Usage).
-        Ensure "upcoming_events" provides context for the customer's health goals.
+        Ensure "upcoming_events" provides context for the customer's shopping goals.
         Extract "recent_purchases" and "upcoming_events" explicitly from the JSON payload. Format prices as integers.
         Ensure "marketingActivity" includes a "type" field of either "Web", "Email", or "App".
         Do not use markdown.

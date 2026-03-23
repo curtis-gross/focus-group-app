@@ -84,8 +84,9 @@ export const SyntheticUsers: React.FC<{ personas: CombinedPersona[] }> = ({ pers
         const explicitContext = `Company Context: ${context}. We are expanding the persona ${basePersona.name}.`;
         const batch = await generateSyntheticUsersBatch(selectedPersona, 6, companyDescription);
         
-        const newProfiles = batch.map((u: any) => ({
+        const newProfiles = batch.map((u: any, idx: number) => ({
           ...basePersona,
+          id: `u_${basePersona.name.replace(/\s+/g, '_')}_${Date.now()}_${idx}`,
           baseAudienceName: basePersona.name,
           baseAudienceBio: basePersona.details?.bio || basePersona.bio,
           name: u.name || "Unknown",
